@@ -1,0 +1,100 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage[left=2.5cm,right=2.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{lmodern}
+\usepackage{nicefrac}
+\usepackage{contour}
+\usepackage{ulem}
+\renewcommand{\ULdepth}{1.8pt}
+\contourlength{0.8pt}
+\renewcommand{\underline}[1]{%
+  \uline{\phantom{#1}}%
+  \llap{\contour{white}{#1}}%
+}
+\usepackage{siunitx}
+\sisetup{
+    locale=DE,
+    group-digits = integer,
+    round-mode = places,
+    round-precision = 3,
+    round-pad = false
+}
+\usepackage{enumitem}
+% \setlist[itemize]{nosep, label=-} 
+% \setlist[enumerate,1]{label=\alph*)}
+\usepackage{tabularx} 
+\usepackage{ragged2e}
+\newcolumntype{L}{>{\RaggedRight}X}
+\newcolumntype{R}{>{\RaggedLeft}X}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcommand{\hrc}[1]{\multicolumn{1}{C}{#1}}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage[dvipsnames]{xcolor, colortbl}
+\definecolor{Gray}{gray}{0.7}
+\definecolor{Lightgray}{gray}{0.9}
+\definecolor{Hellblau}{HTML}{C3F9FD}
+\usepackage{datetime}
+\setcounter{secnumdepth}{0}
+\setcounter{tocdepth}{2}
+\usepackage{csquotes}
+\usepackage[noorphans,font=itshape]{quoting}
+\usepackage{graphicx}
+\usepackage[section]{placeins}
+\usepackage{listings}
+\usepackage{datetime}
+% \newdateformat{monthyeardate}{\monthname[\THEMONTH] \THEYEAR}
+\clubpenalty = 10000
+\widowpenalty = 10000
+\displaywidowpenalty = 10000
+
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\fancypagestyle{mypagestyle}{%
+  \fancyhf{}%
+  % \renewcommand{\footrulewidth}{0.1mm}%
+  % \fancyfoot[R]{Assignment No.}%
+  % \fancyfoot[C]{\thepage}%
+  % \fancyfoot[L]{\today}%
+  \fancyhead[L]{}
+  \fancyhead[C]{Exposé}
+  \fancyhead[R]{\today}
+  % \renewcommand{\headrulewidth}{0mm}%
+  \cfoot{Seite \thepage\ von \pageref{LastPage}}
+}  
+\pagestyle{mypagestyle}
+\fancypagestyle{firstpagestyle}{%
+  \fancyhf{}%
+  % \renewcommand{\footrulewidth}{0.1mm}%
+  % \fancyfoot[R]{Assignment No.}%
+  % \fancyfoot[C]{\thepage}%
+  % \fancyfoot[L]{\today}%
+  \renewcommand{\headrulewidth}{0mm}%
+  \cfoot{Seite \thepage\ von \pageref{LastPage}}
+}  
+
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+      pdftitle={Exposé},
+      pdfsubject={},
+      colorlinks=false,
+      pdfpagemode=UseNone
+      }
+      
+      % chktex-file 17 chktex-file 44 chktex-file 8 chktex-file 18 chktex-file 36
+      
+\begin{document}
+\reversemarginpar{}
+\thispagestyle{firstpagestyle}
+\begin{center}
+  \huge \textbf{Exposé}\\[8pt]
+  % Zusammenfassung\\[10pt]
+  \normalsize \today
+\end{center}
+
+
+
+\end{document}
