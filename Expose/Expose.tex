@@ -1,8 +1,10 @@
+% LTex: enabled=false
+
 \documentclass[a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[ngerman]{babel}
-\usepackage[left=2.5cm,right=2.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage[english]{babel}
+% \usepackage[left=2.5cm,right=2.5cm,top=1.5cm,bottom=1.5cm]{geometry}
 \usepackage{parskip}
 \usepackage{lmodern}
 \usepackage{nicefrac}
@@ -38,8 +40,8 @@
 \definecolor{Lightgray}{gray}{0.9}
 \definecolor{Hellblau}{HTML}{C3F9FD}
 \usepackage{datetime}
-\setcounter{secnumdepth}{0}
-\setcounter{tocdepth}{2}
+% \setcounter{secnumdepth}{0}
+% \setcounter{tocdepth}{2}
 \usepackage{csquotes}
 \usepackage[noorphans,font=itshape]{quoting}
 \usepackage{graphicx}
@@ -60,7 +62,7 @@
   % \fancyfoot[C]{\thepage}%
   % \fancyfoot[L]{\today}%
   \fancyhead[L]{}
-  \fancyhead[C]{Exposé}
+  \fancyhead[C]{Expose}
   \fancyhead[R]{\today}
   % \renewcommand{\headrulewidth}{0mm}%
   \cfoot{Seite \thepage\ von \pageref{LastPage}}
@@ -78,45 +80,46 @@
 
 \usepackage[hidelinks]{hyperref}
 \hypersetup{
-      pdftitle={Exposé},
+      pdftitle={Expose},
       pdfsubject={},
       colorlinks=false,
       pdfpagemode=UseNone
       }
       
       % chktex-file 17 chktex-file 44 chktex-file 8 chktex-file 18 chktex-file 36
+      % Ltex: enabled=true language=en-US
       
 \begin{document}
 \reversemarginpar{}
 \thispagestyle{firstpagestyle}
 \begin{center}
-  \huge \textbf{Exposé}\\[8pt]
+  \huge \textbf{Expose}\\[8pt]
   % Zusammenfassung\\[10pt]
   \normalsize \today
 \end{center}
 
 \section{Motivation}
 
-\section{Stand der Technik}
+% \section{State of the art}
 
-\subsection{Naive Verfahren}
+\section{Naive Procedures}\label{sec:naiveProcedures}
 
-\section{Lösungsansatz}
+\section{Proposed Solution}
 \begin{itemize}
-  \item Maschinelles Lernen
+  \item Machine learning
   \item Sampling
-  \item Evtl.\ zweistufiger Ansatz
-  \item Zu Beginn nur einzelne Spalten überprüfen, keine Kombinationen
+  \item maybe a two phase algorithm
+  \item don't check column combinations in the beginning, just single columns
 \end{itemize}
 
-\section{Evaluationsmethode und Metrik}
+\section{Evaluation Method and Metric}
 \begin{itemize}
-  \item Was ist ein Erfolg für das neuronale Netz?
+  \item What is a success for the neural network?
         \begin{itemize}[label=\(\rightarrow \)]
-          \item Effizienz bzw.\ Geschwindigkeit
-          \item Korrektheit
+          \item efficiency respectively speed
+          \item correctness
         \end{itemize}
-  \item insbesondere im Vergleich zu dem naiven Verfahren, das zuerst ausgeführt wird
+  \item comparison to the naive approach presented in section~\ref{sec:naiveProcedures}
 \end{itemize}
 
 \end{document}
