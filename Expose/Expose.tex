@@ -25,8 +25,6 @@
     round-pad = false
 }
 \usepackage{enumitem}
-% \setlist[itemize]{nosep, label=-} 
-% \setlist[enumerate,1]{label=\alph*)}
 \usepackage{tabularx} 
 \usepackage{ragged2e}
 \newcolumntype{L}{>{\RaggedRight}X}
@@ -35,20 +33,20 @@
 \newcommand{\hrc}[1]{\multicolumn{1}{C}{#1}}
 \usepackage{multirow}
 \usepackage{booktabs}
-\usepackage[dvipsnames]{xcolor, colortbl}
-\definecolor{Gray}{gray}{0.7}
-\definecolor{Lightgray}{gray}{0.9}
-\definecolor{Hellblau}{HTML}{C3F9FD}
-\usepackage{datetime}
+% \usepackage[dvipsnames]{xcolor, colortbl}
+% \definecolor{Gray}{gray}{0.7}
+% \definecolor{Lightgray}{gray}{0.9}
+% \definecolor{Hellblau}{HTML}{C3F9FD}
+
 % \setcounter{secnumdepth}{0}
 % \setcounter{tocdepth}{2}
+
 \usepackage{csquotes}
 \usepackage[noorphans,font=itshape]{quoting}
 \usepackage{graphicx}
 \usepackage[section]{placeins}
 \usepackage{listings}
-\usepackage{datetime}
-% \newdateformat{monthyeardate}{\monthname[\THEMONTH] \THEYEAR}
+
 \clubpenalty = 10000
 \widowpenalty = 10000
 \displaywidowpenalty = 10000
@@ -82,26 +80,26 @@
 \hypersetup{
       pdftitle={Expose},
       pdfsubject={},
+      pdfauthor={Janek Prange},
       colorlinks=false,
       pdfpagemode=UseNone
       }
       
-      % chktex-file 17 chktex-file 44 chktex-file 8 chktex-file 18 chktex-file 36
       % Ltex: enabled=true language=en-US
-      
+
 \begin{document}
-\reversemarginpar{}
 \thispagestyle{firstpagestyle}
 \begin{center}
   \huge \textbf{Expose}\\[8pt]
   % Zusammenfassung\\[10pt]
-  \normalsize \today
+  \normalsize Janek Prange\\
+  \today
 \end{center}
 
 \section{Motivation}
-Big collections of Data and therefore Databases are becoming increasingly important with time as more data is produced with accelerating speed. In the best case, this data is directly saved in a format that contains a lot of metadata such as data types, primary keys and information about dependencies between columns.
+Big collections of data and therefore databases are becoming increasingly important with time as more data is produced with accelerating speed. In the best case, this data is directly saved in a format that contains a lot of metadata such as data types, primary keys and information about dependencies between columns.
 
-In many scenarios however, it is not possible to design a proper schema suited for specific data beforehand. Instead, the data is already present in an arbitrary format or is being taken from other sources such as internet dumps. These use cases require tools to -- as much as possible -- automatically detect the needed metadata from the raw data.
+In many scenarios however, it is not possible to design a proper schema suited for specific data beforehand. Instead, the data is already present in an arbitrary format or is being taken from other sources such as internet dumps. These use cases require tools to -- as much as possible automatically -- detect the needed metadata from the raw data. % chktex 8
 
 The thesis introduced in this expose tries to propose a new solution to this problem making use of machine learning.
 
@@ -113,7 +111,7 @@ The thesis introduced in this expose tries to propose a new solution to this pro
 \begin{itemize}
   \item Machine learning
   \item Sampling
-  \item maybe a two phase algorithm
+  \item maybe a two phase algorithm (simple exclusions first (e.g.\ data type image), neural net second)
   \item don't check column combinations in the beginning, just single columns
 \end{itemize}
 
@@ -124,7 +122,7 @@ The thesis introduced in this expose tries to propose a new solution to this pro
           \item efficiency respectively speed
           \item correctness
         \end{itemize}
-  \item comparison to the naive approach presented in section~\ref{sec:naiveProcedures}
+  \item comparison to the naive approach presented in Section~\ref{sec:naiveProcedures}
 \end{itemize}
 
 \end{document}
