@@ -1,13 +1,14 @@
 % LTex: enabled=false
-
 \documentclass[a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
+
 % \usepackage[left=2.5cm,right=2.5cm,top=1.5cm,bottom=1.5cm]{geometry}
 \usepackage{parskip}
 \usepackage{lmodern}
 \usepackage{nicefrac}
+
 \usepackage{contour}
 \usepackage{ulem}
 \renewcommand{\ULdepth}{1.8pt}
@@ -16,6 +17,7 @@
   \uline{\phantom{#1}}%
   \llap{\contour{white}{#1}}%
 }
+
 \usepackage{siunitx}
 \sisetup{
     locale=DE,
@@ -24,7 +26,9 @@
     round-precision = 3,
     round-pad = false
 }
+
 \usepackage{enumitem}
+
 \usepackage{tabularx} 
 \usepackage{ragged2e}
 \newcolumntype{L}{>{\RaggedRight}X}
@@ -33,48 +37,41 @@
 \newcommand{\hrc}[1]{\multicolumn{1}{C}{#1}}
 \usepackage{multirow}
 \usepackage{booktabs}
+
 % \usepackage[dvipsnames]{xcolor, colortbl}
 % \definecolor{Gray}{gray}{0.7}
 % \definecolor{Lightgray}{gray}{0.9}
 % \definecolor{Hellblau}{HTML}{C3F9FD}
 
-% \setcounter{secnumdepth}{0}
-% \setcounter{tocdepth}{2}
-
 \usepackage{csquotes}
 \usepackage[noorphans,font=itshape]{quoting}
+
 \usepackage{graphicx}
 \usepackage[section]{placeins}
 \usepackage{listings}
 
-\clubpenalty = 10000
-\widowpenalty = 10000
-\displaywidowpenalty = 10000
-
 \usepackage{fancyhdr}
 \usepackage{lastpage}
-\fancypagestyle{mypagestyle}{%
+\fancypagestyle{mainpagestyle}{%
   \fancyhf{}%
-  % \renewcommand{\footrulewidth}{0.1mm}%
-  % \fancyfoot[R]{Assignment No.}%
-  % \fancyfoot[C]{\thepage}%
-  % \fancyfoot[L]{\today}%
-  \fancyhead[L]{}
-  \fancyhead[C]{Expose}
-  \fancyhead[R]{\today}
-  % \renewcommand{\headrulewidth}{0mm}%
-  \cfoot{Seite \thepage\ von \pageref{LastPage}}
+  \fancyhead[L]{}%
+  \fancyhead[C]{Expose}%
+  \fancyhead[R]{\today}%
+  \cfoot{Seite \thepage\ von \pageref{LastPage}}%
 }  
-\pagestyle{mypagestyle}
 \fancypagestyle{firstpagestyle}{%
   \fancyhf{}%
-  % \renewcommand{\footrulewidth}{0.1mm}%
-  % \fancyfoot[R]{Assignment No.}%
-  % \fancyfoot[C]{\thepage}%
-  % \fancyfoot[L]{\today}%
   \renewcommand{\headrulewidth}{0mm}%
   \cfoot{Seite \thepage\ von \pageref{LastPage}}
 }  
+\pagestyle{mainpagestyle}
+
+% \setcounter{secnumdepth}{0}
+% \setcounter{tocdepth}{2}
+
+\clubpenalty = 10000
+\widowpenalty = 10000
+\displaywidowpenalty = 10000
 
 \usepackage[hidelinks]{hyperref}
 \hypersetup{
@@ -85,7 +82,7 @@
       pdfpagemode=UseNone
       }
       
-      % Ltex: enabled=true language=en-US
+% Ltex: enabled=true language=en-US
 
 \begin{document}
 \thispagestyle{firstpagestyle}
@@ -103,9 +100,9 @@ In many scenarios however, it is not possible to design a proper schema suited f
 
 The thesis introduced in this expose tries to propose a new solution to this problem making use of machine learning.
 
-% \section{State of the art}
 
 \section{Naive Procedures}\label{sec:naiveProcedures}
+
 
 \section{Proposed Solution}\label{sec:proposedSolution}
 The thesis introduced here will present a solution to find primary keys respectively primary key candidates that is primarily based on a neural network, which will be trained on a large set of tables. The hope is that the network will discover primary key candidates with better efficiency than the naive solution described in Section~\ref{sec:naiveProcedures}.
@@ -115,6 +112,7 @@ In addition to the usage of neural networks, there may be other ideas to increas
 Another opportunity for increased efficiency could be the implementation of a two phase algorithm. In the first phase, columns which can't practicably be primary keys will be eliminated, such as columns containing images, videos or relatively long texts. In the second phase, the neural network would try detecting the best primary key candidates from the remaining columns.
 
 To reduce the scope of the thesis, the focus of the algorithm will be primarily on detecting single column primary key candidates. If the results are promising and there is time left, multicolumn candidates will be included.
+
 
 \section{Evaluation Method and Metric}
 To train the neural network that is at the center of the in Section~\ref{sec:proposedSolution} proposed solution, metrics have to be defined to evaluate the success or failure of the network. In this case, there are two favorable and relatively easy to measure methods, which are the correctness and the efficiency of the algorithm.
