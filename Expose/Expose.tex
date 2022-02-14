@@ -108,12 +108,13 @@ The thesis introduced in this expose tries to propose a new solution to this pro
 \section{Naive Procedures}\label{sec:naiveProcedures}
 
 \section{Proposed Solution}
-\begin{itemize}
-  \item Machine learning
-  \item Sampling
-  \item maybe a two phase algorithm (simple exclusions first (e.g.\ data type image), neural net second)
-  \item don't check column combinations in the beginning, just single columns
-\end{itemize}
+The thesis introduced here will present a solution to find primary keys respectively primary key candidates that is primarily based on a neural network, which will be trained on a large set of tables. The hope is that the network will discover primary key candidates with better efficiency than the naive solution described in Section~\ref{sec:naiveProcedures}.
+
+In addition to the usage of neural networks, there may be other ideas to increase the efficiency of the algorithm. One possibility would be to sample the columns of the table instead of reading all values. This way, the data that has to be retrieved from the database could be reduced which may result in a significant speedup when the algorithm is used with large datasets.
+
+Another opportunity for increased efficiency could be the implementation of a two phase algorithm. In the first phase, columns which can't practicably be primary keys will be eliminated, such as columns containing images, videos or relatively long texts. In the second phase, the neural network would try detecting the best primary key candidates from the remaining columns.
+
+To reduce the scope of the thesis, the focus of the algorithm will be primarily on detecting single column primary key candidates. If the results are promising and there is time left, multicolumn candidates will be included.
 
 \section{Evaluation Method and Metric}
 \begin{itemize}
