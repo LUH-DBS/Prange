@@ -102,6 +102,9 @@ The thesis introduced in this expose tries to propose a new solution to this pro
 
 
 \section{Naive Procedures}\label{sec:naiveProcedures}
+One of the main characteristics of a primary key is the uniqueness of its values. Based on that constraint, a naive way of finding primary key candidates would be to search for columns or column combinations which don't have any duplicate values. This could be achieved either by sorting or hashing.
+
+Especially when using a hashing algorithm, the primary key candidates could be found relatively efficiently. It is however necessary to read all values in all columns, which can become a very large amount of data very fast, especially if no single column candidate can be found and column combinations have to be hashed. It could however be possible to increase the efficiency by ignoring some columns, for example the ones containing images or long texts.
 
 
 \section{Proposed Solution}\label{sec:proposedSolution}
