@@ -47,6 +47,7 @@
 \usepackage[noorphans,font=itshape]{quoting}
 
 \usepackage{graphicx}
+\usepackage{float}
 \usepackage[section]{placeins}
 \usepackage{listings}
 
@@ -57,14 +58,17 @@
   \fancyhead[L]{}%
   \fancyhead[C]{Expose}%
   \fancyhead[R]{\today}%
-  \cfoot{Seite \thepage\ von \pageref{LastPage}}%
+  \cfoot{Page \thepage\ of \pageref{LastPage}}%
 }  
 \fancypagestyle{firstpagestyle}{%
   \fancyhf{}%
   \renewcommand{\headrulewidth}{0mm}%
-  \cfoot{Seite \thepage\ von \pageref{LastPage}}
+  \cfoot{Page \thepage\ of \pageref{LastPage}}
 }  
 \pagestyle{mainpagestyle}
+
+\usepackage[style=trad-plain, sorting=none, block=ragged]{biblatex}
+\addbibresource{../main/literatur.bib}
 
 % \setcounter{secnumdepth}{0}
 % \setcounter{tocdepth}{2}
@@ -102,13 +106,13 @@ The thesis introduced in this expose tries to propose a new solution to this pro
 
 
 \section{Naive Procedures}\label{sec:naiveProcedures}
-One of the main characteristics of a primary key is the uniqueness of its values. Based on that constraint, a naive way of finding primary key candidates would be to search for columns or column combinations which don't have any duplicate values. This could be achieved either by sorting or hashing.
+One of the main characteristics of a primary key is the uniqueness of its values. Based on this constraint, a naive way of finding primary key candidates would be to search for columns or column combinations which don't have any duplicate values. This could be achieved either by sorting or hashing.
 
 Especially when using a hashing algorithm, the primary key candidates could be found relatively efficiently. It is however necessary to read all values in all columns, which can become a very large amount of data very fast, especially if no single column candidate can be found and column combinations have to be examined too. It could be possible though to increase the efficiency by ignoring some columns, for example the ones containing images or long texts.
 
 
 \section{Proposed Solution}\label{sec:proposedSolution}
-The thesis introduced in this expose will present a solution to find primary keys respectively primary key candidates. The solution will be primarily based on a neural network, which will be trained on a large set of tables. The hope is that the network will discover primary key candidates with better efficiency than the naive solution described in Section~\ref{sec:naiveProcedures}.
+The thesis introduced here will present a solution to find primary keys respectively primary key candidates. The solution will be primarily based on a neural network, which will be trained on a large set of tables. The hope is that the network will discover primary key candidates with better efficiency than the naive solution described in Section~\ref{sec:naiveProcedures}.
 
 In addition to the usage of neural networks, there may be other ideas to increase the efficiency of the algorithm. One possibility would be to sample the columns of the table instead of reading all values. This way, the data that has to be retrieved from the database could be reduced which may result in a significant speedup when the algorithm is used with large datasets.
 
