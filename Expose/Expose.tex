@@ -105,20 +105,22 @@ In many scenarios however, it is not possible to design a proper schema suited f
 The thesis introduced in this expose tries to propose a new solution to this problem making use of machine learning.
 
 
-\section{Naive Procedures}\label{sec:naiveProcedures}
+\section{Existing Techniques}\label{sec:naiveProcedures}
 One of the main characteristics of a primary key is the uniqueness of its values. Based on this constraint, a naive way of finding primary key candidates would be to search for columns or column combinations which do not have any duplicate values. This could be achieved for example by sorting or hashing.
 
-One existing algorithm which uses this characteristic is GORDIAN\footfullcite{gordian}. It works by finding the largest column combinations that have duplicate values and from those compute the minimal column combinations which exclusively contain unique values.
+One existing algorithm which uses this characteristic is GORDIAN\footfullcite{gordian}. It works by organizing the data into a prefix tree, finding the largest column combinations that have duplicate values (maximal non-uniques) and from those compute the minimal column combinations which exclusively contain unique values (minimal uniques).
 
 This technique has the disadvantage that the work increases with the size of the column combinations with duplicate values and is therefore not suited for large databases.
 
+Another algorithm which tries to solve the problem of primary key detection efficiently is DUCC\footfullcite{ducc}. It has a vastly higher efficiency than GORDIAN, even though it detects both minimal uniques and maximal non-uniques at the same time. This is possible primarily because of its focus on aggressively pruning column combinations which can not be part of the desired solution.
+
 
 \section{Proposed Solution}\label{sec:proposedSolution}
-The thesis introduced here will try to increase the efficiency of finding primary key candidates making primarily use of a neural network  which will be trained on a large set of tables. The hope is that the network will discover primary key candidates with better efficiency than the solution described in Section~\ref{sec:naiveProcedures}.
+The thesis introduced here will try to increase the efficiency of finding primary key candidates using a neural network  which will be trained on a large set of tables. The hope is that the network will discover primary key candidates with better efficiency than the solutions described in Section~\ref{sec:naiveProcedures}.
 
 In addition to the usage of neural networks, there may be other ideas to increase the efficiency of the algorithm. One possibility would be to sample from the columns of the table instead of reading all values. This way, the data that has to be retrieved from the database could be reduced, which may result in a significant speedup when the algorithm is used with large datasets.
 
-Another opportunity for increased efficiency could be to narrow the selection of possible primary key candidates with filters. To begin with, columns which can not practicably be primary keys will be eliminated, such as columns containing images, videos or relatively long texts. As a later filter, the neural network would try to detect the best primary key candidates from the remaining columns.
+Another opportunity for increased efficiency could be to narrow the selection of possible primary key candidates with filters. To begin with, columns which can not practicably be primary keys will be eliminated, such as columns containing images, videos or long texts. As a later filter, the neural network would try to detect the best primary key candidates from the remaining columns.
 
 To reduce the scope of the thesis, the focus of the algorithm will be primarily on detecting single column primary key candidates. If the results are promising and there is time left, multicolumn candidates will be included.
 
@@ -126,7 +128,7 @@ To reduce the scope of the thesis, the focus of the algorithm will be primarily 
 \section{Evaluation Method and Metric}
 To train the neural network that is at the center of the solution proposed in Section~\ref{sec:proposedSolution}, methods have to be defined to evaluate the success or failure of the network. In this case, there are two favorable and relatively easy to measure metrics, which are the correctness and the efficiency of the algorithm.
 
-A primary key candidate is correct when it has no duplicate elements and no subset of it is a primary key. These requirements are easy to check, especially if the algorithm is limited to single column candidates.
+A primary key candidate is correct when it has no duplicate elements and no subset of it is a column combination only consisting of unique values. These requirements are easy to check, especially if the algorithm is limited to single column candidates.
 
 For the purposes of this thesis, the algorithm is efficient if it is faster and uses less main memory than the naive solution presented in Section~\ref{sec:naiveProcedures}, which will be tested on the same data as the neural network.
 
