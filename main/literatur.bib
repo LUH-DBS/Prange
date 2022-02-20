@@ -30,24 +30,6 @@
 }
 
 
-@article{discoveryUniqueColumnCombinations,
-  keywords   = {starter},
-  title      = {Scalable Discovery of Unique Column Combinations},
-  author     = {Heise, Arvid and Quian\'{e}-Ruiz, Jorge-Arnulfo and Abedjan, Ziawasch and Jentzsch, Anja and Naumann, Felix},
-  year       = {2013},
-  url        = {https://doi.org/10.14778/2732240.2732248},
-  abstract   = {The discovery of all unique (and non-unique) column combinations in a given dataset is at the core of any data profiling effort. The results are useful for a large number of areas of data management, such as anomaly detection, data integration, data modeling, duplicate detection, indexing, and query optimization. However, discovering all unique and non-unique column combinations is an NP-hard problem, which in principle requires to verify an exponential number of column combinations for uniqueness on all data values. Thus, achieving efficiency and scalability in this context is a tremendous challenge by itself.In this paper, we devise Ducc, a scalable and efficient approach to the problem of finding all unique and non-unique column combinations in big datasets. We first model the problem as a graph coloring problem and analyze the pruning effect of individual combinations. We then present our hybrid column-based pruning technique, which traverses the lattice in a depth-first and random walk combination. This strategy allows Ducc to typically depend on the solution set size and hence to prune large swaths of the lattice. Ducc also incorporates row-based pruning to run uniqueness checks in just few milliseconds. To achieve even higher scalability, Ducc runs on several CPU cores (scale-up) and compute nodes (scale-out) with a very low overhead. We exhaustively evaluate Ducc using three datasets (two real and one synthetic) with several millions rows and hundreds of attributes. We compare Ducc with related work: Gordian and HCA. The results show that Ducc is up to more than 2 orders of magnitude faster than Gordian and HCA (631x faster than Gordian and 398x faster than HCA). Finally, a series of scalability experiments shows the efficiency of Ducc to scale up and out.},
-  doi        = {10.14778/2732240.2732248},
-  issn       = {2150-8097},
-  issue_date = {December 2013},
-  journal    = {Proc. VLDB Endow.},
-  month      = {dec},
-  number     = {4},
-  numpages   = {12},
-  pages      = {301–312},
-  publisher  = {VLDB Endowment},
-  volume     = {7}
-}
 @article{profilingRelData,
   keywords = {starter},
   title    = {Profiling relational data: a survey},
@@ -65,4 +47,22 @@
   number   = {4},
   pages    = {557-581},
   volume   = {24}
+}
+@article{ducc,
+  keywords   = {starter, existingTechniques},
+  title      = {Scalable Discovery of Unique Column Combinations},
+  author     = {Heise, Arvid and Quian\'{e}-Ruiz, Jorge-Arnulfo and Abedjan, Ziawasch and Jentzsch, Anja and Naumann, Felix},
+  year       = {2013},
+  url        = {https://doi.org/10.14778/2732240.2732248},
+  abstract   = {The discovery of all unique (and non-unique) column combinations in a given dataset is at the core of any data profiling effort. The results are useful for a large number of areas of data management, such as anomaly detection, data integration, data modeling, duplicate detection, indexing, and query optimization. However, discovering all unique and non-unique column combinations is an NP-hard problem, which in principle requires to verify an exponential number of column combinations for uniqueness on all data values. Thus, achieving efficiency and scalability in this context is a tremendous challenge by itself.In this paper, we devise Ducc, a scalable and efficient approach to the problem of finding all unique and non-unique column combinations in big datasets. We first model the problem as a graph coloring problem and analyze the pruning effect of individual combinations. We then present our hybrid column-based pruning technique, which traverses the lattice in a depth-first and random walk combination. This strategy allows Ducc to typically depend on the solution set size and hence to prune large swaths of the lattice. Ducc also incorporates row-based pruning to run uniqueness checks in just few milliseconds. To achieve even higher scalability, Ducc runs on several CPU cores (scale-up) and compute nodes (scale-out) with a very low overhead. We exhaustively evaluate Ducc using three datasets (two real and one synthetic) with several millions rows and hundreds of attributes. We compare Ducc with related work: Gordian and HCA. The results show that Ducc is up to more than 2 orders of magnitude faster than Gordian and HCA (631x faster than Gordian and 398x faster than HCA). Finally, a series of scalability experiments shows the efficiency of Ducc to scale up and out.},
+  doi        = {10.14778/2732240.2732248},
+  issn       = {2150-8097},
+  issue_date = {December 2013},
+  journal    = {Proc. VLDB Endow.},
+  month      = {dec},
+  number     = {4},
+  numpages   = {12},
+  pages      = {301–312},
+  publisher  = {VLDB Endowment},
+  volume     = {7}
 }
