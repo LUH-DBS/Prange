@@ -1,4 +1,4 @@
-# This file is there to test if auto-sklearn is installed correctly.
+# This file is to test if auto-sklearn is installed correctly.
 
 from pprint import pprint
 
