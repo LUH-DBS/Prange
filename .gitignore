@@ -1,6 +1,7 @@
 ## Eigene
 lib/
-.vscode/
+venv/
+.vscode/settings.json
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

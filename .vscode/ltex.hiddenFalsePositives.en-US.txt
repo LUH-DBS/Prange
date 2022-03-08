@@ -1,0 +1,1 @@
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QBased on this constraint, a naive way of finding primary key candidates would be to search for columns or column combinations which don't have any duplicate valuesgordian.\\E$"}
