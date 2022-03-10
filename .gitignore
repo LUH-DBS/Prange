@@ -2,6 +2,8 @@
 lib/
 venv/
 .vscode/settings.json
+*.session.sql
+.env
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
