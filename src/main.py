@@ -1,9 +1,8 @@
 import os
-from unittest import result
 from dotenv import load_dotenv
 import psycopg2
 
-from datasets.gittables import *
+from datasets import *
 
 load_dotenv()
 db_params = {
@@ -16,21 +15,22 @@ db_params = {
 
 def main():
     connection = psycopg2.connect(**db_params)
-
     cursor = connection.cursor()
 
-    unique_columns(cursor, 2000, 2050, False)
+    global tables
+    tables = Gittables(cursor)
+
+    unique_columns(2000, 2050, False)
 
     connection.close()
 
 
-def unique_columns(cursor, mintable: int, maxtable: int, do_print: bool, do_csv='test.csv') -> list[list]:
+def unique_columns(mintable: int, maxtable: int, do_print: bool, do_csv='test.csv') -> list[list]:
     """Compute all unique columns for a range of tables.
 
     The result is a two dimensional list with the format ['tableid', 'tablename', 'columnids', 'columnnames']
 
     Args:
-        cursor: _description_
         mintable (int): the first table id (inclusive)
         maxtable (int): the last table id (exclusive)
         do_print (bool): if True, the result will be printed to the command line
@@ -44,15 +44,15 @@ def unique_columns(cursor, mintable: int, maxtable: int, do_print: bool, do_csv=
     number_of_tables = maxtable - mintable
     for i in range(mintable, maxtable):
         counter += 1
-        tablename = get_tablename_gittable(cursor, i)
+        tablename = tables.get_tablename_gittable(i)
         print(f"{counter}/{number_of_tables}:\t{tablename}         ", end='\r')
 
-        table = get_table_gittable(cursor, i, True)
+        table = tables.get_table_gittable(i, True)
         unique_columns = find_unique_columns(table, 'hash')
         result.append([i,
                        tablename,
                        unique_columns,
-                       get_columnnames_gittable(cursor, i, unique_columns)])
+                       tables.get_columnnames_gittable(i, unique_columns)])
 
     if do_print:
         from pprint import pprint

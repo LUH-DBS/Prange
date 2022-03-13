@@ -1,69 +1,67 @@
 
+class Gittables():
 
-def get_table_gittable(cursor, tableid: int, flipped: bool) -> list[list]:
-    """Return a complete table from the gittables with the id [tableid].
+    def __init__(self, cursor) -> None:
+        self.cursor = cursor
 
-    Args:
-        cursor: a cursor instance of the psycopg2 connection
-        tableid (int): the id of the table
-        flipped (bool): if True, a list of columns will be returned, otherwise a list of rows
+    def get_table_gittable(self, tableid: int, flipped: bool) -> list[list]:
+        """Return a complete table from the gittables with the id [tableid].
 
-    Returns:
-        list[list]: the table in a list format
-    """
-    table = []
-    query = "SELECT num_rows, num_columns FROM gittables_tables_info WHERE id = %s"
-    cursor.execute(query, (tableid,))
-    row_count, column_count = cursor.fetchone()
+        Args:
+            tableid (int): the id of the table
+            flipped (bool): if True, a list of columns will be returned, otherwise a list of rows
 
-    if flipped:
-        query = "SELECT tokenized FROM gittables_main_tokenized WHERE tableid = %s and columnid = %s"
-        for columnid in range(0, column_count):
-            cursor.execute(query, (tableid, columnid))
-            table.append([r[0] for r in cursor.fetchall()])
-        return table
-    else:
-        table.append(get_columninfo_gittable(cursor, tableid))
-        query = "SELECT tokenized FROM gittables_main_tokenized WHERE tableid = %s and rowid = %s"
-        for rowid in range(0, row_count):
-            cursor.execute(query, (tableid, rowid))
-            table.append([r[0] for r in cursor.fetchall()])
-        return table
+        Returns:
+            list[list]: the table in a list format
+        """
+        table = []
+        query = "SELECT num_rows, num_columns FROM gittables_tables_info WHERE id = %s"
+        self.cursor.execute(query, (tableid,))
+        row_count, column_count = self.cursor.fetchone()
 
+        if flipped:
+            query = "SELECT tokenized FROM gittables_main_tokenized WHERE tableid = %s and columnid = %s"
+            for columnid in range(0, column_count):
+                self.cursor.execute(query, (tableid, columnid))
+                table.append([r[0] for r in self.cursor.fetchall()])
+            return table
+        else:
+            table.append(self.get_columninfo_gittable(self.cursor, tableid))
+            query = "SELECT tokenized FROM gittables_main_tokenized WHERE tableid = %s and rowid = %s"
+            for rowid in range(0, row_count):
+                self.cursor.execute(query, (tableid, rowid))
+                table.append([r[0] for r in self.cursor.fetchall()])
+            return table
 
-def get_columninfo_gittable(cursor, tableid: int) -> list:
-    """Get the column header for a table.
+    def get_columninfo_gittable(self, tableid: int) -> list:
+        """Get the column header for a table.
 
-    Args:
-        cursor: a cursor instance of the psycopg2 connection
-        tableid (int): the id of the table
+        Args:
+            tableid (int): the id of the table
 
-    Returns:
-        list: the header
-    """
-    query = "SELECT header FROM gittables_columns_info WHERE tableid = %s"
-    cursor.execute(query, (tableid,))
-    return [r[0] for r in cursor.fetchall()]
+        Returns:
+            list: the header
+        """
+        query = "SELECT header FROM gittables_columns_info WHERE tableid = %s"
+        self.cursor.execute(query, (tableid,))
+        return [r[0] for r in self.cursor.fetchall()]
 
+    def get_tablename_gittable(self, tableid: int) -> str:
+        """Get the name of a table.
 
-def get_tablename_gittable(cursor, tableid: int) -> str:
-    """Get the name of a table.
+        Args:
+            tableid (int): the id of the table
 
-    Args:
-        cursor: a cursor instance of the psycopg2 connection
-        tableid (int): the id of the table
+        Returns:
+            str: the name of the table
+        """
+        query = "SELECT filename FROM gittables_tables_info WHERE id = %s"
+        self.cursor.execute(query, (tableid,))
+        return self.cursor.fetchone()[0]
 
-    Returns:
-        str: the name of the table
-    """
-    query = "SELECT filename FROM gittables_tables_info WHERE id = %s"
-    cursor.execute(query, (tableid,))
-    return cursor.fetchone()[0]
-
-
-def get_columnnames_gittable(cursor, tableid: int, columnids: list[int]) -> list[str]:
-    names = get_columninfo_gittable(cursor, tableid)
-    result = []
-    for i in columnids:
-        result.append(names[i])
-    return result
+    def get_columnnames_gittable(self, tableid: int, columnids: list[int]) -> list[str]:
+        names = self.get_columninfo_gittable(tableid)
+        result = []
+        for i in columnids:
+            result.append(names[i])
+        return result
