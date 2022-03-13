@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2
 
-from datasets import *
+from datasets import Gittables
 
 load_dotenv()
 db_params = {
@@ -44,15 +44,15 @@ def unique_columns(mintable: int, maxtable: int, do_print: bool, do_csv='test.cs
     number_of_tables = maxtable - mintable
     for i in range(mintable, maxtable):
         counter += 1
-        tablename = tables.get_tablename_gittable(i)
+        tablename = tables.get_tablename(i)
         print(f"{counter}/{number_of_tables}:\t{tablename}         ", end='\r')
 
-        table = tables.get_table_gittable(i, True)
+        table = tables.get_table(i, True)
         unique_columns = find_unique_columns(table, 'hash')
         result.append([i,
                        tablename,
                        unique_columns,
-                       tables.get_columnnames_gittable(i, unique_columns)])
+                       tables.get_columnnames(i, unique_columns)])
 
     if do_print:
         from pprint import pprint

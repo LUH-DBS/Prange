@@ -1,10 +1,12 @@
+from ._base import Baseclass
 
-class Gittables():
+
+class Gittables(Baseclass):
 
     def __init__(self, cursor) -> None:
         self.cursor = cursor
 
-    def get_table_gittable(self, tableid: int, flipped: bool) -> list[list]:
+    def get_table(self, tableid: int, flipped: bool) -> list[list]:
         """Return a complete table from the gittables with the id [tableid].
 
         Args:
@@ -26,14 +28,14 @@ class Gittables():
                 table.append([r[0] for r in self.cursor.fetchall()])
             return table
         else:
-            table.append(self.get_columninfo_gittable(self.cursor, tableid))
+            table.append(self.get_columninfo(self.cursor, tableid))
             query = "SELECT tokenized FROM gittables_main_tokenized WHERE tableid = %s and rowid = %s"
             for rowid in range(0, row_count):
                 self.cursor.execute(query, (tableid, rowid))
                 table.append([r[0] for r in self.cursor.fetchall()])
             return table
 
-    def get_columninfo_gittable(self, tableid: int) -> list:
+    def get_columninfo(self, tableid: int) -> list:
         """Get the column header for a table.
 
         Args:
@@ -46,7 +48,7 @@ class Gittables():
         self.cursor.execute(query, (tableid,))
         return [r[0] for r in self.cursor.fetchall()]
 
-    def get_tablename_gittable(self, tableid: int) -> str:
+    def get_tablename(self, tableid: int) -> str:
         """Get the name of a table.
 
         Args:
@@ -59,8 +61,8 @@ class Gittables():
         self.cursor.execute(query, (tableid,))
         return self.cursor.fetchone()[0]
 
-    def get_columnnames_gittable(self, tableid: int, columnids: list[int]) -> list[str]:
-        names = self.get_columninfo_gittable(tableid)
+    def get_columnnames(self, tableid: int, columnids: list[int]) -> list[str]:
+        names = self.get_columninfo(tableid)
         result = []
         for i in columnids:
             result.append(names[i])
