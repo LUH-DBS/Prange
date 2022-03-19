@@ -35,7 +35,20 @@ class Gittables(Baseclass):
                 table.append([r[0] for r in self.cursor.fetchall()])
             return table
 
-    def get_columninfo(self, tableid: int) -> list:
+    def pretty_columns(self, tableid: int, columnids: list[int]) -> list[str | int | list]:
+        """Return the column and table id together with its names.
+
+
+        Args:
+            tableid (int): th id of the table
+            columnids (list[int]): a list with the column ids
+
+        Returns:
+            list[list]: a list in the format ['tableid', 'tablename', 'columnids', 'columnnames']
+        """
+        return [tableid, self.get_tablename(tableid), columnids, self.get_columnnames(tableid, columnids)]
+
+    def get_columnheader(self, tableid: int) -> list:
         """Get the column header for a table.
 
         Args:
@@ -44,7 +57,7 @@ class Gittables(Baseclass):
         Returns:
             list: the header
         """
-        query = "SELECT header FROM gittables_columns_info WHERE tableid = %s"
+        query = "SELECT header FROM gittables_columns_info WHERE tableid = %s ORDER BY columnid"
         self.cursor.execute(query, (tableid,))
         return [r[0] for r in self.cursor.fetchall()]
 
@@ -62,7 +75,16 @@ class Gittables(Baseclass):
         return self.cursor.fetchone()[0]
 
     def get_columnnames(self, tableid: int, columnids: list[int]) -> list[str]:
-        names = self.get_columninfo(tableid)
+        """Get the names of the columns
+
+        Args:
+            tableid (int): the id of the table
+            columnids (list[int]): a list with the column ids
+
+        Returns:
+            list[str]: a list with the column names
+        """
+        names = self.get_columnheader(tableid)
         result = []
         for i in columnids:
             result.append(names[i])

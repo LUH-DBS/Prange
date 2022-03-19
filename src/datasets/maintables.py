@@ -35,35 +35,15 @@ class Maintables(Baseclass):
                 table.append([r[0] for r in self.cursor.fetchall()])
             return table
 
-    def get_columninfo(self, tableid: int) -> list:
-        """Get the column header for a table.
+    def pretty_columns(self, tableid: int, columnids: list[int]) -> list[str | int | list]:
+        """Return the column together with the table id.
+
 
         Args:
-            tableid (int): the id of the table
+            tableid (int): th id of the table
+            columnids (list[int]): a list with the column ids
 
         Returns:
-            list: the header
+            list[list]: a list in the format ['tableid', 'columnids', ]
         """
-        query = "SELECT header FROM gittables_columns_info WHERE tableid = %s"
-        self.cursor.execute(query, (tableid,))
-        return [r[0] for r in self.cursor.fetchall()]
-
-    def get_tablename(self, tableid: int) -> str:
-        """Get the name of a table.
-
-        Args:
-            tableid (int): the id of the table
-
-        Returns:
-            str: the name of the table
-        """
-        query = "SELECT filename FROM gittables_tables_info WHERE id = %s"
-        self.cursor.execute(query, (tableid,))
-        return self.cursor.fetchone()[0]
-
-    def get_columnnames(self, tableid: int, columnids: list[int]) -> list[str]:
-        names = self.get_columninfo(tableid)
-        result = []
-        for i in columnids:
-            result.append(names[i])
-        return result
+        return [tableid, columnids]

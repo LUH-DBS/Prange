@@ -18,14 +18,14 @@ def main():
     cursor = connection.cursor()
 
     global tables
-    tables = Maintables(cursor)
+    tables = Gittables(cursor)
 
-    unique_columns(2000, 2050, False)
+    unique_columns(2000, 2005, True, True, None)
 
     connection.close()
 
 
-def unique_columns(mintable: int, maxtable: int, do_print: bool, do_csv='test.csv') -> list[list]:
+def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, csv_path='test.csv') -> list[list]:
     """Compute all unique columns for a range of tables.
 
     The result is a two dimensional list with the format ['tableid', 'tablename', 'columnids', 'columnnames']
@@ -33,8 +33,9 @@ def unique_columns(mintable: int, maxtable: int, do_print: bool, do_csv='test.cs
     Args:
         mintable (int): the first table id (inclusive)
         maxtable (int): the last table id (exclusive)
+        pretty (bool): if True, the result will contain table and column names, otherwise it will just contain the column ids
         do_print (bool): if True, the result will be printed to the command line
-        do_csv (str, optional): If not None, the result will be saved as a csv under the given path. Defaults to 'test.csv'.
+        csv_path (str, optional): If not None, the result will be saved as a csv under the given path. Defaults to 'test.csv'.
 
     Returns:
         list[list]: the result as a two dimensional list
@@ -44,28 +45,27 @@ def unique_columns(mintable: int, maxtable: int, do_print: bool, do_csv='test.cs
     number_of_tables = maxtable - mintable
     for i in range(mintable, maxtable):
         counter += 1
-        # tablename = tables.get_tablename(i)
-        tablename = ""
-        print(f"{counter}/{number_of_tables}:\t{tablename}         ", end='\r')
+        print(
+            f"Table Nr. {i} ({counter}/{number_of_tables})         ", end='\r')
 
         table = tables.get_table(i, True)
         unique_columns = find_unique_columns(table, 'hash')
-        result.append([i,
-                       tablename,
-                       unique_columns,
-                       tables.get_columnnames(i, unique_columns)])
+        if pretty:
+            unique_columns = tables.pretty_columns(i, unique_columns)
+        result.append(unique_columns)
 
     if do_print:
         from pprint import pprint
         pprint(result)
-    if do_csv is not None:
-        if type(do_csv) == 'bool':
-            do_csv = 'test.csv'
+    if csv_path is not None:
+        if pretty:
+            result = [['tableid', 'tablename',
+                       'columnids', 'columnnames'], *result]
         import pandas as pd
         import numpy as np
         arr = np.asarray(
-            [['tableid', 'tablename', 'columnids', 'columnnames'], *result], dtype=object)
-        pd.DataFrame(arr).to_csv(do_csv, header=None, index=False)
+            result, dtype=object)
+        pd.DataFrame(arr).to_csv(csv_path, header=None, index=False)
 
     return result
 
