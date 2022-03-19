@@ -5,6 +5,7 @@ venv/
 *.session.sql
 .env
 __pycache__/
+test.csv
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

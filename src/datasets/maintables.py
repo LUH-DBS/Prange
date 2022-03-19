@@ -7,7 +7,7 @@ class Maintables(Baseclass):
         self.cursor = cursor
 
     def get_table(self, tableid: int, flipped: bool) -> list[list]:
-        """Return a complete table from the maintable with the id [tableid].
+        """Return a complete table from the maintables with the id [tableid].
 
         Args:
             tableid (int): the id of the table

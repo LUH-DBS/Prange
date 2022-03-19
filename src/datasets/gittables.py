@@ -55,7 +55,7 @@ class Gittables(Baseclass):
             tableid (int): the id of the table
 
         Returns:
-            list: the header
+            list: the header ordered by column id
         """
         query = "SELECT header FROM gittables_columns_info WHERE tableid = %s ORDER BY columnid"
         self.cursor.execute(query, (tableid,))
