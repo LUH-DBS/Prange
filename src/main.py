@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2
 
-from datasets import Gittables
+from datasets import Gittables, Maintables
 
 load_dotenv()
 db_params = {
@@ -18,7 +18,7 @@ def main():
     cursor = connection.cursor()
 
     global tables
-    tables = Gittables(cursor)
+    tables = Maintables(cursor)
 
     unique_columns(2000, 2050, False)
 
@@ -44,7 +44,8 @@ def unique_columns(mintable: int, maxtable: int, do_print: bool, do_csv='test.cs
     number_of_tables = maxtable - mintable
     for i in range(mintable, maxtable):
         counter += 1
-        tablename = tables.get_tablename(i)
+        # tablename = tables.get_tablename(i)
+        tablename = ""
         print(f"{counter}/{number_of_tables}:\t{tablename}         ", end='\r')
 
         table = tables.get_table(i, True)
