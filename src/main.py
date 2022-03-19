@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2
 
-from datasets import Gittables, Maintables
+from datasets import Gittables, Maintables, OpenData
 
 load_dotenv()
 db_params = {
@@ -18,17 +18,15 @@ def main():
     cursor = connection.cursor()
 
     global tables
-    tables = Gittables(cursor)
+    tables = OpenData(cursor)
 
-    unique_columns(2000, 2005, True, True, None)
+    unique_columns(2000, 2005, True, False)
 
     connection.close()
 
 
 def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, csv_path='test.csv') -> list[list]:
     """Compute all unique columns for a range of tables.
-
-    The result is a two dimensional list with the format ['tableid', 'tablename', 'columnids', 'columnnames']
 
     Args:
         mintable (int): the first table id (inclusive)
