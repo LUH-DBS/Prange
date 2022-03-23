@@ -22,7 +22,8 @@
 ## Ideen
 
 - Verschiedene Filter erstellen und Experimente mit verschiedenen Filterkombinationen durchführen
-- entweder Rohdaten Tabellen aus der Datenbank erstellen oder [Fatemeh Ahmadi](mailto:ahmadi@dbs.uni-hannover.de) bzw. [Mahdi Esmailoghli](mailto:esmailoghli@dbs.uni-hannover.de) nach Rohdaten fragen
+- entweder Rohdaten Tabellen aus der Datenbank erstellen ✅ (oder [Fatemeh Ahmadi](mailto:ahmadi@dbs.uni-hannover.de) bzw. [Mahdi Esmailoghli](mailto:esmailoghli@dbs.uni-hannover.de) nach Rohdaten fragen)
+- Sortieralgorithmen evtl. von Metanome übernehmen
 
 ## Anmerkungen
 
