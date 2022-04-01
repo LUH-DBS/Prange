@@ -73,8 +73,6 @@
 % \setcounter{secnumdepth}{0}
 % \setcounter{tocdepth}{2}
 
-\usepackage{import}
-
 \clubpenalty = 10000
 \widowpenalty = 10000
 \displaywidowpenalty = 10000
@@ -88,8 +86,8 @@
       
 \begin{document}
 
-\subimport{content/basics/}{basics.tex}
-\subimport{content/existing-algorithms/}{existing-algorithms.tex}
+\include{content/basics/basics.tex}
+\include{content/existing-algorithms/existing-algorithms.tex}
 
 \section{Other Sections}
 \begin{itemize}
@@ -97,7 +95,7 @@
         \begin{itemize}
           \item Structure of the neural network?
           \item Training
-          \item Perfomance (probably just in comparison)
+          \item Perfomance (probably just in experiments)
         \end{itemize}
   \item Experiments
   \item Conclusions
