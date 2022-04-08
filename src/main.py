@@ -1,8 +1,11 @@
 import os
 from dotenv import load_dotenv
 import psycopg2
+import sys
 
 from datasets import Gittables, Maintables, OpenData
+
+from algorithms import NaiveAlgorithmFlipped
 
 load_dotenv()
 db_params = {
@@ -20,7 +23,10 @@ def main():
     global tables
     tables = OpenData(cursor)
 
-    unique_columns(2000, 2005, True, False)
+    global algorithm
+    algorithm = NaiveAlgorithmFlipped()
+
+    unique_columns(2000, 2005, True, True)
 
     connection.close()
 
@@ -47,10 +53,11 @@ def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, c
             f"Table Nr. {i} ({counter}/{number_of_tables})         ", end='\r')
 
         table = tables.get_table(i, True)
-        unique_columns = find_unique_columns(table, 'hash')
+        unique_columns = algorithm.find_unique_columns(table, 'hash')
         if pretty:
             unique_columns = tables.pretty_columns(i, unique_columns)
         result.append(unique_columns)
+    sys.stdout.write("\033[K")
 
     if do_print:
         from pprint import pprint
@@ -69,70 +76,6 @@ def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, c
 
 
 ################################################################################
-
-
-def find_unique_columns(table: list[list], algorithm: str) -> list[int]:
-    """Generate a list with all column ids which only contain unique values making use of sorting.
-
-    Args:
-        table (list[list]): the table which has to be flipped (a list of columns, not of rows)
-        algorithm (str): either 'hash' or 'sort', raises an error otherwise
-
-    Raises:
-        ValueError: if algorithm is neither 'hash' nor 'sort'
-
-    Returns:
-        list[int]: the indexes of the unique columns
-    """
-
-    def column_is_unique_sorting(column: list) -> bool:
-        """Determine wether a column contains only unique values.
-
-        Args:
-            column (list): the column to test
-
-        Returns:
-            bool: True if unique, False otherwise
-        """
-        column = sorted(column)  # TODO: implement own sorting/hashing?
-        for index in range(len(column)):
-            if index == 0:
-                continue
-            if column[index] == column[index - 1]:  # TODO: what about NULL/NaN values?
-                return False
-        return True
-
-    def column_is_unique_hashing(column: list) -> bool:
-        """Determine wether a column contains only unique values.
-
-        Args:
-            column (list): the column to test
-
-        Returns:
-            bool: True if unique, False otherwise
-        """
-        hashmap = {}
-        for value in column:
-            if value not in hashmap:
-                hashmap[value] = 0
-            else:
-                return False
-        return True
-
-    match algorithm:
-        case 'hash':
-            column_is_unique = column_is_unique_hashing
-        case 'sort':
-            column_is_unique = column_is_unique_sorting
-        case _:
-            raise ValueError("Only 'hash' and 'sort' are valid algorithms.")
-
-    uniques = []
-    for index, column in enumerate(table):
-        if column_is_unique(column):
-            uniques.append(index)
-    return uniques
-
 
 if __name__ == '__main__':
     main()
