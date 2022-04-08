@@ -35,7 +35,7 @@ class NaiveAlgorithmFlipped(Baseclass):
             Returns:
                 bool: True if unique, False otherwise
             """
-            column = sorted(column)  # TODO: implement own sorting/hashing?
+            column = sorted(column)
             for index in range(len(column)):
                 if index == 0:
                     continue

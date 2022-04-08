@@ -9,7 +9,7 @@ import numpy as np
 
 from datasets import Gittables, Maintables, OpenData
 
-from algorithms import NaiveAlgorithmFlipped
+from algorithms import NaiveAlgorithmFlipped, NaiveAlgorithm
 
 load_dotenv()
 db_params = {
@@ -28,7 +28,7 @@ def main():
     tables = OpenData(cursor)
 
     global algorithm
-    algorithm = NaiveAlgorithmFlipped()
+    algorithm = NaiveAlgorithm()
 
     unique_columns(2000, 2005, True, True)
 
