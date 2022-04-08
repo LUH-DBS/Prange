@@ -1,7 +1,11 @@
 import os
+from pprint import pprint
 from dotenv import load_dotenv
 import psycopg2
 import sys
+from pprint import pprint
+import pandas as pd
+import numpy as np
 
 from datasets import Gittables, Maintables, OpenData
 
@@ -52,7 +56,7 @@ def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, c
         print(
             f"Table Nr. {i} ({counter}/{number_of_tables})         ", end='\r')
 
-        table = tables.get_table(i)
+        table = tables.get_table(i, -1)
         unique_columns = algorithm.find_unique_columns(table, 'hash')
         if pretty:
             unique_columns = tables.pretty_columns(i, unique_columns)
@@ -60,13 +64,10 @@ def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, c
     sys.stdout.write("\033[K")
 
     if do_print:
-        from pprint import pprint
         pprint(result)
     if csv_path is not None:
         if pretty:
             result = [tables.pretty_columns_header(), *result]
-        import pandas as pd
-        import numpy as np
         arr = np.asarray(
             result, dtype=object)
         pd.DataFrame(arr).to_csv(csv_path, header=None, index=False)

@@ -6,11 +6,12 @@ class OpenData(Baseclass):
     def __init__(self, cursor) -> None:
         self.cursor = cursor
 
-    def get_table(self, tableid: int, flipped=False) -> list[list]:
+    def get_table(self, tableid: int, max_rows: int, flipped=False) -> list[list]:
         """Return a complete table from the open data tables with the id [tableid].
 
         Args:
             tableid (int): the id of the table
+            max_rows (int): the maximum number of rows the returned table will have (only if flipped is False)
             flipped (bool): if True, a list of columns will be returned, otherwise a list of rows
 
         Returns:
@@ -28,7 +29,8 @@ class OpenData(Baseclass):
                 table.append([r[0] for r in self.cursor.fetchall()])
             return table
         else:
-            # table.append(self.get_columninfo(self.cursor, tableid))
+            if max_rows > 0:
+                row_count = min(row_count, max_rows)
             query = "SELECT term FROM open_data_main_tokenized WHERE tableid = %s and rowid = %s"
             for rowid in range(0, row_count):
                 self.cursor.execute(query, (tableid, rowid))

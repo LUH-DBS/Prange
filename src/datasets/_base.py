@@ -2,7 +2,7 @@ from abc import ABC
 
 
 class Baseclass(ABC):
-    def get_table(self, tableid: int) -> list[list]:
+    def get_table(self, tableid: int, max_rows) -> list[list]:
         raise NotImplementedError()
 
     def pretty_columns(self, tableid: int, columnids: list[int]) -> list[str | int | list]:
