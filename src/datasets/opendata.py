@@ -6,7 +6,7 @@ class OpenData(Baseclass):
     def __init__(self, cursor) -> None:
         self.cursor = cursor
 
-    def get_table(self, tableid: int, flipped: bool) -> list[list]:
+    def get_table(self, tableid: int, flipped=False) -> list[list]:
         """Return a complete table from the open data tables with the id [tableid].
 
         Args:
@@ -47,6 +47,9 @@ class OpenData(Baseclass):
             list[list]: a list in the format ['tableid', 'columnids', 'columnnames']
         """
         return [tableid, columnids, self.get_columnnames(tableid, columnids)]
+
+    def pretty_columns_header(self) -> list[str]:
+        return ['tableid', 'columnids', 'columnnames']
 
     def get_columnheader(self, tableid: int) -> list:
         """Get the column header for a table.

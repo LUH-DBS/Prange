@@ -6,7 +6,7 @@ class Gittables(Baseclass):
     def __init__(self, cursor) -> None:
         self.cursor = cursor
 
-    def get_table(self, tableid: int, flipped: bool) -> list[list]:
+    def get_table(self, tableid: int, flipped=False) -> list[list]:
         """Return a complete table from the gittables with the id [tableid].
 
         Args:
@@ -47,6 +47,9 @@ class Gittables(Baseclass):
             list[list]: a list in the format ['tableid', 'tablename', 'columnids', 'columnnames']
         """
         return [tableid, self.get_tablename(tableid), columnids, self.get_columnnames(tableid, columnids)]
+
+    def pretty_columns_header(self) -> list[str]:
+        return ['tableid', 'tablename', 'columnids', 'columnnames']
 
     def get_columnheader(self, tableid: int) -> list:
         """Get the column header for a table.

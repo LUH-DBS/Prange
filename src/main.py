@@ -52,7 +52,7 @@ def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, c
         print(
             f"Table Nr. {i} ({counter}/{number_of_tables})         ", end='\r')
 
-        table = tables.get_table(i, True)
+        table = tables.get_table(i)
         unique_columns = algorithm.find_unique_columns(table, 'hash')
         if pretty:
             unique_columns = tables.pretty_columns(i, unique_columns)
@@ -64,8 +64,7 @@ def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, c
         pprint(result)
     if csv_path is not None:
         if pretty:
-            result = [['tableid', 'tablename',
-                       'columnids', 'columnnames'], *result]
+            result = [tables.pretty_columns_header(), *result]
         import pandas as pd
         import numpy as np
         arr = np.asarray(

@@ -6,7 +6,7 @@ class Maintables(Baseclass):
     def __init__(self, cursor) -> None:
         self.cursor = cursor
 
-    def get_table(self, tableid: int, flipped: bool) -> list[list]:
+    def get_table(self, tableid: int, flipped=False) -> list[list]:
         """Return a complete table from the maintables with the id [tableid].
 
         Args:
@@ -47,3 +47,6 @@ class Maintables(Baseclass):
             list[list]: a list in the format ['tableid', 'columnids', ]
         """
         return [tableid, columnids]
+
+    def pretty_columns_header(self) -> list[str]:
+        return ['tableid', 'columnids', ]
