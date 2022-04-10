@@ -1,2 +1,1 @@
-from .naiveAlgorithmFlipped import NaiveAlgorithmFlipped
 from .naiveAlgorithm import NaiveAlgorithm
