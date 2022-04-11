@@ -1,7 +1,7 @@
 import os
 from pprint import pprint
 from dotenv import load_dotenv
-import psycopg2
+from sqlalchemy import create_engine
 import sys
 from pprint import pprint
 import pandas as pd
@@ -9,7 +9,7 @@ import numpy as np
 
 from datasets import Gittables, Maintables, OpenData
 
-from algorithms import NaiveAlgorithmFlipped, NaiveAlgorithm
+from algorithms import NaiveAlgorithm
 
 load_dotenv()
 db_params = {
@@ -21,18 +21,15 @@ db_params = {
 
 
 def main():
-    connection = psycopg2.connect(**db_params)
-    cursor = connection.cursor()
+    engine = create_engine(
+        f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}/{db_params['database']}")
 
-    global tables
-    tables = OpenData(cursor)
-
-    global algorithm
-    algorithm = NaiveAlgorithm()
-
-    unique_columns(2000, 2005, True, True)
-
-    connection.close()
+    with engine.connect() as connection:
+        global tables
+        tables = Gittables(connection)
+        global algorithm
+        algorithm = NaiveAlgorithm()
+        unique_columns(200, 205, True, True)
 
 
 def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, csv_path='test.csv') -> list[list]:
@@ -57,7 +54,7 @@ def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, c
             f"Table Nr. {i} ({counter}/{number_of_tables})         ", end='\r')
 
         table = tables.get_table(i, -1)
-        unique_columns = algorithm.find_unique_columns(table, 'hash')
+        unique_columns = algorithm.find_unique_columns(table)
         if pretty:
             unique_columns = tables.pretty_columns(i, unique_columns)
         result.append(unique_columns)
