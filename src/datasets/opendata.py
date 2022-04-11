@@ -70,7 +70,7 @@ class OpenData(Baseclass):
         query = "SELECT header FROM open_data_columns_tokenized WHERE tableid = %s ORDER BY colid"
         result = sqlio.read_sql_query(
             query, self.connection, params=(tableid,))
-        return result
+        return result.T
 
     def get_columnnames(self, tableid: int, columnids: list[int]) -> list[str]:
         """Get the names of the columns

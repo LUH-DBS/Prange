@@ -1,12 +1,14 @@
 from ._base import Baseclass
+import pandas.io.sql as sqlio
+import pandas
 
 
 class Gittables(Baseclass):
 
-    def __init__(self, cursor) -> None:
-        self.cursor = cursor
+    def __init__(self, connection) -> None:
+        self.connection = connection
 
-    def get_table(self, tableid: int, max_rows: int, flipped=False) -> list[list]:
+    def get_table(self, tableid: int, max_rows: int, flipped=False) -> pandas.DataFrame:
         """Return a complete table from the gittables with the id [tableid].
 
         Args:
@@ -17,24 +19,27 @@ class Gittables(Baseclass):
         Returns:
             list[list]: the table in a list format
         """
-        table = []
+        table = pandas.DataFrame([])
         query = "SELECT num_rows, num_columns FROM gittables_tables_info WHERE id = %s"
-        self.cursor.execute(query, (tableid,))
-        row_count, column_count = self.cursor.fetchone()
+        result = sqlio.read_sql_query(
+            query, self.connection, params=(tableid,))
+        row_count, column_count = result.values[0]
 
         if flipped:
             query = "SELECT tokenized FROM gittables_main_tokenized WHERE tableid = %s and columnid = %s"
             for columnid in range(0, column_count):
-                self.cursor.execute(query, (tableid, columnid))
-                table.append([r[0] for r in self.cursor.fetchall()])
+                result = sqlio.read_sql_query(
+                    query, self.connection, params=(tableid, columnid))
+                table: pandas.DataFrame = pandas.concat([table, result.T])
             return table
         else:
             if max_rows > 0:
                 row_count = min(row_count, max_rows)
             query = "SELECT tokenized FROM gittables_main_tokenized WHERE tableid = %s and rowid = %s"
             for rowid in range(0, row_count):
-                self.cursor.execute(query, (tableid, rowid))
-                table.append([r[0] for r in self.cursor.fetchall()])
+                result = sqlio.read_sql_query(
+                    query, self.connection, params=(tableid, rowid))
+                table: pandas.DataFrame = pandas.concat([table, result.T])
             return table
 
     def pretty_columns(self, tableid: int, columnids: list[int]) -> list[str | int | list]:
@@ -53,7 +58,7 @@ class Gittables(Baseclass):
     def pretty_columns_header(self) -> list[str]:
         return ['tableid', 'tablename', 'columnids', 'columnnames']
 
-    def get_columnheader(self, tableid: int) -> list:
+    def get_columnheader(self, tableid: int) -> pandas.DataFrame:
         """Get the column header for a table.
 
         Args:
@@ -63,8 +68,9 @@ class Gittables(Baseclass):
             list: the header ordered by column id
         """
         query = "SELECT header FROM gittables_columns_info WHERE tableid = %s ORDER BY columnid"
-        self.cursor.execute(query, (tableid,))
-        return [r[0] for r in self.cursor.fetchall()]
+        result = sqlio.read_sql_query(
+            query, self.connection, params=(tableid,))
+        return result.T
 
     def get_tablename(self, tableid: int) -> str:
         """Get the name of a table.
@@ -76,8 +82,9 @@ class Gittables(Baseclass):
             str: the name of the table
         """
         query = "SELECT filename FROM gittables_tables_info WHERE id = %s"
-        self.cursor.execute(query, (tableid,))
-        return self.cursor.fetchone()[0]
+        result = sqlio.read_sql_query(
+            query, self.connection, params=(tableid,))
+        return result.values[0][0]
 
     def get_columnnames(self, tableid: int, columnids: list[int]) -> list[str]:
         """Get the names of the columns
@@ -89,7 +96,7 @@ class Gittables(Baseclass):
         Returns:
             list[str]: a list with the column names
         """
-        names = self.get_columnheader(tableid)
+        names = self.get_columnheader(tableid).values[0]
         result = []
         for i in columnids:
             result.append(names[i])
