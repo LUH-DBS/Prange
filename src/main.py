@@ -72,7 +72,19 @@ def unique_columns(mintable: int, maxtable: int, pretty: bool, do_print: bool, c
     return result
 
 
-################################################################################
+def save_csv(table_range: Iterable, max_rows = -1) -> None:
+    path = "src/data/"
+    if isinstance(tables, Gittables):
+        path += "gittables/"
+    elif isinstance(tables, OpenData):
+        path += "opendata/"
+    elif isinstance(tables, Maintables):
+        path += "maintables/"
+
+    for tableid in table_range:
+        table = tables.get_table(tableid, max_rows)
+        table.to_csv(f"{path}{tableid}.csv")
+
 
 if __name__ == '__main__':
     main()

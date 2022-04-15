@@ -1,11 +1,12 @@
 ## Eigene
-lib/
+/lib
 venv/
 .vscode/settings.json
 *.session.sql
 .env
 __pycache__/
 test.csv
+/src/data
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
