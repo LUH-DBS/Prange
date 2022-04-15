@@ -18,8 +18,12 @@ class CSV(Baseclass):
         Returns:
             list[list]: the table in a list format
         """
-        if max_rows > 0:
-            table = pandas.read_csv(f"{self.path}{tableid}.csv", nrows=max_rows)
-        else:
-            table = pandas.read_csv(f"{self.path}{tableid}.csv")
-        return table
+        try:
+            if max_rows > 0:
+                table = pandas.read_csv(f"{self.path}{tableid}.csv", nrows=max_rows)
+            else:
+                table = pandas.read_csv(f"{self.path}{tableid}.csv")
+            return table
+        except pandas.errors.EmptyDataError:
+            print(f"The file {tableid} is empty.")
+            return pandas.DataFrame([])
