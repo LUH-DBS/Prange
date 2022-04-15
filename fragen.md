@@ -4,17 +4,16 @@
 
 ## Fragen
 
-- Wie können die verschiedenen Tabellen auf eine feste Anzahl von Parametern reduziert werden?
-- Welche Parameter sollen kodiert werden?
-- Ideen für Parameter:
-  - Zeilenanzahl der gesamten Tabelle
-  - Betrachtete Zeilenanzahl
-  - Column Header als String
-
 ## Ideen
 
-- Verschiedene Filter erstellen und Experimente mit verschiedenen Filterkombinationen durchführen
-- Sortieralgorithmen evtl. von Metanome übernehmen
+- Nur die ersten x Tupel (evtl. x% Tupel) lesen
+- Datenvorbereitung:
+  - Spalten mit doppelten Werten ausschließen (evtl. Information welche Tupel doppelt sind für andere Spalten interessant, unklar ist wie die Information übergeben werden kann)
+  - Informationen extrahieren
+    - Datentyp
+    - durschnittliche String Länge (evtl. auch Varianz)
+    - durchschnittlicher Zahlenbereich (evtl. auch Varianz)
+    - Sind die Werte aufsteigend/absteigend (wenn ja, mit Lücken?)
 
 ## Anmerkungen
 
