@@ -68,7 +68,8 @@ def unique_columns(table_range: Iterable, cache_csv: bool, pretty: bool, do_prin
         unique_columns = algorithm.find_unique_columns(table)
         if pretty:
             unique_columns = tables.pretty_columns(i, unique_columns)
-        result.append(unique_columns)
+        if len(unique_columns) > 1:
+            result.append(unique_columns)
     sys.stdout.write("\033[K")
 
     if do_print:
@@ -94,10 +95,18 @@ def get_csv_path() -> str:
     return path
 
 
-def save_csv(table_range: Iterable, max_rows = -1) -> None:
+def save_csv(table_range: Iterable, skip_existing = True, max_rows = -1) -> None:
+    counter = 0
+    number_of_tables = len(table_range)
     for tableid in table_range:
-        table = tables.get_table(tableid, max_rows)
-        table.to_csv(f"{get_csv_path()}{tableid}.csv", index=False)
+        counter += 1
+        print(
+            f"Saving table Nr. {tableid} ({counter}/{number_of_tables})         ", end='\r')
+        if not skip_existing or not exists(f"{get_csv_path()}{tableid}.csv"):
+            table = tables.get_table(tableid, max_rows)
+            table.to_csv(f"{get_csv_path()}{tableid}.csv", index=False)
+    sys.stdout.write("\033[K")
+    print(f"Saved {number_of_tables} tables (from {table_range[0]} to {table_range[-1]})")
 
 
 if __name__ == '__main__':
