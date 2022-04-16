@@ -5,15 +5,11 @@ import pandas as pd
 class NaiveAlgorithm(Baseclass):
 
     # Possible higher efficiency with the table as a numpy array instead of a list
-    def find_unique_columns(self, table: pd.DataFrame) -> list:
+    def find_unique_columns(self, table: pd.DataFrame) -> pd.DataFrame:
         """Generate a list with all column ids which only contain unique values making use of sorting.
 
         Args:
-            table (list[list]): the table to inspect
-            algorithm (str): either 'hash' or 'sort', raises an error otherwise
-
-        Raises:
-            ValueError: if algorithm is neither 'hash' nor 'sort'
+            table (pd.Dataframe): the table to inspect
 
         Returns:
             pd.DataFrame: the indexes of the unique columns
