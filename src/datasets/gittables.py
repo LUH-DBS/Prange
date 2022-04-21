@@ -19,6 +19,8 @@ class Gittables(Baseclass):
         Returns:
             list[list]: the table in a list format
         """
+        column_names = self.get_columnheader(tableid).values[0]
+        column_names_dict = {x: y for x, y in enumerate(column_names)}
         table = pandas.DataFrame([])
         query = "SELECT num_rows, num_columns FROM gittables_tables_info WHERE id = %s"
         result = sqlio.read_sql_query(
@@ -30,8 +32,9 @@ class Gittables(Baseclass):
             for columnid in range(0, column_count):
                 result = sqlio.read_sql_query(
                     query, self.connection, params=(tableid, columnid))
-                table: pandas.DataFrame = pandas.concat([table, result.T])
-            return table
+                table: pandas.DataFrame = pandas.concat(
+                    [table, result.T])
+            return table.rename(columns=column_names_dict)
         else:
             if max_rows > 0:
                 row_count = min(row_count, max_rows)
@@ -40,7 +43,7 @@ class Gittables(Baseclass):
                 result = sqlio.read_sql_query(
                     query, self.connection, params=(tableid, rowid))
                 table: pandas.DataFrame = pandas.concat([table, result.T])
-            return table
+            return table.rename(columns=column_names_dict)
 
     def pretty_columns(self, tableid: int, columnids: list[int]) -> list[str | int | list]:
         """Return the column and table id together with its names.

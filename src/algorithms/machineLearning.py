@@ -28,15 +28,14 @@ class MachineLearning(Baseclass):
         result = pd.DataFrame(columns=self.header)
         for column_id in table:
             result = pd.concat([result, self.prepare_column(
-                table[column_id])], ignore_index=True)
-            # print(self.prepare_column(table[column_id]))
+                table[column_id])])
         return result
 
     def prepare_column(self, column: pd.DataFrame) -> pd.DataFrame:
         # return immediatly if there are any duplicated
         if column.duplicated().any():
             # 10
-            return pd.DataFrame([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]], columns=self.header)
+            return pd.DataFrame([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]], columns=self.header, index=[column.name])
         # duplicate = 0, data type and sorted will be changed
         result = [0, 0, 0]
         # check if entries are sorted
@@ -54,13 +53,13 @@ class MachineLearning(Baseclass):
             result.append(description['std'])
             # values for strings
             result += [0, 0, 0]
-            return pd.DataFrame([result], columns=self.header)
+            return pd.DataFrame([result], columns=self.header, index=[column.name])
         if is_string_dtype(column):
             result[1] = 2
             # values for numbers
             result += [0, 0, 0, 0]
             result += self._describe_string(column)
-            return pd.DataFrame([result], columns=self.header)
+            return pd.DataFrame([result], columns=self.header, index=[column.name])
         raise NotImplementedError("Not implemented column type")
 
     def _describe_string(self, column: pd.DataFrame) -> list:
