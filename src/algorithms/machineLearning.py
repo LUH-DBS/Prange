@@ -4,7 +4,7 @@ from pandas.api.types import is_numeric_dtype, is_string_dtype
 
 
 class MachineLearning(Baseclass):
-    header = ["Duplicates", "Data Types", "Sorted",
+    header = ["Duplicates", "Data Type", "Sorted",
               # number
               "Min. value", "Max. value", "Mean", "Std. Deviation",
               # string
@@ -27,7 +27,8 @@ class MachineLearning(Baseclass):
     def prepare_table(self, table: pd.DataFrame) -> pd.DataFrame:
         result = pd.DataFrame(columns=self.header)
         for column_id in table:
-            result = pd.concat([result, self.prepare_column(table[column_id])])
+            result = pd.concat([result, self.prepare_column(
+                table[column_id])], ignore_index=True)
             # print(self.prepare_column(table[column_id]))
         return result
 
@@ -54,5 +55,20 @@ class MachineLearning(Baseclass):
             # values for strings
             result += [0, 0, 0]
             return pd.DataFrame([result], columns=self.header)
-        return pd.DataFrame([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], columns=self.header)
+        if is_string_dtype(column):
+            result[1] = 2
+            # values for numbers
+            result += [0, 0, 0, 0]
+            result += self._describe_string(column)
+            return pd.DataFrame([result], columns=self.header)
         raise NotImplementedError("Not implemented column type")
+
+    def _describe_string(self, column: pd.DataFrame) -> list:
+        # "Avg. string length", "Min. string length", "Max. string length"
+        length_list = []
+        for value in column.values:
+            length_list.append(len(value))
+        average = sum(length_list)/len(length_list)
+        minimum = min(length_list)
+        maximum = max(length_list)
+        return [average, minimum, maximum]
