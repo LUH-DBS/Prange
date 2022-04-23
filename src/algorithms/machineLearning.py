@@ -39,10 +39,13 @@ class MachineLearning(Baseclass):
         # duplicate = 0, data type and sorted will be changed
         result = [0, 0, 0]
         # check if entries are sorted
-        if all(column[i+1] >= column[i] for i in range(0, len(column)-1)):
-            result[2] = 1
-        if all(column[i+1] <= column[i] for i in range(0, len(column)-1)):
-            result[2] = 1
+        try:
+            if all(column[i+1] >= column[i] for i in range(0, len(column)-1)):
+                result[2] = 1
+            if all(column[i+1] <= column[i] for i in range(0, len(column)-1)):
+                result[2] = 1
+        except:
+            print("Error: column " + column.name)
         # handle integer and float
         if is_numeric_dtype(column):
             result[1] = 1
@@ -58,7 +61,10 @@ class MachineLearning(Baseclass):
             result[1] = 2
             # values for numbers
             result += [0, 0, 0, 0]
-            result += self._describe_string(column)
+            try:
+                result += self._describe_string(column)
+            except:
+                result[1] = 3  # mixed column
             return pd.DataFrame([result], columns=self.header, index=[column.name])
         raise NotImplementedError("Not implemented column type")
 
@@ -66,7 +72,10 @@ class MachineLearning(Baseclass):
         # "Avg. string length", "Min. string length", "Max. string length"
         length_list = []
         for value in column.values:
-            length_list.append(len(value))
+            if isinstance(value, str):
+                length_list.append(len(value))
+            else:
+                pass  # TODO
         average = sum(length_list)/len(length_list)
         minimum = min(length_list)
         maximum = max(length_list)
