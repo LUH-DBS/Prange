@@ -65,6 +65,7 @@ class MachineLearning(Baseclass):
                 result += self._describe_string(column)
             except:
                 result[1] = 3  # mixed column
+                result += [0, 0, 0]
             return pd.DataFrame([result], columns=self.header, index=[column.name])
         raise NotImplementedError("Not implemented column type")
 
@@ -75,7 +76,7 @@ class MachineLearning(Baseclass):
             if isinstance(value, str):
                 length_list.append(len(value))
             else:
-                pass  # TODO
+                raise ValueError("Not a String")
         average = sum(length_list)/len(length_list)
         minimum = min(length_list)
         maximum = max(length_list)
