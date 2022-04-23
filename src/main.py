@@ -116,15 +116,28 @@ def save_csv(table_range: Iterable, skip_existing=True, max_rows=-1) -> None:
 
 def prepare_training(table_range: Iterable, number_rows: int, path='src/data/training/'):
     path = f"{path}{min(table_range)}-{max(table_range)}.csv"
+    path_result = path.replace(".csv", "-result.csv")
     ml = MachineLearning()
+    na = NaiveAlgorithm()
     csv = CSV(get_csv_path())
-    pd.DataFrame([], columns=ml.header).to_csv(path)
+    pd.DataFrame([], columns=ml.header).to_csv(path, index=False)
+    pd.DataFrame([], columns=["PK Candidates"]).to_csv(path_result, index=False)
     for tableid in table_range:
         # TODO: error catching etc.
         table = csv.get_table(tableid, number_rows)
         data = ml.prepare_table(table)
-        data.to_csv(path, mode='a', header=False)
-
+        data.to_csv(path, mode='a', header=False, index=False)
+        data = na.find_unique_columns(table)
+        filtered_data = []
+        for i in range(0, len(table.columns)):
+            if i in data:
+                filtered_data.append(True)
+            else:
+                filtered_data.append(False)
+        index = table.columns.values
+        filtered_data = [int(x) for x in filtered_data]
+        result = pd.DataFrame(filtered_data, index=index, columns=["PK Candidate"])
+        result.to_csv(path_result,mode='a', header=False, index=False)
 
 if __name__ == '__main__':
     main()

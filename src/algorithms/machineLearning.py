@@ -45,7 +45,7 @@ class MachineLearning(Baseclass):
             if all(column[i+1] <= column[i] for i in range(0, len(column)-1)):
                 result[2] = 1
         except:
-            print("Error: column " + column.name)
+            print(f"Column {column.name} does not just include strings")
         # handle integer and float
         if is_numeric_dtype(column):
             result[1] = 1
