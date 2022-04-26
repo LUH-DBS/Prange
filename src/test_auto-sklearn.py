@@ -7,7 +7,9 @@ import sklearn.metrics
 
 import autosklearn.classification
 
-X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+import pandas
+X = pandas.read_csv('src/data/training/100-999_50.csv')
+y = pandas.read_csv('src/data/training/100-999_50-result.csv')
 X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
     X, y, random_state=1)
 
@@ -28,3 +30,10 @@ print("\n-------------------------------\n")
 
 predictions = automl.predict(X_test)
 print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
+
+X2 = pandas.read_csv('src/data/training/1000-1499_50_nt.csv')
+y2 = pandas.read_csv('src/data/training/1000-1499_50_nt-result.csv')
+
+predictions = automl.predict(X2)
+print("Non trivial accuracy score:",
+      sklearn.metrics.accuracy_score(y2, predictions))
