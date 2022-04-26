@@ -2,6 +2,31 @@
 
 # Fragen und Themen zur Bachelorarbeit
 
+## Ergebnisse
+
+Ergebnisse nach zwei Minuten Training mit Spalten aus 900 Tabellen (100-999 aus gittables).
+Die nicht trivialen Spalten (keine doppelten Werte in den ersten x Zeilen) stammen aus 500 Tabellen (1000-1499 aus gittables).
+
+- 5 Spalten
+  - Accuracy score: 0.9703825586178527
+  - Non trivial accuracy score: 0.9196687370600414
+- 10 Spalten
+  - Accuracy score: 0.9831345125462773
+  - Non trivial accuracy score: 0.9569767441860465
+- 20 Spalten
+  - Accuracy score: 0.9987659399424106
+  - Non trivial accuracy score: 0.9955357142857143
+- 50 Spalten
+  - Accuracy score: 0.9995886466474702
+  - Non trivial accuracy score: 1.0
+
+| Spalten | Accuracy | n.t. Accuracy |
+| ------- | -------- | ------------- |
+| 5       | 97.04%   | 91.97%        |
+| 10      | 98.31%   | 95.70%        |
+| 20      | 99.88%   | 99.55%        |
+| 50      | 99.96%   | 100%          |
+
 ## Fragen
 
 ## Ideen
