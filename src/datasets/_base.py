@@ -10,3 +10,6 @@ class Baseclass(ABC):
 
     def pretty_columns_header(self) -> list[str]:
         raise NotImplementedError()
+
+    def pathname(self) -> str:
+        raise NotImplementedError()
