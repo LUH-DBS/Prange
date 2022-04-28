@@ -31,14 +31,8 @@ Die nicht trivialen Spalten (keine doppelten Werte in den ersten x Zeilen) stamm
 
 ## Ideen
 
-- Nur die ersten x Tupel (evtl. x% Tupel) lesen
-- Datenvorbereitung:
-  - Spalten mit doppelten Werten ausschließen (evtl. Information welche Tupel doppelt sind für andere Spalten interessant, unklar ist wie die Information übergeben werden kann)
-  - Informationen extrahieren
-    - Datentyp
-    - durschnittliche String Länge (evtl. auch Varianz)
-    - durchschnittlicher Zahlenbereich (evtl. auch Varianz)
-    - Sind die Werte aufsteigend/absteigend (wenn ja, mit Lücken?)
+- nicht nur accuracy messen, sondern auch precision (wie viele wurden korrekt als Kandidaten erkannt)
+- csv der Tabellen aus dem Internet (<https://gittables.github.io/>)
 
 ## Anmerkungen
 
