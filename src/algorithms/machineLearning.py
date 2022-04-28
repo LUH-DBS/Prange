@@ -1,5 +1,10 @@
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_string_dtype
+from typing import Iterable
+
+import datasets.csv as csv_interface
+import algorithms.naiveAlgorithm as naiveAlgorithm
+import algorithms.machineLearning as machineLearning
 
 
 header = ["Duplicates", "Data Type", "Sorted",
@@ -79,3 +84,36 @@ def _describe_string(column: pd.DataFrame) -> list:
     minimum = min(length_list)
     maximum = max(length_list)
     return [average, minimum, maximum]
+
+def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool, csv_path: str, path='src/data/training/'):
+    if non_trivial:
+        path = f"{path}{min(table_range)}-{max(table_range)}_{number_rows}_nt.csv"
+    else:
+        path = f"{path}{min(table_range)}-{max(table_range)}_{number_rows}.csv"
+    path_result = path.replace(".csv", "-result.csv")
+    pd.DataFrame([], columns=machineLearning.header).to_csv(path, index=False)
+    pd.DataFrame([], columns=["PK Candidates"]).to_csv(
+        path_result, index=False)
+    for tableid in table_range:
+        # TODO: error catching etc.
+        table = csv_interface.get_table_local(csv_path, tableid, number_rows)
+        data = machineLearning.prepare_table(table)
+        if non_trivial:
+            # remove all trivial cases
+            trivial_cases = data[data["Duplicates"] == 1].index
+            data = data.drop(trivial_cases)
+        data.to_csv(path, mode='a', header=False, index=False)
+        data = naiveAlgorithm.find_unique_columns(table)
+        filtered_data = []
+        for i in range(0, len(table.columns)):
+            if i in data:
+                filtered_data.append(True)
+            else:
+                filtered_data.append(False)
+        index = table.columns.values
+        filtered_data = [int(x) for x in filtered_data]
+        result = pd.DataFrame(filtered_data, index=index,
+                              columns=["PK Candidate"])
+        if non_trivial:
+            result = result.drop(trivial_cases)
+        result.to_csv(path_result, mode='a', header=False, index=False)
