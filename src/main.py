@@ -14,7 +14,8 @@ import algorithms
 from datasets import Gittables, Maintables, OpenData
 import datasets.csv as csv_interface
 
-from algorithms import NaiveAlgorithm, MachineLearning
+import algorithms.naiveAlgorithm as naiveAlgorithm
+import algorithms.machineLearning as machineLearning
 
 load_dotenv()
 db_params = {
@@ -33,7 +34,7 @@ def main():
         global tables
         tables = Gittables(connection)
         global algorithm
-        algorithm = MachineLearning()
+        algorithm = machineLearning
         global csv_path
         csv_path = f"src/data/{tables.pathname()}"
         unique_columns(range(100, 101), True, True, True)
@@ -93,21 +94,19 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
     else:
         path = f"{path}{min(table_range)}-{max(table_range)}_{number_rows}.csv"
     path_result = path.replace(".csv", "-result.csv")
-    ml = MachineLearning()
-    na = NaiveAlgorithm()
-    pd.DataFrame([], columns=ml.header).to_csv(path, index=False)
+    pd.DataFrame([], columns=machineLearning.header).to_csv(path, index=False)
     pd.DataFrame([], columns=["PK Candidates"]).to_csv(
         path_result, index=False)
     for tableid in table_range:
         # TODO: error catching etc.
         table = csv_interface.get_table_local(csv_path, tableid, number_rows)
-        data = ml.prepare_table(table)
+        data = machineLearning.prepare_table(table)
         if non_trivial:
             # remove all trivial cases
             trivial_cases = data[data["Duplicates"] == 1].index
             data = data.drop(trivial_cases)
         data.to_csv(path, mode='a', header=False, index=False)
-        data = na.find_unique_columns(table)
+        data = naiveAlgorithm.find_unique_columns(table)
         filtered_data = []
         for i in range(0, len(table.columns)):
             if i in data:
