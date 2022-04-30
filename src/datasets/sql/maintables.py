@@ -1,9 +1,9 @@
-from ._base import Baseclass
+from ._sql_base import SQL_Baseclass
 import pandas.io.sql as sqlio
 import pandas
 
 
-class Maintables(Baseclass):
+class Maintables(SQL_Baseclass):
 
     def __init__(self, connection) -> None:
         self.connection = connection

@@ -1,5 +1,5 @@
 from typing import Iterable
-from ._base import Baseclass
+from .sql._sql_base import SQL_Baseclass
 import pandas
 from genericpath import exists
 import sys
@@ -28,7 +28,7 @@ def get_table_local(path: str, tableid: int, max_rows: int) -> pandas.DataFrame:
         return pandas.DataFrame([])
 
 
-def get_table(dataset_interface: Baseclass, path: str, tableid: int, max_rows: int) -> pandas.DataFrame:
+def get_table(dataset_interface: SQL_Baseclass, path: str, tableid: int, max_rows: int) -> pandas.DataFrame:
     """Return a complete table from the locally saved csv files with the id [tableid]
     or from the database if no local file exists.
 
@@ -48,7 +48,7 @@ def get_table(dataset_interface: Baseclass, path: str, tableid: int, max_rows: i
     return table
 
 
-def save_table_range(dataset_interface: Baseclass, path: str, table_range: Iterable, skip_existing=True, max_rows=-1) -> None:
+def save_table_range(dataset_interface: SQL_Baseclass, path: str, table_range: Iterable, skip_existing=True, max_rows=-1) -> None:
     counter = 0
     number_of_tables = len(table_range)
     for tableid in table_range:

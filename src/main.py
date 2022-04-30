@@ -8,7 +8,7 @@ from pprint import pprint
 import pandas as pd
 import numpy as np
 
-from datasets import Gittables, Maintables, OpenData
+from datasets.sql import Gittables, Maintables, OpenData
 import datasets.csv as csv_interface
 import algorithms.naiveAlgorithm as naiveAlgorithm
 import algorithms.machineLearning as machineLearning
