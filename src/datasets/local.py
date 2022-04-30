@@ -21,9 +21,12 @@ def traverse_directory(path: str, nrows=-1) -> Iterator:
 
 def get_table_from_parquet(path: str, nrows=-1) -> pd.DataFrame:
     if nrows > 0:
-        file = ParquetFile(path)
-        first_rows = next(file.iter_batches(batch_size=nrows))
-        return pa.Table.from_batches([first_rows]).to_pandas()
+        try:
+            file = ParquetFile(path)
+            first_rows = next(file.iter_batches(batch_size=nrows))
+            return pa.Table.from_batches([first_rows]).to_pandas()
+        except StopIteration:
+            return pd.read_parquet(path)
     else:
         return pd.read_parquet(path)
 
