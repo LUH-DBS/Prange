@@ -7,6 +7,8 @@ venv/
 __pycache__/
 test.csv
 /src/data
+/src/training
+/tmp.py
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
