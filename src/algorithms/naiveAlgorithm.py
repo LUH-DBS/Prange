@@ -25,7 +25,7 @@ def unique_columns(table_range: Iterable, csv_path: str) -> list[list]:
         print(
             f"Table Nr. {tableid} ({counter}/{number_of_tables})         ", end='\r')
         table = csv_cache.get_table_local(csv_path, tableid, -1)
-        unique_columns = _find_unique_columns_table(table)
+        unique_columns = find_unique_columns_in_table(table)
         if len(unique_columns) > 1:
             result.append(unique_columns)
     sys.stdout.write("\033[K")
@@ -51,14 +51,14 @@ def unique_columns_online(table_range: Iterable, csv_path: str, dataset) -> list
         print(
             f"Table Nr. {i} ({counter}/{number_of_tables})         ", end='\r')
         table = dataset.get_table(i, -1)
-        unique_columns = _find_unique_columns_table(table)
+        unique_columns = find_unique_columns_in_table(table)
         if len(unique_columns) > 1:
             result.append(unique_columns)
     sys.stdout.write("\033[K")
     return result
 
 
-def _find_unique_columns_table(table: pd.DataFrame) -> list:
+def find_unique_columns_in_table(table: pd.DataFrame) -> list:
     """Generate a list with all column ids which only contain unique values making use of sorting.
 
     Args:
