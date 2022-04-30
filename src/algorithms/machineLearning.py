@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_string_dtype
-from typing import Iterable
+from typing import Iterable, Iterator
 
 import datasets.sql.csv_cache as csv_cache
 import algorithms.naiveAlgorithm as naiveAlgorithm
@@ -110,6 +110,43 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
             data = data.drop(trivial_cases)
         data.to_csv(path, mode='a', header=False, index=False)
         data = naiveAlgorithm.find_unique_columns(table)
+        filtered_data = []
+        for i in range(0, len(table.columns)):
+            if i in data:
+                filtered_data.append(True)
+            else:
+                filtered_data.append(False)
+        index = table.columns.values
+        filtered_data = [int(x) for x in filtered_data]
+        result = pd.DataFrame(filtered_data, index=index,
+                              columns=["PK Candidate"])
+        if non_trivial:
+            result = result.drop(trivial_cases)
+        result.to_csv(path_result, mode='a', header=False, index=False)
+
+
+def prepare_training_iterator(table_iter: Iterator, non_trivial: bool, read_tables_max: int, out_path='src/training/'):
+    if non_trivial:
+        out_path = f"{out_path}training-nontrivial.csv"
+    else:
+        out_path = f"{out_path}training.csv"
+    path_result = out_path.replace(".csv", "-result.csv")
+    pd.DataFrame([], columns=machineLearning.header).to_csv(
+        out_path, index=False)
+    pd.DataFrame([], columns=["PK Candidates"]).to_csv(
+        path_result, index=False)
+    count = 0
+    for table in table_iter:
+        count += 1
+        if read_tables_max > 0 and count > read_tables_max:
+            break
+        data = machineLearning.prepare_table(table)
+        if non_trivial:
+            # remove all trivial cases
+            trivial_cases = data[data["Duplicates"] == 1].index
+            data = data.drop(trivial_cases)
+        data.to_csv(out_path, mode='a', header=False, index=False)
+        data = naiveAlgorithm.find_unique_columns_in_table(table)
         filtered_data = []
         for i in range(0, len(table.columns)):
             if i in data:
