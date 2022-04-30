@@ -1,5 +1,5 @@
 from typing import Iterable
-from .sql._sql_base import SQL_Baseclass
+from ._sql_base import SQL_Baseclass
 import pandas
 from genericpath import exists
 import sys

@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 from datasets.sql import Gittables, Maintables, OpenData
-import datasets.csv as csv_interface
+import datasets.sql.csv_cache as csv_cache
 import algorithms.naiveAlgorithm as naiveAlgorithm
 import algorithms.machineLearning as machineLearning
 
@@ -62,7 +62,7 @@ def unique_columns(table_range: Iterable, cache_csv: bool, pretty: bool, do_prin
         print(
             f"Table Nr. {i} ({counter}/{number_of_tables})         ", end='\r')
         if cache_csv:
-            table = csv_interface.get_table(tables, csv_path, i, max_rows)
+            table = csv_cache.get_table(tables, csv_path, i, max_rows)
         else:
             table = tables.get_table(i, max_rows)
         unique_columns = algorithm.find_unique_columns(table)

@@ -2,20 +2,22 @@ import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_string_dtype
 from typing import Iterable
 
-import datasets.csv as csv_interface
+import datasets.sql.csv_cache as csv_cache
 import algorithms.naiveAlgorithm as naiveAlgorithm
 import algorithms.machineLearning as machineLearning
 
 
 header = ["Duplicates", "Data Type", "Sorted",
-            # number
-            "Min. value", "Max. value", "Mean", "Std. Deviation",
-            # string
-            "Avg. string length", "Min. string length", "Max. string length"
-            # date?
-            ]  # 10
+          # number
+          "Min. value", "Max. value", "Mean", "Std. Deviation",
+          # string
+          "Avg. string length", "Min. string length", "Max. string length"
+          # date?
+          ]  # 10
 
 # Possible higher efficiency with the table as a numpy array instead of a list
+
+
 def find_unique_columns(table: pd.DataFrame) -> pd.DataFrame:
     """Generate a list with all column ids which only contain unique values making use of machine learning.
 
@@ -27,12 +29,14 @@ def find_unique_columns(table: pd.DataFrame) -> pd.DataFrame:
     """
     print(prepare_table(table))
 
+
 def prepare_table(table: pd.DataFrame) -> pd.DataFrame:
     result = pd.DataFrame(columns=header)
     for column_id in table:
         result = pd.concat([result, prepare_column(
             table[column_id])])
     return result
+
 
 def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
     # return immediatly if there are any duplicated
@@ -72,6 +76,7 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame([result], columns=header, index=[column.name])
     raise NotImplementedError("Not implemented column type")
 
+
 def _describe_string(column: pd.DataFrame) -> list:
     # "Avg. string length", "Min. string length", "Max. string length"
     length_list = []
@@ -85,6 +90,7 @@ def _describe_string(column: pd.DataFrame) -> list:
     maximum = max(length_list)
     return [average, minimum, maximum]
 
+
 def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool, csv_path: str, path='src/data/training/'):
     if non_trivial:
         path = f"{path}{min(table_range)}-{max(table_range)}_{number_rows}_nt.csv"
@@ -96,7 +102,7 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
         path_result, index=False)
     for tableid in table_range:
         # TODO: error catching etc.
-        table = csv_interface.get_table_local(csv_path, tableid, number_rows)
+        table = csv_cache.get_table_local(csv_path, tableid, number_rows)
         data = machineLearning.prepare_table(table)
         if non_trivial:
             # remove all trivial cases

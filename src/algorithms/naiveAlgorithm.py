@@ -4,7 +4,8 @@ from pprint import pprint
 import sys
 from typing import Iterable
 
-import datasets.csv as csv_interface
+import datasets.sql.csv_cache as csv_cache
+
 
 def unique_columns(table_range: Iterable, csv_path: str) -> list[list]:
     """Compute all unique columns for a range of tables.
@@ -23,12 +24,13 @@ def unique_columns(table_range: Iterable, csv_path: str) -> list[list]:
         counter += 1
         print(
             f"Table Nr. {tableid} ({counter}/{number_of_tables})         ", end='\r')
-        table = csv_interface.get_table_local(csv_path, tableid, -1)
+        table = csv_cache.get_table_local(csv_path, tableid, -1)
         unique_columns = _find_unique_columns_table(table)
         if len(unique_columns) > 1:
             result.append(unique_columns)
     sys.stdout.write("\033[K")
     return result
+
 
 def unique_columns_online(table_range: Iterable, csv_path: str, dataset) -> list:
     """Compute all unique columns for a range of tables.
