@@ -1,12 +1,12 @@
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_string_dtype
-from typing import Iterable
+from typing import Iterable, Iterator
 
 from autosklearn.classification import AutoSklearnClassifier
 from sklearn.model_selection import train_test_split
 import pickle
 
-import datasets.csv as csv_interface
+import datasets.sql.csv_cache as csv_cache
 import algorithms.naiveAlgorithm as naiveAlgorithm
 import algorithms.machineLearning as machineLearning
 
@@ -104,7 +104,7 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
         path_result, index=False)
     for tableid in table_range:
         # TODO: error catching etc.
-        table = csv_interface.get_table_local(csv_path, tableid, number_rows)
+        table = csv_cache.get_table_local(csv_path, tableid, number_rows)
         data = machineLearning.prepare_table(table)
         if non_trivial:
             # remove all trivial cases
@@ -145,3 +145,40 @@ def train(train_csv: str, save_path="", train_time=120, per_run_time=30) -> Auto
         with open(save_path, 'wb') as file:
             pickle.dump(automl, file)
     return automl
+
+
+def prepare_training_iterator(table_iter: Iterator, non_trivial: bool, read_tables_max: int, out_path='src/training/'):
+    if non_trivial:
+        out_path = f"{out_path}training-nontrivial.csv"
+    else:
+        out_path = f"{out_path}training.csv"
+    path_result = out_path.replace(".csv", "-result.csv")
+    pd.DataFrame([], columns=machineLearning.header).to_csv(
+        out_path, index=False)
+    pd.DataFrame([], columns=["PK Candidates"]).to_csv(
+        path_result, index=False)
+    count = 0
+    for table in table_iter:
+        count += 1
+        if read_tables_max > 0 and count > read_tables_max:
+            break
+        data = machineLearning.prepare_table(table)
+        if non_trivial:
+            # remove all trivial cases
+            trivial_cases = data[data["Duplicates"] == 1].index
+            data = data.drop(trivial_cases)
+        data.to_csv(out_path, mode='a', header=False, index=False)
+        data = naiveAlgorithm.find_unique_columns_in_table(table)
+        filtered_data = []
+        for i in range(0, len(table.columns)):
+            if i in data:
+                filtered_data.append(True)
+            else:
+                filtered_data.append(False)
+        index = table.columns.values
+        filtered_data = [int(x) for x in filtered_data]
+        result = pd.DataFrame(filtered_data, index=index,
+                              columns=["PK Candidate"])
+        if non_trivial:
+            result = result.drop(trivial_cases)
+        result.to_csv(path_result, mode='a', header=False, index=False)

@@ -1,7 +1,7 @@
 from abc import ABC
 
 
-class Baseclass(ABC):
+class SQL_Baseclass(ABC):
     def get_table(self, tableid: int, max_rows) -> list[list]:
         raise NotImplementedError()
 

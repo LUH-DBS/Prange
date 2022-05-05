@@ -5,8 +5,8 @@ from sklearn.metrics import accuracy_score, precision_score
 from genericpath import exists
 import pickle
 
-from datasets import Gittables, Maintables, OpenData
-import datasets.csv as csv_interface
+from datasets.sql import Gittables, Maintables, OpenData
+import datasets.sql.csv_cache as csv_cache
 import algorithms.naiveAlgorithm as naiveAlgorithm
 import algorithms.machineLearning as machineLearning
 
