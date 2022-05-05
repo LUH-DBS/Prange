@@ -1,6 +1,7 @@
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_string_dtype
 from typing import Iterable, Iterator
+from pathlib import Path
 
 from autosklearn.classification import AutoSklearnClassifier
 from sklearn.model_selection import train_test_split
@@ -127,7 +128,7 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
         result.to_csv(path_result, mode='a', header=False, index=False)
 
 
-def train(train_csv: str, save_path="", train_time=120, per_run_time=30) -> AutoSklearnClassifier:
+def train(train_csv: str, save_path: str = "", train_time=120, per_run_time=30) -> AutoSklearnClassifier:
     X = pd.read_csv(train_csv)
     y = pd.read_csv(train_csv.replace('.csv', '-result.csv'))
 
@@ -142,6 +143,7 @@ def train(train_csv: str, save_path="", train_time=120, per_run_time=30) -> Auto
     automl.fit(X, y, dataset_name="Test")
 
     if save_path != "":
+        Path(save_path.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
         with open(save_path, 'wb') as file:
             pickle.dump(automl, file)
     return automl

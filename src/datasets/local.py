@@ -6,9 +6,13 @@ import os
 from typing import Iterator
 
 
-def traverse_directory(path: str, nrows=-1) -> Iterator:
+def traverse_directory(path: str, nrows=-1, files_per_dir=-1) -> Iterator:
     for root, dirs, files in os.walk(path):
+        filecounter = 0
         for file in files:
+            filecounter += 1
+            if files_per_dir > 0 and filecounter > files_per_dir:
+                break
             match os.path.splitext(file)[1]:
                 case '.parquet':
                     yield get_table_from_parquet(f"{root}/{file}", nrows)
