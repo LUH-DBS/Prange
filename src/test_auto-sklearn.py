@@ -11,8 +11,8 @@ import pandas
 
 
 def main():
-    X = pandas.read_csv('src/data/training/100-999_20.csv')
-    y = pandas.read_csv('src/data/training/100-999_20-result.csv')
+    X = pandas.read_csv('src/data/training/100-999_5.csv')
+    y = pandas.read_csv('src/data/training/100-999_5-result.csv')
 
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
         X, y, random_state=1)
@@ -32,8 +32,8 @@ def main():
     predictions = automl.predict(X_test)
     print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
 
-    X2 = pandas.read_csv('src/data/training/1000-1499_20_nt.csv').values
-    y2 = pandas.read_csv('src/data/training/1000-1499_20_nt-result.csv').values
+    X2 = pandas.read_csv('src/data/training/1000-1499_5_nt.csv').values
+    y2 = pandas.read_csv('src/data/training/1000-1499_5_nt-result.csv').values
 
     predictions = automl.predict(X2)
     print("Non trivial accuracy score:",
