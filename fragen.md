@@ -31,8 +31,13 @@ Die nicht trivialen Spalten (keine doppelten Werte in den ersten x Zeilen) stamm
 
 ## Ideen
 
-- nicht nur accuracy messen, sondern auch precision (wie viele wurden korrekt als Kandidaten erkannt)
-- csv der Tabellen aus dem Internet (<https://gittables.github.io/>)
+- automatisierte Tests
+- Training und Test mit 5, 10, 20 Spalten
+- Ergebnis CSV mit table_id, accuracy, precision, Anzahl Zeilen, Anzahl Spalten
+  - evtl. Datentypen von Spalten
+  - evtl. Zeit Model und Zeit naiver Algorithmus
+  - evtl. eine CSV pro Tabellenkategorie
+- zusätzlich Gesamtübersicht mit accuracy und precision
 
 ## Anmerkungen
 
