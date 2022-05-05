@@ -1,5 +1,3 @@
-from email import header
-from genericpath import exists
 import os
 from pprint import pprint
 from typing import Iterable
@@ -10,9 +8,10 @@ from pprint import pprint
 import pandas as pd
 import numpy as np
 
-from datasets import Gittables, Maintables, OpenData, CSV
-
-from algorithms import NaiveAlgorithm, MachineLearning
+from datasets import Gittables, Maintables, OpenData
+import datasets.csv as csv_interface
+import algorithms.naiveAlgorithm as naiveAlgorithm
+import algorithms.machineLearning as machineLearning
 
 load_dotenv()
 db_params = {
@@ -31,12 +30,14 @@ def main():
         global tables
         tables = Gittables(connection)
         global algorithm
-        algorithm = MachineLearning()
-        # unique_columns(range(100, 101), True, True, True)
-        # save_csv(range(200, 2200)) # opendata
-        # save_csv(range(1000, 1500), True)  # gittables
-        prepare_training(range(100, 1000), 50, False)
-        prepare_training(range(1000, 1500), 50, True)
+        algorithm = machineLearning
+        global csv_path
+        csv_path = f"src/data/{tables.pathname()}"
+        unique_columns(range(100, 101), True, True, True)
+        # csv_interface.save_table_range(range(200, 2200)) # opendata
+        # csv_interface.save_table_range(tables, csv_path, range(1500, 1501), True)  # gittables
+        # machineLearning.prepare_training(range(100, 1000), 50, False)
+        # machineLearning.prepare_training(range(1000, 1500), 50, True)
 
 
 def unique_columns(table_range: Iterable, cache_csv: bool, pretty: bool, do_print: bool, csv_path='test.csv') -> list[list]:
@@ -52,8 +53,6 @@ def unique_columns(table_range: Iterable, cache_csv: bool, pretty: bool, do_prin
     Returns:
         list[list]: the result as a two dimensional list
     """
-    if cache_csv:
-        csv_tables = CSV(get_csv_path())
     max_rows = 10
     result = []
     counter = 0
@@ -63,11 +62,7 @@ def unique_columns(table_range: Iterable, cache_csv: bool, pretty: bool, do_prin
         print(
             f"Table Nr. {i} ({counter}/{number_of_tables})         ", end='\r')
         if cache_csv:
-            if exists(f"{get_csv_path()}{i}.csv"):
-                table = csv_tables.get_table(i, max_rows)
-            else:
-                table = tables.get_table(i, max_rows)
-                table.to_csv(f"{get_csv_path()}{i}.csv", index=False)
+            table = csv_interface.get_table(tables, csv_path, i, max_rows)
         else:
             table = tables.get_table(i, max_rows)
         unique_columns = algorithm.find_unique_columns(table)
@@ -87,69 +82,6 @@ def unique_columns(table_range: Iterable, cache_csv: bool, pretty: bool, do_prin
         pd.DataFrame(arr).to_csv(csv_path, header=None, index=False)
 
     return result
-
-
-def get_csv_path() -> str:
-    path = "src/data/"
-    if isinstance(tables, Gittables):
-        path += "gittables/"
-    elif isinstance(tables, OpenData):
-        path += "opendata/"
-    elif isinstance(tables, Maintables):
-        path += "maintables/"
-    return path
-
-
-def save_csv(table_range: Iterable, skip_existing=True, max_rows=-1) -> None:
-    counter = 0
-    number_of_tables = len(table_range)
-    for tableid in table_range:
-        counter += 1
-        print(
-            f"Saving table Nr. {tableid} ({counter}/{number_of_tables})         ", end='\r')
-        if not skip_existing or not exists(f"{get_csv_path()}{tableid}.csv"):
-            table = tables.get_table(tableid, max_rows)
-            table.to_csv(f"{get_csv_path()}{tableid}.csv", index=False)
-    sys.stdout.write("\033[K")
-    print(
-        f"Saved {number_of_tables} tables (from {table_range[0]} to {table_range[-1]})")
-
-
-def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool, path='src/data/training/'):
-    if non_trivial:
-        path = f"{path}{min(table_range)}-{max(table_range)}_{number_rows}_nt.csv"
-    else:
-        path = f"{path}{min(table_range)}-{max(table_range)}_{number_rows}.csv"
-    path_result = path.replace(".csv", "-result.csv")
-    ml = MachineLearning()
-    na = NaiveAlgorithm()
-    csv = CSV(get_csv_path())
-    pd.DataFrame([], columns=ml.header).to_csv(path, index=False)
-    pd.DataFrame([], columns=["PK Candidates"]).to_csv(
-        path_result, index=False)
-    for tableid in table_range:
-        # TODO: error catching etc.
-        table = csv.get_table(tableid, number_rows)
-        data = ml.prepare_table(table)
-        if non_trivial:
-            # remove all trivial cases
-            trivial_cases = data[data["Duplicates"] == 1].index
-            data = data.drop(trivial_cases)
-        data.to_csv(path, mode='a', header=False, index=False)
-        data = na.find_unique_columns(table)
-        filtered_data = []
-        for i in range(0, len(table.columns)):
-            if i in data:
-                filtered_data.append(True)
-            else:
-                filtered_data.append(False)
-        index = table.columns.values
-        filtered_data = [int(x) for x in filtered_data]
-        result = pd.DataFrame(filtered_data, index=index,
-                              columns=["PK Candidate"])
-        if non_trivial:
-            result = result.drop(trivial_cases)
-        result.to_csv(path_result, mode='a', header=False, index=False)
 
 
 if __name__ == '__main__':

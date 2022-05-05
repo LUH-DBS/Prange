@@ -87,3 +87,6 @@ class OpenData(Baseclass):
         for i in columnids:
             result.append(names[i])
         return result
+
+    def pathname(self) -> str:
+        return "opendata/"

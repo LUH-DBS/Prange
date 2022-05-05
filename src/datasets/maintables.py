@@ -57,3 +57,6 @@ class Maintables(Baseclass):
 
     def pretty_columns_header(self) -> list[str]:
         return ['tableid', 'columnids', ]
+
+    def pathname(self) -> str:
+        return "maintables/"
