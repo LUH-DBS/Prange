@@ -1,5 +1,5 @@
 import pandas as pd
-from pandas.api.types import is_numeric_dtype, is_string_dtype
+from pandas.api.types import is_numeric_dtype, is_string_dtype, is_bool_dtype
 from typing import Iterable, Iterator
 from pathlib import Path
 
@@ -54,9 +54,14 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
             result[2] = 1
         if all(column[i+1] <= column[i] for i in range(0, len(column)-1)):
             result[2] = 1
-    except:
-        print(f"Column {column.name} does not just include strings")
+    except Exception:
+        # print(f"Column {column.name} does not just include strings")
+        pass
     # handle integer and float
+    if is_bool_dtype(column):
+        result[1] = 3
+        result += [0, 0, 0, 0, 0, 0, 0]
+        return pd.DataFrame([result], columns=header, index=[column.name])
     if is_numeric_dtype(column):
         result[1] = 1
         description = column.describe()
@@ -73,8 +78,8 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
         result += [0, 0, 0, 0]
         try:
             result += _describe_string(column)
-        except:
-            result[1] = 3  # mixed column
+        except Exception:
+            result[1] = 4  # mixed column
             result += [0, 0, 0]
         return pd.DataFrame([result], columns=header, index=[column.name])
     raise NotImplementedError("Not implemented column type")
@@ -154,6 +159,7 @@ def prepare_training_iterator(table_iter: Iterator, non_trivial: bool, read_tabl
         out_path = f"{out_path}training-nontrivial.csv"
     else:
         out_path = f"{out_path}training.csv"
+    Path(out_path.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
     path_result = out_path.replace(".csv", "-result.csv")
     pd.DataFrame([], columns=machineLearning.header).to_csv(
         out_path, index=False)
@@ -161,6 +167,7 @@ def prepare_training_iterator(table_iter: Iterator, non_trivial: bool, read_tabl
         path_result, index=False)
     count = 0
     for table in table_iter:
+        print(count, end="\r")
         count += 1
         if read_tables_max > 0 and count > read_tables_max:
             break
