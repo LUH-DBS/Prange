@@ -209,7 +209,7 @@ def train(train_csv: str, save_path: str = "", train_time=120, per_run_time=30) 
     return automl
 
 
-def prepare_training_iterator(table_iter: Iterator, non_trivial: bool, read_tables_max: int, out_path='src/training/'):
+def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: bool, read_tables_max: int, out_path='src/training/'):
     """Prepare a feature table for training a model.
 
     Args:
