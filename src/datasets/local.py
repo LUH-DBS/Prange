@@ -1,12 +1,23 @@
+"""Interface Module to read locally saved files."""
+import os
+from typing import Iterator
+
 import pandas as pd
 from pyarrow.parquet import ParquetFile
 import pyarrow as pa
-import os
-
-from typing import Iterator
 
 
-def traverse_directory(path: str, nrows=-1, files_per_dir=-1) -> Iterator:
+def traverse_directory(path: str, nrows=-1, files_per_dir=-1) -> Iterator[pd.DataFrame]:
+    """Returns an Iterator which iterates through local files converted to DataFrames.
+
+    Args:
+        path (str): The path where the files are located.
+        nrows (int, optional): The number of rows to read from each file. Defaults to -1.
+        files_per_dir (int, optional): The number of files to read from each (sub-)directory at max. Defaults to -1.
+
+    Yields:
+        DataFrame: A Dataframe from the files und [path].
+    """
     for root, dirs, files in os.walk(path):
         filecounter = 0
         for file in files:
@@ -24,6 +35,15 @@ def traverse_directory(path: str, nrows=-1, files_per_dir=-1) -> Iterator:
 
 
 def get_table_from_parquet(path: str, nrows=-1) -> pd.DataFrame:
+    """Read a parquet file as a DataFrame.
+
+    Args:
+        path (str): The path to the file.
+        nrows (int, optional): The number of rows to read. Defaults to -1.
+
+    Returns:
+        pd.DataFrame: The table as a DataFrame.
+    """
     if nrows > 0:
         try:
             file = ParquetFile(path)
@@ -36,6 +56,15 @@ def get_table_from_parquet(path: str, nrows=-1) -> pd.DataFrame:
 
 
 def get_table_from_csv(path: str, nrows=-1) -> pd.DataFrame:
+    """Read a csv file as a DataFrame.
+
+    Args:
+        path (str): The path to the file.
+        nrows (int, optional): The number of rows to read. Defaults to -1.
+
+    Returns:
+        pd.DataFrame: The table as a DataFrame.
+    """
     if nrows > 0:
         return pd.read_csv(path, nrows=nrows)
     else:
