@@ -177,7 +177,7 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
         result.to_csv(path_result, mode='a', header=False, index=False)
 
 
-def train(train_csv: str, save_path: str = "", train_time=120, per_run_time=30) -> AutoSklearnClassifier:
+def train(train_csv: str, scoring_functions: list, save_path: str = "", train_time=120, per_run_time=30) -> AutoSklearnClassifier:
     """Train a network on a feature table.
 
     Args:
@@ -198,6 +198,7 @@ def train(train_csv: str, save_path: str = "", train_time=120, per_run_time=30) 
     automl = AutoSklearnClassifier(
         time_left_for_this_task=train_time,
         per_run_time_limit=per_run_time,
+        scoring_functions=scoring_functions
     )
     # automl.fit(X_train, y_train, dataset_name="Test")
     automl.fit(X, y, dataset_name="Test")

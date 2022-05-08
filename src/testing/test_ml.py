@@ -14,7 +14,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str):
+def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, scoring_functions: list):
     """Prepare and conduct the training ml models. One model will be trained for each row_count in [row_count_iter].
 
     Args:
@@ -31,10 +31,11 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
             table_iter, False, train_table_count, training_csv_path)
         train_if_not_exists(train_csv=training_csv_path + "training.csv",
                             save_path=model_path,
-                            train_time=30)
+                            train_time=30,
+                            scoring_functions=scoring_functions)
 
 
-def train_if_not_exists(train_csv: str, save_path: str, train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
+def train_if_not_exists(train_csv: str, save_path: str, scoring_functions: list, train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
     """Train and save a ml model if it doesn't already exist.
 
     Args:
@@ -52,4 +53,4 @@ def train_if_not_exists(train_csv: str, save_path: str, train_time: int = 120, p
         with open(save_path, 'rb') as file:
             return pickle.load(file)
     else:
-        return machine_learning.train(train_csv, save_path, train_time, per_run_time)
+        return machine_learning.train(train_csv, scoring_functions, save_path, train_time, per_run_time)
