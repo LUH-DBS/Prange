@@ -23,7 +23,7 @@ header = ["Duplicates", "Data Type", "Sorted",
           ]  # 10
 
 
-def find_unique_columns(table: pd.DataFrame, output_file: TextIO) -> pd.DataFrame:
+def find_unique_columns(table: pd.DataFrame, model: AutoSklearnClassifier) -> list[int]:
     """Generate a list with all column ids which only contain unique values making use of machine learning.
 
     Args:
@@ -33,6 +33,8 @@ def find_unique_columns(table: pd.DataFrame, output_file: TextIO) -> pd.DataFram
         pd.DataFrame: the indexes of the unique columns
     """
     prepared_table = prepare_table(table)
+    prediction = model.predict(prepared_table)
+    return [i for i in range(0, len(prediction)) if prediction[i] == 1]
 
 
 def prepare_table(table: pd.DataFrame) -> pd.DataFrame:

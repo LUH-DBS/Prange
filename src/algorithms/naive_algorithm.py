@@ -57,7 +57,7 @@ def unique_columns_online(table_range: Iterable, dataset) -> list:
     return result
 
 
-def find_unique_columns_in_table(table: pd.DataFrame) -> list:
+def find_unique_columns_in_table(table: pd.DataFrame) -> list[int]:
     """Generate a list with all column ids which only contain unique values making use of sorting.
 
     Args:
