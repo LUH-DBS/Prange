@@ -3,6 +3,8 @@
 import pickle
 from typing import Iterable
 from genericpath import exists
+import csv
+from timeit import default_timer as timer
 
 from autosklearn.classification import AutoSklearnClassifier
 
@@ -12,6 +14,61 @@ from algorithms import machine_learning
 
 BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
+
+
+def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, skip_tables: int = -1) -> None:
+    """Test a model and print the results into a csv file.
+
+    Args:
+        path_to_model (str): The filepath to the pickle file of the model.
+        nrows (int): The number of rows the model will be inspecting.
+        input_path (str): The path to the directory where the tables are located.
+        output_path (str): The filepath where the result csv will be saved.
+        skip_tables (int, optional): Skip the first [skip_tables] tables. Defaults to -1.
+    """
+    # TODO: table filename in result csv too?
+    # TODO: include opening file in timing -> traverse_directory would have to return the path, not the DataFrame
+    with open(path_to_model, 'rb') as file:
+        ml = pickle.load(file)
+    with open(output_path, 'w') as file:
+        csv_file = csv.writer(file)
+        row = ["Rows", "Columns", "Accuracy", "Precision",
+               "Recall", "F1", "Time ML (usec)", "Time Naive (usec)"]
+        csv_file.writerow(row)
+        for table in local.traverse_directory(input_path, skip_tables=skip_tables, files_per_dir=5):
+            ml_time = -timer()
+            ml_unqiues = machine_learning.find_unique_columns(
+                table.head(nrows), ml)
+            ml_time += timer()
+            na_time = -timer()
+            naive_uniques = naive_algorithm.find_unique_columns_in_table(table)
+            na_time += timer()
+            true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
+            for i in range(0, len(table.columns)):
+                if i in ml_unqiues:
+                    if i in naive_uniques:
+                        true_pos += 1
+                    else:
+                        false_pos += 1
+                else:
+                    if i in naive_uniques:
+                        false_neg += 1
+                    else:
+                        true_neg += 1
+            accuracy = (true_pos + true_neg) / \
+                (true_pos + true_neg + false_pos + false_neg)
+            if true_pos + false_pos != 0:
+                precision = true_pos / (true_pos + false_pos)
+            else:
+                precision = 0.0
+            if true_pos + false_neg != 0:
+                recall = true_pos / (true_pos + false_neg)
+            else:
+                recall = 1.0
+            f1 = 2 * precision * recall / (precision + recall)
+            row = [*table.shape, accuracy, precision,
+                   recall, f1, ml_time, na_time]
+            csv_file.writerow(row)
 
 
 def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, scoring_functions: list):
