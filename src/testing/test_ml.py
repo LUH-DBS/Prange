@@ -26,23 +26,23 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         output_path (str): The filepath where the result csv will be saved.
         skip_tables (int, optional): Skip the first [skip_tables] tables. Defaults to -1.
     """
-    # TODO: table filename in result csv too?
-    # TODO: include opening file in timing -> traverse_directory would have to return the path, not the DataFrame
     with open(path_to_model, 'rb') as file:
         ml = pickle.load(file)
     with open(output_path, 'w') as file:
         csv_file = csv.writer(file)
-        row = ["Rows", "Columns", "Accuracy", "Precision",
+        row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
                "Recall", "F1", "Time ML (usec)", "Time Naive (usec)"]
         csv_file.writerow(row)
-        for table in local.traverse_directory(input_path, skip_tables=skip_tables, files_per_dir=5):
+        for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=5):
+            na_time = -timer()
+            table = local.get_table(table_path)
+            naive_uniques = naive_algorithm.find_unique_columns_in_table(table)
+            na_time += timer()
             ml_time = -timer()
+            table = local.get_table(table_path, nrows)
             ml_unqiues = machine_learning.find_unique_columns(
                 table.head(nrows), ml)
             ml_time += timer()
-            na_time = -timer()
-            naive_uniques = naive_algorithm.find_unique_columns_in_table(table)
-            na_time += timer()
             true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
             for i in range(0, len(table.columns)):
                 if i in ml_unqiues:
@@ -66,7 +66,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             else:
                 recall = 1.0
             f1 = 2 * precision * recall / (precision + recall)
-            row = [*table.shape, accuracy, precision,
+            row = [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
                    recall, f1, ml_time, na_time]
             csv_file.writerow(row)
 

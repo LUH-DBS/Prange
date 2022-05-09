@@ -71,6 +71,16 @@ def traverse_directory(path: str, nrows: int = -1, files_per_dir: int = -1, skip
                         f'file {file} with unsupported extension {os.path.splitext(file)[1]}')
 
 
+def get_table(path: str, nrows: int = -1) -> pd.DataFrame:
+    match os.path.splitext(path)[1]:
+        case '.parquet':
+            return get_table_from_parquet(path, nrows)
+        case '.csv':
+            return get_table_from_csv(path, nrows)
+        case _:
+            pass
+
+
 def get_table_from_parquet(path: str, nrows: int = -1) -> pd.DataFrame:
     """Read a parquet file as a DataFrame.
 
