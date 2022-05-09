@@ -7,6 +7,38 @@ from pyarrow.parquet import ParquetFile
 import pyarrow as pa
 
 
+def traverse_directory_path(path: str, files_per_dir: int = -1, skip_tables: int = -1) -> Iterator[str]:
+    """Returns an Iterator which iterates through local files returning their filepath.
+
+    Args:
+        path (str): The path where the files are located.
+        nrows (int, optional): The number of rows to read from each file. Defaults to -1.
+        files_per_dir (int, optional): The number of files to read from each (sub-)directory at max. Defaults to -1.
+        skip_tables (int, optional): The number of tables/files to skip before returning them as DataFrames. Defaults to -1.
+
+    Yields:
+        str: The path to the file, if it has an extension of '.csv' or '.parquet'
+    """
+    skipcounter = 0
+    for root, dirs, files in os.walk(path):
+        filecounter = 0
+        for file in files:
+            if skip_tables > 0 and skipcounter < skip_tables:
+                skipcounter += 1
+                continue
+            filecounter += 1
+            if files_per_dir > 0 and filecounter > files_per_dir:
+                break
+            match os.path.splitext(file)[1]:
+                case '.parquet':
+                    yield f"{root}/{file}"
+                case '.csv':
+                    yield f"{root}/{file}"
+                case _:
+                    print(
+                        f'file {file} with unsupported extension {os.path.splitext(file)[1]}')
+
+
 def traverse_directory(path: str, nrows: int = -1, files_per_dir: int = -1, skip_tables: int = -1) -> Iterator[pd.DataFrame]:
     """Returns an Iterator which iterates through local files converted to DataFrames.
 
