@@ -34,15 +34,15 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                "Recall", "F1", "Time ML (usec)", "Time Naive (usec)"]
         csv_file.writerow(row)
         for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=5):
-            na_time = -timer()
-            table = local.get_table(table_path)
-            naive_uniques = naive_algorithm.find_unique_columns_in_table(table)
-            na_time += timer()
             ml_time = -timer()
             table = local.get_table(table_path, nrows)
             ml_unqiues = machine_learning.find_unique_columns(
                 table.head(nrows), ml)
             ml_time += timer()
+            na_time = -timer()
+            table = local.get_table(table_path)
+            naive_uniques = naive_algorithm.find_unique_columns_in_table(table)
+            na_time += timer()
             true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
             for i in range(0, len(table.columns)):
                 if i in ml_unqiues:
