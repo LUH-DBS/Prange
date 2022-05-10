@@ -82,15 +82,13 @@ def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_
     """
     for row_count in row_count_iter:
         training_csv_path = f'{BASE_PATH_TRAINING}{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-        model_path = f'{BASE_PATH_MODEL}{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
         table_iter = local.traverse_directory(
             data_path, row_count, files_per_dir)
-        # training
         machine_learning.prepare_training_iterator(
             table_iter, False, train_table_count, training_csv_path)
 
 
-def train_if_not_exists(train_csv: str, save_path: str, scoring_function_names: list[str], train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
+def train_if_not_exists(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
     """Train and save a ml model if it doesn't already exist.
 
     Args:
@@ -108,10 +106,10 @@ def train_if_not_exists(train_csv: str, save_path: str, scoring_function_names: 
         with open(save_path, 'rb') as file:
             return pickle.load(file)
     else:
-        return machine_learning.train(train_csv, scoring_function_names, save_path, train_time, per_run_time)
+        return machine_learning.train(train_csv, scoring_functions, save_path, train_time, per_run_time)
 
 
-def train_and_override(train_csv: str, save_path: str, scoring_function_names: list[str], train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
+def train_and_override(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
     """Train and save a ml model if it doesn't already exist.
 
     Args:
@@ -125,7 +123,7 @@ def train_and_override(train_csv: str, save_path: str, scoring_function_names: l
     """
     train_time_minute = int(train_time / 60)
     save_path = f"{save_path}{train_time_minute}minutes/{'_'.join(scoring_function_names)}.pickle"
-    return machine_learning.train(train_csv, scoring_function_names, save_path, train_time, per_run_time)
+    return machine_learning.train(train_csv, scoring_functions, save_path, train_time, per_run_time)
 
 
 def list_models(path: str) -> Iterator[str]:
