@@ -88,6 +88,38 @@ def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_
             table_iter, False, train_table_count, training_csv_path)
 
 
+def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]]):
+    """Prepare and execute the training of one ml model per value of [row_count_iter] and per value of [scoring_strategies].
+
+    Args:
+        row_count_iter (Iterable[int]): Number of rows to train the model on.
+        train_table_count (int): The number of tables to use for the training.
+        data_path (str): The path to the directory where the table files are.
+        train_envenly (bool): If True, the tables will be evenly from the subdirectories of [data_path].
+    """
+    train_time = 1800  # 30 minutes
+    per_run_time = 300  # 5 minutes
+    files_per_dir = -1
+    number_of_subdirs = len(
+        [f.path for f in os.scandir(data_path) if f.is_dir()])
+    if train_envenly and number_of_subdirs > 0:
+        files_per_dir = int(train_table_count / number_of_subdirs)
+    prepare_by_rows(row_count_iter=row_count_iter,
+                    train_table_count=train_table_count,
+                    data_path=data_path,
+                    files_per_dir=files_per_dir)
+    for row_count in row_count_iter:
+        for strategy in scoring_strategies:
+            training_csv_path = f'src/data/training/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
+            model_path = f'src/data/model/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
+            train_and_override(train_csv=training_csv_path,
+                               scoring_function_names=strategy[0],
+                               scoring_functions=strategy[1],
+                               save_path=model_path,
+                               train_time=train_time,
+                               per_run_time=per_run_time)
+
+
 def train_if_not_exists(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
     """Train and save a ml model if it doesn't already exist.
 
