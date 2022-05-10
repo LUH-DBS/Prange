@@ -1,7 +1,8 @@
 """A module containing functions to test the ml model."""
 
+import os
 import pickle
-from typing import Iterable
+from typing import Iterable, Iterator
 from genericpath import exists
 import csv
 from timeit import default_timer as timer
@@ -71,7 +72,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             csv_file.writerow(row)
 
 
-def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, scoring_functions: list):
+def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, files_per_dir: int = -1):
     """Prepare and conduct the training ml models. One model will be trained for each row_count in [row_count_iter].
 
     Args:
@@ -82,17 +83,14 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
     for row_count in row_count_iter:
         training_csv_path = f'{BASE_PATH_TRAINING}{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
         model_path = f'{BASE_PATH_MODEL}{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-        table_iter = local.traverse_directory(data_path, row_count)
+        table_iter = local.traverse_directory(
+            data_path, row_count, files_per_dir)
         # training
         machine_learning.prepare_training_iterator(
             table_iter, False, train_table_count, training_csv_path)
-        train_if_not_exists(train_csv=training_csv_path + "training.csv",
-                            save_path=model_path,
-                            train_time=30,
-                            scoring_functions=scoring_functions)
 
 
-def train_if_not_exists(train_csv: str, save_path: str, scoring_functions: list, train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
+def train_if_not_exists(train_csv: str, save_path: str, scoring_function_names: list[str], train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
     """Train and save a ml model if it doesn't already exist.
 
     Args:
@@ -105,9 +103,33 @@ def train_if_not_exists(train_csv: str, save_path: str, scoring_functions: list,
         AutoSklearnClassifier: _description_
     """
     train_time_minute = int(train_time / 60)
-    save_path = f"{save_path}{train_time_minute}minutes.pickle"
+    save_path = f"{save_path}{train_time_minute}minutes/{'_'.join(scoring_function_names)}.pickle"
     if exists(save_path):
         with open(save_path, 'rb') as file:
             return pickle.load(file)
     else:
-        return machine_learning.train(train_csv, scoring_functions, save_path, train_time, per_run_time)
+        return machine_learning.train(train_csv, scoring_function_names, save_path, train_time, per_run_time)
+
+
+def train_and_override(train_csv: str, save_path: str, scoring_function_names: list[str], train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
+    """Train and save a ml model if it doesn't already exist.
+
+    Args:
+        train_csv (str): path to the feature table used to train the model
+        save_path (str): directory where to save the model (ends with /)
+        train_time (int, optional): number of seconds to train the network. Defaults to 120.
+        per_run_time (int, optional): number of seconds for each run. Defaults to 30.
+
+    Returns:
+        AutoSklearnClassifier: _description_
+    """
+    train_time_minute = int(train_time / 60)
+    save_path = f"{save_path}{train_time_minute}minutes/{'_'.join(scoring_function_names)}.pickle"
+    return machine_learning.train(train_csv, scoring_function_names, save_path, train_time, per_run_time)
+
+
+def list_models(path: str) -> Iterator[str]:
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if os.path.splitext(file)[1] == '.pickle':
+                yield f"{root}/{file}"
