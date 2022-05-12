@@ -29,16 +29,10 @@ Die nicht trivialen Spalten (keine doppelten Werte in den ersten x Zeilen) stamm
 
 ## Fragen
 
-- Rechencluster verwenden
-  - <https://www.luis.uni-hannover.de/de/services/computing/scientific-computing/>
-  - Wer muss den Antrag ausfüllen?
-  - Ist es problemlos möglich, dass die Tabellen bereit gestellt werden und auto-sklearn installiert wird?
-- Ungereimtheiten bei .parquet Dateien
-  - Die größten Dateien enthalten nur 0 oder 1 Zeilen (und nicht mehr als 5000 Spalten), sind aber mehrere MB groß
-- Aktuelles Zwischenergebnis: Das Model ist langsamer als der naive Algorithmus
-  - Frage, ob/bei welcher Tabellengröße sich das ändert
-
 ## Ideen
+
+- Tabellen selber in verschiedenen Größen für Laufzeittests generieren
+  - auch verschiedene row group Größen bei den .parquet Dateien ausprobieren
 
 - automatisierte Tests
 - Training und Test mit 5, 10, 20 Spalten
