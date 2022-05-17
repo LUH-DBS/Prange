@@ -97,8 +97,9 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
         data_path (str): The path to the directory where the table files are.
         train_envenly (bool): If True, the tables will be evenly from the subdirectories of [data_path].
     """
-    train_time = 1800  # 30 minutes
-    per_run_time = 300  # 5 minutes
+    train_time = 3600  # 30 minutes
+    # per_run_time = 300  # 5 minutes
+    per_run_time = -1
     files_per_dir = -1
     number_of_subdirs = len(
         [f.path for f in os.scandir(data_path) if f.is_dir()])
@@ -112,7 +113,7 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
         for strategy in scoring_strategies:
             training_csv_path = f'src/data/training/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
             model_path = f'src/data/model/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-            train_and_override(train_csv=training_csv_path,
+            train_and_override(train_csv=training_csv_path + 'training.csv',
                                scoring_function_names=strategy[0],
                                scoring_functions=strategy[1],
                                save_path=model_path,

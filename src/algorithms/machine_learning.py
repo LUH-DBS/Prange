@@ -8,7 +8,8 @@ import pickle
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_string_dtype, is_bool_dtype
 
-from autosklearn.classification import AutoSklearnClassifier
+# from autosklearn.classification import AutoSklearnClassifier
+from autosklearn.experimental.askl2 import AutoSklearn2Classifier as AutoSklearnClassifier
 
 from datasets.sql import csv_cache
 from algorithms import naive_algorithm
@@ -233,6 +234,9 @@ def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: b
         path_result, index=False)
     count = 0
     for table in table_iter:
+        # skip tables with less than 15 rows # TODO: do that in local.traverse_directory()
+        if len(table) < 15:
+            continue
         print(count, end="\r")
         count += 1
         if read_tables_max > 0 and count > read_tables_max:

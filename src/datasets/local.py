@@ -61,14 +61,18 @@ def traverse_directory(path: str, nrows: int = -1, files_per_dir: int = -1, skip
             filecounter += 1
             if files_per_dir > 0 and filecounter > files_per_dir:
                 break
-            match os.path.splitext(file)[1]:
-                case '.parquet':
-                    yield get_table_from_parquet(f"{root}/{file}", nrows)
-                case '.csv':
-                    yield get_table_from_csv(f"{root}/{file}", nrows)
-                case _:
-                    print(
-                        f'file {file} with unsupported extension {os.path.splitext(file)[1]}')
+            try:
+                match os.path.splitext(file)[1]:
+                    case '.parquet':
+                        yield get_table_from_parquet(f"{root}/{file}", nrows)
+                    case '.csv':
+                        yield get_table_from_csv(f"{root}/{file}", nrows)
+                    case _:
+                        print(
+                            f'file {file} with unsupported extension {os.path.splitext(file)[1]}')
+            except ValueError as error:
+                print('Error:', error, f'({root}/{file})')
+                continue
 
 
 def get_table(path: str, nrows: int = -1) -> pd.DataFrame:
