@@ -88,7 +88,7 @@
   %backend=biber,bibencoding=utf8, %instead of bibtex
   backend=bibtex8,bibencoding=ascii,%
   language=auto,%
-  style=numeric-comp,%
+  % style=numeric-comp,%
   %style=authoryear-comp, % Author 1999, 2010
   %bibstyle=authoryear,dashed=false, % dashed: substitute rep. author with ---
   sorting=nyt, % name, year, title
@@ -97,6 +97,7 @@
   natbib=true % natbib compatibility mode (\citep and \citet still work)
 }{biblatex}
 \usepackage{biblatex}
+\DeclareFieldFormat{url}{\newline\mkbibacro{URL}\addcolon\nobreakspace\url{#1}}
 
 \PassOptionsToPackage{fleqn}{amsmath}       % math environments and more by the AMS
 \usepackage{amsmath}
