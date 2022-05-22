@@ -21,16 +21,16 @@ db_params = {
 
 scoring_strategies = [
     [['recall', 'precision'], [recall, precision]],
-    [['recall', 'recall', 'precision'], [recall, recall, precision]]
+    # [['recall', 'recall', 'precision'], [recall, recall, precision]]
 ]
 
 
 def main():
     # TODO: Key error: 1
-    testing.prepare_and_train(row_count_iter=[5, 10, 15, 20],
-                              train_table_count=6000,
+    testing.prepare_and_train(row_count_iter=[5],
+                              train_table_count=100,
                               data_path='src/data/gittables',
-                              train_envenly=True,
+                              train_envenly=False,
                               scoring_strategies=scoring_strategies)
 
     # testing.test_model(path_to_model='src/data/model/10_rows/100_tables/gittables/0minutes.pickle',

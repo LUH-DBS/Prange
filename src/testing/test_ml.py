@@ -97,7 +97,7 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
         data_path (str): The path to the directory where the table files are.
         train_envenly (bool): If True, the tables will be evenly from the subdirectories of [data_path].
     """
-    train_time = 3600  # 30 minutes
+    train_time = 30 # 3600  # 30 minutes
     # per_run_time = 300  # 5 minutes
     per_run_time = -1
     files_per_dir = -1
