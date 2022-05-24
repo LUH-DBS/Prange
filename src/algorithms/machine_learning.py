@@ -202,7 +202,7 @@ def train(train_csv: str, scoring_functions: list, save_path: str = "", train_ti
         time_left_for_this_task=train_time,
         per_run_time_limit=per_run_time,
         scoring_functions=scoring_functions,
-        # tmp_folder='~/tmp/ml_training'
+        memory_limit=200000  # 200GB
     )
     # automl.fit(X_train, y_train, dataset_name="Test")
     automl.fit(X, y, dataset_name="Test")
