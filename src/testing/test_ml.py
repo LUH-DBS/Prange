@@ -2,7 +2,11 @@
 
 import os
 import pickle
+import pandas as pd
+import numpy as np
 from typing import Iterable, Iterator
+from pathlib import Path
+from shutil import rmtree
 from genericpath import exists
 import csv
 from timeit import default_timer as timer
@@ -164,3 +168,28 @@ def list_models(path: str) -> Iterator[str]:
         for file in files:
             if os.path.splitext(file)[1] == '.pickle':
                 yield f"{root}/{file}"
+
+
+def generate_random_int_dataframe(nrows: int, ncols: int) -> pd.DataFrame:
+    min_number = 0
+    max_number = nrows
+    col_names = [f"Row {i}" for i in range(0, ncols)]
+    return pd.DataFrame(np.random.randint(
+        min_number, max_number, size=(nrows, ncols)), columns=col_names)
+
+
+def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, nrows: int) -> None:
+    path = 'src/data/generated'
+    if exists(path):
+        rmtree(path)
+    Path(path).mkdir(parents=True)
+    for nrows in row_counts:
+        filepath = f'src/data/generated/{nrows}-{ncols}.parquet'
+        generate_random_int_dataframe(nrows, ncols).to_parquet(
+            filepath, row_group_size=500)
+    test_model(path_to_model=path_to_model,
+               nrows=nrows,
+               input_path=path,
+               output_path=out_path,
+               files_per_dir=100000,
+               skip_tables=-1)

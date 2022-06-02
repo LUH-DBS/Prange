@@ -33,11 +33,12 @@ def main():
                               train_envenly=False,
                               scoring_strategies=scoring_strategies)
 
-    # testing.test_model(path_to_model='src/data/model/10_rows/100_tables/gittables/0minutes.pickle',
-    #                    nrows=10,
-    #                    input_path='src/data/gittables/object_tables/',
-    #                    output_path='test.csv',
-    #                    skip_tables=-1)
+def random_int():
+    testing.test_random_int(row_counts=[100, 1000, 10000, 100000, 1000000, 5000000, 10000000],
+                            ncols=100,
+                            out_path="test-random-int.csv",
+                            path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
+                            nrows=10)
 
 
 if __name__ == '__main__':
