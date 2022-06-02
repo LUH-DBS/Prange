@@ -21,7 +21,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, skip_tables: int = -1) -> None:
+def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, files_per_dir: int, skip_tables: int = -1) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -36,9 +36,13 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
     with open(output_path, 'w') as file:
         csv_file = csv.writer(file)
         row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
-               "Recall", "F1", "Time ML (usec)", "Time Naive (usec)"]
+               "Recall", "F1", "Time ML (sec)", "Time Naive (sec)", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
-        for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=5):
+        # TODO: counter + correct column predictions
+        counter = 0
+        for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
+            counter += 1
+            print(counter, end='\r')
             ml_time = -timer()
             table = local.get_table(table_path, nrows)
             ml_unqiues = machine_learning.find_unique_columns(
@@ -72,7 +76,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                 recall = 1.0
             f1 = 2 * precision * recall / (precision + recall)
             row = [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
-                   recall, f1, ml_time, na_time]
+                   recall, f1, ml_time, na_time, true_pos, true_neg, false_pos, false_neg]
             csv_file.writerow(row)
 
 
@@ -101,9 +105,9 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
         data_path (str): The path to the directory where the table files are.
         train_envenly (bool): If True, the tables will be evenly from the subdirectories of [data_path].
     """
-    train_time = 30 # 3600  # 30 minutes
+    train_time = 10800  # 3 hours
     # per_run_time = 300  # 5 minutes
-    per_run_time = -1
+    per_run_time = int(train_time / 10)
     files_per_dir = -1
     number_of_subdirs = len(
         [f.path for f in os.scandir(data_path) if f.is_dir()])
