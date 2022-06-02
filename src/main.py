@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from typing import Iterable
 from dotenv import load_dotenv
 from pathlib import Path
@@ -24,10 +25,11 @@ db_params = {
 
 
 def main():
-    download_dataset(csv=True)
+    # download_dataset(csv=True)
+    testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
 
 
-def testcase_1(nrows_iter: Iterable[int], train_model: bool = False):
+def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
     """Train and test models which look at nrows rows for their prediction.
 
     Args:
@@ -38,19 +40,28 @@ def testcase_1(nrows_iter: Iterable[int], train_model: bool = False):
         [['recall', 'precision'], [recall, precision]],
         # [['recall', 'recall', 'precision'], [recall, recall, precision]]
     ]
-    ntables = 5000
+
+    train_table_count = 10000
+    train_datasource = 'gittables'
+    test_datasource = 'gittables/abstraction_tables_licensed'
+    train_time = 10800  # 3 hours
+    result_path = "src/result"
+    result_path_long = f"{result_path}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
+    Path(result_path_long).mkdir(parents=True, exist_ok=True)
+
     if train_model:
-        testing.prepare_and_train(row_count_iter=[5, 10, 20],
-                                  train_table_count=10000,
-                                  data_path='src/data/gittables',
+        testing.prepare_and_train(row_count_iter=nrows_iter,
+                                  train_table_count=train_table_count,
+                                  data_path=f'src/data/{train_datasource}',
                                   train_envenly=False,
-                                  scoring_strategies=scoring_strategies)
+                                  scoring_strategies=scoring_strategies,
+                                  train_time=train_time)
     for nrows in nrows_iter:
-        testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
+        testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{train_table_count}_tables/{train_datasource}/{int(train_time / 60)}minutes/recall_precision.pickle',
                            nrows=nrows,
-                           input_path='src/data/gittables/',
-                           output_path=f'test-{ntables}_{nrows}rows.csv',
-                           files_per_dir=ntables,
+                           input_path=f'src/data/{test_datasource}/',
+                           output_path=f'{result_path_long}/{nrows}rows.csv',
+                           files_per_dir=100,
                            skip_tables=-1)
 
 

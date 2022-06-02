@@ -31,9 +31,9 @@ def traverse_directory_path(path: str, files_per_dir: int = -1, skip_tables: int
                 break
             match os.path.splitext(file)[1]:
                 case '.parquet':
-                    yield f"{root}/{file}"
+                    yield f"{root}{file}"
                 case '.csv':
-                    yield f"{root}/{file}"
+                    yield f"{root}{file}"
                 case _:
                     print(
                         f'file {file} with unsupported extension {os.path.splitext(file)[1]}')

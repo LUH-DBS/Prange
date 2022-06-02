@@ -43,15 +43,21 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
             counter += 1
             print(counter, end='\r')
-            ml_time = -timer()
-            table = local.get_table(table_path, nrows)
-            ml_unqiues = machine_learning.find_unique_columns(
-                table.head(nrows), ml)
-            ml_time += timer()
-            na_time = -timer()
-            table = local.get_table(table_path)
-            naive_uniques = naive_algorithm.find_unique_columns_in_table(table)
-            na_time += timer()
+            try:
+                ml_time = -timer()
+                table = local.get_table(table_path, nrows)
+                ml_unqiues = machine_learning.find_unique_columns(
+                    table.head(nrows), ml)
+                ml_time += timer()
+                na_time = -timer()
+                table = local.get_table(table_path)
+                naive_uniques = naive_algorithm.find_unique_columns_in_table(
+                    table)
+                na_time += timer()
+            except pd.errors.ParserError as e:
+                counter -= 1
+                print("ParserError with file " + table_path)
+                continue
             true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
             for i in range(0, len(table.columns)):
                 if i in ml_unqiues:
@@ -96,7 +102,7 @@ def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_
             table_iter, False, train_table_count, training_csv_path)
 
 
-def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]]):
+def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]], train_time: int):
     """Prepare and execute the training of one ml model per value of [row_count_iter] and per value of [scoring_strategies].
 
     Args:
@@ -104,8 +110,8 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
         train_table_count (int): The number of tables to use for the training.
         data_path (str): The path to the directory where the table files are.
         train_envenly (bool): If True, the tables will be evenly from the subdirectories of [data_path].
+        train_time (int): Number of seconds to train the model.
     """
-    train_time = 10800  # 3 hours
     # per_run_time = 300  # 5 minutes
     per_run_time = int(train_time / 10)
     files_per_dir = -1
