@@ -1,6 +1,8 @@
 import os
 from typing import Iterable
 from dotenv import load_dotenv
+from pathlib import Path
+from shutil import rmtree
 import pandas as pd
 
 from autosklearn.metrics import accuracy, precision, recall, f1
@@ -22,7 +24,7 @@ db_params = {
 
 
 def main():
-    pass
+    download_dataset(csv=True)
 
 
 def testcase_1(nrows_iter: Iterable[int], train_model: bool = False):
@@ -58,6 +60,39 @@ def random_int():
                             out_path="test-random-int.csv",
                             path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
                             nrows=10)
+
+
+def download_dataset(csv: bool = True):
+    import requests
+
+    ACCESS_TOKEN = os.getenv("ZENODO_API_KEY")
+    if csv:
+        record_id = "6515973"  # CSV
+        filepath_base = "src/data/gittables-csv/"
+    else:
+        record_id = "6517052"  # parquet
+        filepath_base = "src/data/gittables-parquet/"
+    Path(filepath_base).mkdir(parents=True, exist_ok=True)
+    Path('tmp').mkdir(parents=True, exist_ok=True)
+
+    r = requests.get(
+        f"https://zenodo.org/api/records/{record_id}", params={'access_token': ACCESS_TOKEN})
+    download_urls = [f['links']['self'] for f in r.json()['files']]
+    filenames = [f['key'] for f in r.json()['files']]
+
+    print(f"Downloading {len(download_urls)} folders.")
+    # print(download_urls)
+    # print(filenames)
+
+    for filename, url in zip(filenames, download_urls):
+        print("Downloading:", filename)
+        r = requests.get(url, params={'access_token': ACCESS_TOKEN})
+        from zipfile import ZipFile
+        with open('tmp/' + filename, 'wb') as f:
+            f.write(r.content)
+        with ZipFile('tmp/' + filename, 'r') as zip_ref:
+            zip_ref.extractall(filepath_base + filename.replace(".zip", ""))
+    rmtree('tmp')
 
 
 if __name__ == '__main__':
