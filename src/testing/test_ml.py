@@ -188,17 +188,20 @@ def generate_random_int_dataframe(nrows: int, ncols: int) -> pd.DataFrame:
         min_number, max_number, size=(nrows, ncols)), columns=col_names)
 
 
-def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, nrows: int) -> None:
-    path = 'src/data/generated'
+def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, nrows: int, csv: bool = False) -> None:
+    path = 'src/data/generated/'
     if exists(path):
         rmtree(path)
     Path(path).mkdir(parents=True)
     for nrows in row_counts:
-        filepath = f'src/data/generated/{nrows}-{ncols}.parquet'
-        generate_random_int_dataframe(nrows, ncols).to_parquet(
-            filepath, row_group_size=500)
+        if csv:
+            filepath = f'src/data/generated/{nrows}-{ncols}.csv'
+            generate_random_int_dataframe(nrows, ncols).to_csv(filepath)
+        else:
+            filepath = f'src/data/generated/{nrows}-{ncols}.parquet'
+            generate_random_int_dataframe(nrows, ncols).to_parquet(filepath)
     test_model(path_to_model=path_to_model,
-               nrows=nrows,
+               nrows=model_rows,
                input_path=path,
                output_path=out_path,
                files_per_dir=100000,

@@ -65,11 +65,21 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
                            skip_tables=-1)
 
 
-def random_int():
-    testing.test_random_int(row_counts=[100, 1000, 10000, 100000, 1000000, 5000000, 10000000],
-                            ncols=100,
-                            out_path="test-random-int.csv",
+def random_int(max_row_size: int, csv: bool = False):
+    if csv:
+        filetype = 'csv'
+    else:
+        filetype = 'parquet'
+    ncols = 100
+    row_list = [100, 1000, 10000, 100000, 1000000,
+                5000000, 10000000, 50000000, 100000000]
+    out_path = f"src/result/speed_random-int/{filetype}/"
+    Path(out_path).mkdir(parents=True, exist_ok=True)
+    testing.test_random_int(row_counts=[x for x in row_list if x <= max_row_size],
+                            ncols=ncols,
+                            out_path=f"{out_path}{max_row_size:,.0f}-{ncols:,.0f}.csv",
                             path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
+                            model_rows=10,
                             nrows=10)
 
 
