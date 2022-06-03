@@ -70,6 +70,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
                            output_path=f'{result_path_long}/{nrows}rows.csv',
                            files_per_dir=100,
                            skip_tables=-1)
+    logger.info("Finished Testcase 1")
 
 
 def random_int(max_row_size: int, csv: bool = False):
@@ -90,6 +91,7 @@ def random_int(max_row_size: int, csv: bool = False):
                             path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
                             model_rows=10,
                             nrows=10)
+    logger.info("Finished random_int test")
 
 
 def download_dataset(csv: bool = True):
@@ -124,6 +126,7 @@ def download_dataset(csv: bool = True):
         with ZipFile('tmp/' + filename, 'r') as zip_ref:
             zip_ref.extractall(filepath_base + filename.replace(".zip", ""))
     rmtree('tmp')
+    logger.info("Finished download")
 
 
 def setup_logging(log_to_file: bool = True, level=logging.DEBUG):

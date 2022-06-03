@@ -41,9 +41,10 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
                "Recall", "F1", "Time ML (sec)", "Time Naive (sec)", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
-        # TODO: counter + correct column predictions
         counter = 0
         for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
+            if counter % 100 == 0 and counter != 0:
+                logger.info("Finished testing of %s tables", counter)
             counter += 1
             print(f"Testing table {counter}              ", end='\r')
             try:
@@ -87,6 +88,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             row = [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
                    recall, f1, ml_time, na_time, true_pos, true_neg, false_pos, false_neg]
             csv_file.writerow(row)
+    logger.info("Finished testing")
 
 
 def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, files_per_dir: int = -1):
@@ -106,6 +108,7 @@ def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_
             data_path, row_count, files_per_dir)
         machine_learning.prepare_training_iterator(
             table_iter, False, train_table_count, training_csv_path)
+        logger.info("Finished preparation")
 
 
 def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]], train_time: int):
@@ -167,12 +170,14 @@ def train_model(train_csv: str, save_path: str, scoring_function_names: list[str
     else:
         logger.info("Started to train a model for %s minutes (%s)",
                     train_time_minute, ", ".join(scoring_function_names))
-        return machine_learning.train(train_csv=train_csv,
-                                      scoring_functions=scoring_functions,
-                                      save_path=save_path,
-                                      train_time=train_time,
-                                      per_run_time=per_run_time
-                                      )
+        model = machine_learning.train(train_csv=train_csv,
+                                       scoring_functions=scoring_functions,
+                                       save_path=save_path,
+                                       train_time=train_time,
+                                       per_run_time=per_run_time
+                                       )
+        logger.info("Finished training")
+        return model
 
 
 def list_models(path: str) -> Iterator[str]:
