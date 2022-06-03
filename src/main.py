@@ -14,6 +14,8 @@ import datasets.sql.csv_cache as csv_cache
 import algorithms.naive_algorithm as naive_algorithm
 import algorithms.machine_learning as machine_learning
 import testing
+import logging
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 db_params = {
@@ -25,8 +27,10 @@ db_params = {
 
 
 def main():
+    setup_logging()
     # download_dataset(csv=True)
-    testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
+    # testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
+    random_int(max_row_size=1000000, csv=False)
 
 
 def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
@@ -36,6 +40,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
         nrows_iter (Iterable[int]): A model will be trained/tested for each item in the Iterable.
         train_model (bool, optional): Only train the models if True. Defaults to False.
     """
+    logger.info("Started Testcase 1")
     scoring_strategies = [
         [['recall', 'precision'], [recall, precision]],
         # [['recall', 'recall', 'precision'], [recall, recall, precision]]
@@ -50,6 +55,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
     Path(result_path_long).mkdir(parents=True, exist_ok=True)
 
     if train_model:
+        logger.debug("Started training the models")
         testing.prepare_and_train(row_count_iter=nrows_iter,
                                   train_table_count=train_table_count,
                                   data_path=f'src/data/{train_datasource}',
@@ -57,6 +63,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
                                   scoring_strategies=scoring_strategies,
                                   train_time=train_time)
     for nrows in nrows_iter:
+        logger.debug("Testing model with %s rows", nrows)
         testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{train_table_count}_tables/{train_datasource}/{int(train_time / 60)}minutes/recall_precision.pickle',
                            nrows=nrows,
                            input_path=f'src/data/{test_datasource}/',
@@ -70,6 +77,8 @@ def random_int(max_row_size: int, csv: bool = False):
         filetype = 'csv'
     else:
         filetype = 'parquet'
+    logger.info("Started random_int test with filetype %s with max %s rows",
+                filetype, max_row_size)
     ncols = 100
     row_list = [100, 1000, 10000, 100000, 1000000,
                 5000000, 10000000, 50000000, 100000000]
@@ -85,12 +94,15 @@ def random_int(max_row_size: int, csv: bool = False):
 
 def download_dataset(csv: bool = True):
     import requests
+    logger.info("Started downloading the dataset")
 
     ACCESS_TOKEN = os.getenv("ZENODO_API_KEY")
     if csv:
+        logger.info("Downloading csv files")
         record_id = "6515973"  # CSV
         filepath_base = "src/data/gittables-csv/"
     else:
+        logger.info("Downloading parquet files")
         record_id = "6517052"  # parquet
         filepath_base = "src/data/gittables-parquet/"
     Path(filepath_base).mkdir(parents=True, exist_ok=True)
@@ -101,12 +113,10 @@ def download_dataset(csv: bool = True):
     download_urls = [f['links']['self'] for f in r.json()['files']]
     filenames = [f['key'] for f in r.json()['files']]
 
-    print(f"Downloading {len(download_urls)} folders.")
-    # print(download_urls)
-    # print(filenames)
+    logger.debug("Downloading %s folders", len(download_urls))
 
     for filename, url in zip(filenames, download_urls):
-        print("Downloading:", filename)
+        logger.debug("Downloading: ", filename)
         r = requests.get(url, params={'access_token': ACCESS_TOKEN})
         from zipfile import ZipFile
         with open('tmp/' + filename, 'wb') as f:
@@ -114,6 +124,26 @@ def download_dataset(csv: bool = True):
         with ZipFile('tmp/' + filename, 'r') as zip_ref:
             zip_ref.extractall(filepath_base + filename.replace(".zip", ""))
     rmtree('tmp')
+
+
+def setup_logging(log_to_file: bool = True, level=logging.DEBUG):
+    if log_to_file:
+        Path("src/log/").mkdir(parents=True, exist_ok=True)
+        log_path = f"src/log/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}.csv"
+        with open(log_path, "w") as file:
+            file.write("Module,Function,Level,Time,Message\n")
+        logging.basicConfig(
+            level=level,
+            filename=log_path,
+            encoding='utf-8',
+            format='%(name)s,%(funcName)s,%(levelname)s,%(asctime)s,%(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+    else:
+        logging.basicConfig(
+            level=level,
+            format='%(levelname)s (%(name)s:%(lineno)d): %(message)s'
+        )
 
 
 if __name__ == '__main__':

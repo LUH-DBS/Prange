@@ -10,6 +10,7 @@ test.csv
 /src/training
 /tmp.py
 /src/result/long/
+/src/log/
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
