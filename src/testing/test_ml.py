@@ -36,41 +36,87 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
     logger.info("Started testing of a model with %s rows", nrows)
     with open(path_to_model, 'rb') as file:
         ml = pickle.load(file)
+    table_path_list: list[str] = []
+    ml_dict = {}
+    naive_dict = {}
+    counter = 0
     with open(output_path, 'w') as file:
         csv_file = csv.writer(file)
         row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
-               "Recall", "F1", "Time ML (sec)", "Time Naive (sec)", "True Pos", "True Neg", "False Pos", "False Neg"]
+               "Recall", "F1", "ML: Loading", "ML: Compute Time", "ML: Loading", "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
-        counter = 0
-        for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
-            if counter % 100 == 0 and counter != 0:
-                logger.info("Finished testing of %s tables", counter)
-            counter += 1
-            print(f"Testing table {counter}              ", end='\r')
+    for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
+        if counter % 100 == 0 and counter != 0:
+            logger.debug("Finished model testing of %s tables", counter)
+        counter += 1
+        print(f"Model on table {counter}              ", end='\r')
+        try:
+            # ml_dict: load_time, computing_time, unique_columns
+            total_time = -timer()
+            load_time = -timer()
+            table = local.get_table(table_path, nrows)
+            load_time += timer()
+            computing_time = -timer()
+            unique_columns = machine_learning.find_unique_columns(
+                table.head(nrows), ml)
+            computing_time += timer()
+            load_time2 = -timer()
+            # TODO: load columns to validate
+            load_time2 += timer()
+            # TODO: validate columns
+            confirmed_time = -timer()
+            confirmed_time += timer()
+            total_time += timer()
+            ml_dict[table_path] = {
+                'unique_columns': unique_columns,
+                'load_time': load_time,
+                'computing_time': computing_time,
+                'load_time2': load_time2,
+                'confirmed_time': confirmed_time,
+                'total_time': total_time
+            }
+            table_path_list.append(table_path)
+        except pd.errors.ParserError as e:
+            counter -= 1
+            logger.warn(
+                "ParserError with file %s", table_path)
+            continue
+    with open(output_path, 'a') as file:
+        csv_file = csv.writer(file)
+        for table_path in table_path_list:
             try:
-                ml_time = -timer()
-                table = local.get_table(table_path, nrows)
-                ml_unqiues = machine_learning.find_unique_columns(
-                    table.head(nrows), ml)
-                ml_time += timer()
-                na_time = -timer()
+                total_time = -timer()
+                load_time = -timer()
                 table = local.get_table(table_path)
-                naive_uniques = naive_algorithm.find_unique_columns_in_table(
+                load_time += timer()
+                computing_time = -timer()
+                unique_columns = naive_algorithm.find_unique_columns_in_table(
                     table)
-                na_time += timer()
+                computing_time += timer()
+                total_time += timer()
+                naive_dict[table_path] = {
+                    'unique_columns': unique_columns,
+                    'load_time': load_time,
+                    'computing_time': computing_time,
+                    'total_time': total_time
+                }
             except pd.errors.ParserError as e:
                 counter -= 1
-                logger.warn("ParserError with file %s", table_path)
+                logger.warn(
+                    "ParserError with file %s (theoretically this can't happen at this point)", table_path)
                 continue
+
+            ml_values = ml_dict[table_path]
+            naive_values = naive_dict[table_path]
             true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
             for i in range(0, len(table.columns)):
-                if i in ml_unqiues:
-                    if i in naive_uniques:
+                if i in ml_values['unique_columns']:
+                    if i in naive_values['unique_columns']:
                         true_pos += 1
                     else:
                         false_pos += 1
                 else:
-                    if i in naive_uniques:
+                    if i in naive_values['unique_columns']:
                         false_neg += 1
                     else:
                         true_neg += 1
@@ -86,7 +132,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                 recall = 1.0
             f1 = 2 * precision * recall / (precision + recall)
             row = [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
-                   recall, f1, ml_time, na_time, true_pos, true_neg, false_pos, false_neg]
+                   recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
             csv_file.writerow(row)
     logger.info("Finished testing")
 
