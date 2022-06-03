@@ -2,6 +2,15 @@
 
 # Fragen und Themen zur Bachelorarbeit
 
+## TODO
+
+- Programm überarbeiten
+  - Ausschließen, dass Tabellen gecached werden
+  - Vorteil von parquet Dateien prüfen (Werden tatsächlich nur die ersten x Zeilen gelesen?)
+  - Überprüfung des ML Ergebnisses auf naive Weise mit machen und messen
+  - Wird beim naiven Algorithmus parallelisiert?
+- Tabellenverzeichnis fertig machen
+
 ## Ergebnisse
 
 Ergebnisse nach zwei Minuten Training mit Spalten aus 900 Tabellen (100-999 aus gittables).

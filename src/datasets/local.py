@@ -5,6 +5,8 @@ from typing import Iterator
 import pandas as pd
 from pyarrow.parquet import ParquetFile
 import pyarrow as pa
+import logging
+logger = logging.getLogger(__name__)
 
 
 def traverse_directory_path(path: str, files_per_dir: int = -1, skip_tables: int = -1) -> Iterator[str]:
@@ -31,12 +33,12 @@ def traverse_directory_path(path: str, files_per_dir: int = -1, skip_tables: int
                 break
             match os.path.splitext(file)[1]:
                 case '.parquet':
-                    yield f"{root}/{file}"
+                    yield f"{root}{file}"
                 case '.csv':
-                    yield f"{root}/{file}"
+                    yield f"{root}{file}"
                 case _:
-                    print(
-                        f'file {file} with unsupported extension {os.path.splitext(file)[1]}')
+                    logger.error('file %s with unsupported extension %s',
+                                 file, os.path.splitext(file)[1])
 
 
 def traverse_directory(path: str, nrows: int = -1, files_per_dir: int = -1, skip_tables: int = -1) -> Iterator[pd.DataFrame]:
@@ -68,10 +70,10 @@ def traverse_directory(path: str, nrows: int = -1, files_per_dir: int = -1, skip
                     case '.csv':
                         yield get_table_from_csv(f"{root}/{file}", nrows)
                     case _:
-                        print(
-                            f'file {file} with unsupported extension {os.path.splitext(file)[1]}')
+                        logger.error('file %s with unsupported extension %s',
+                                     file, os.path.splitext(file)[1])
             except ValueError as error:
-                print('Error:', error, f'({root}/{file})')
+                logger.error('Error with file %s/%s: %s', root, file, error)
                 continue
 
 

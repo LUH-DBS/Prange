@@ -5,6 +5,8 @@ from typing import Iterable
 import pandas as pd
 
 from datasets.sql import csv_cache
+import logging
+logger = logging.getLogger(__name__)
 
 
 def unique_columns(table_range: Iterable, csv_path: str) -> list[list]:
