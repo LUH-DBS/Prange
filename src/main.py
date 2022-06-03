@@ -77,8 +77,8 @@ def random_int(max_row_size: int, csv: bool = False):
         filetype = 'csv'
     else:
         filetype = 'parquet'
-    logger.info("Started random_int test with filetype %s with max %s rows",
-                filetype, max_row_size)
+    logger.info(
+        f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows")
     ncols = 100
     row_list = [100, 1000, 10000, 100000, 1000000,
                 5000000, 10000000, 50000000, 100000000]
@@ -136,7 +136,7 @@ def setup_logging(log_to_file: bool = True, level=logging.DEBUG):
             level=level,
             filename=log_path,
             encoding='utf-8',
-            format='%(name)s,%(funcName)s,%(levelname)s,%(asctime)s,%(message)s',
+            format='%(name)s,%(funcName)s,%(levelname)s,%(asctime)s,"%(message)s"',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
     else:

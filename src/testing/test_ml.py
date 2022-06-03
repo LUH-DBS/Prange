@@ -16,6 +16,8 @@ from autosklearn.classification import AutoSklearnClassifier
 from datasets import local
 from algorithms import naive_algorithm
 from algorithms import machine_learning
+import logging
+logger = logging.getLogger(__name__)
 
 BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
@@ -31,6 +33,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         output_path (str): The filepath where the result csv will be saved.
         skip_tables (int, optional): Skip the first [skip_tables] tables. Defaults to -1.
     """
+    logger.info("Started testing of a model with %s rows", nrows)
     with open(path_to_model, 'rb') as file:
         ml = pickle.load(file)
     with open(output_path, 'w') as file:
@@ -42,7 +45,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         counter = 0
         for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
             counter += 1
-            print(counter, end='\r')
+            print(f"Testing table {counter}              ", end='\r')
             try:
                 ml_time = -timer()
                 table = local.get_table(table_path, nrows)
@@ -56,7 +59,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                 na_time += timer()
             except pd.errors.ParserError as e:
                 counter -= 1
-                print("ParserError with file " + table_path)
+                logger.warn("ParserError with file %s", table_path)
                 continue
             true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
             for i in range(0, len(table.columns)):
@@ -87,14 +90,17 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
 
 
 def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, files_per_dir: int = -1):
-    """Prepare and conduct the training ml models. One model will be trained for each row_count in [row_count_iter].
+    """Prepare the training data. One trainingsset will be generated for each item in [row_count_iter].
 
     Args:
-        row_count_iter (Iterable[int]): An Iterable containing different row_counts with witch a model will be trained.
+        row_count_iter (Iterable[int]): An Iterable containing different row_counts for which the trainingsset will be generated.
         train_table_count (int): The number of tables to use to train the model.
-        data_path (str): The path where the model will be saved as a pickle file.
+        data_path (str): The path where the tables used for training are.
+        files_per_dir (int): If > 0, only this many files in each subdirectory will be used. Defaults to -1. 
     """
     for row_count in row_count_iter:
+        logger.info("Started preparing trainingsdata from %s tables using %s rows",
+                    train_table_count, row_count)
         training_csv_path = f'{BASE_PATH_TRAINING}{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
         table_iter = local.traverse_directory(
             data_path, row_count, files_per_dir)
@@ -127,50 +133,46 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
         for strategy in scoring_strategies:
             training_csv_path = f'src/data/training/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
             model_path = f'src/data/model/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-            train_and_override(train_csv=training_csv_path + 'training.csv',
-                               scoring_function_names=strategy[0],
-                               scoring_functions=strategy[1],
-                               save_path=model_path,
-                               train_time=train_time,
-                               per_run_time=per_run_time)
+            train_model(train_csv=training_csv_path + 'training.csv',
+                        scoring_function_names=strategy[0],
+                        scoring_functions=strategy[1],
+                        save_path=model_path,
+                        train_time=train_time,
+                        per_run_time=per_run_time,
+                        train_if_exists=True
+                        )
 
 
-def train_if_not_exists(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
+def train_model(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, per_run_time: int = 30, train_if_exists: bool = False) -> AutoSklearnClassifier:
     """Train and save a ml model if it doesn't already exist.
 
     Args:
         train_csv (str): path to the feature table used to train the model
         save_path (str): directory where to save the model (ends with /)
+        scoring_function_names (list[str]): A list with the names of the scoring functions for the filenames.
+        scoring_functions (list): A list with the scoring functions for the training.
         train_time (int, optional): number of seconds to train the network. Defaults to 120.
         per_run_time (int, optional): number of seconds for each run. Defaults to 30.
+        train_if_exists (bool, optional): If True, a new model will be trained even if one with the given parameters already exists. Defaults to False.
 
     Returns:
-        AutoSklearnClassifier: _description_
+        AutoSklearnClassifier: The trained model.
     """
     train_time_minute = int(train_time / 60)
     save_path = f"{save_path}{train_time_minute}minutes/{'_'.join(scoring_function_names)}.pickle"
-    if exists(save_path):
+    if exists(save_path) and not train_if_exists:
+        logger.info("Loading model from %s", save_path)
         with open(save_path, 'rb') as file:
             return pickle.load(file)
     else:
-        return machine_learning.train(train_csv, scoring_functions, save_path, train_time, per_run_time)
-
-
-def train_and_override(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, per_run_time: int = 30) -> AutoSklearnClassifier:
-    """Train and save a ml model if it doesn't already exist.
-
-    Args:
-        train_csv (str): path to the feature table used to train the model
-        save_path (str): directory where to save the model (ends with /)
-        train_time (int, optional): number of seconds to train the network. Defaults to 120.
-        per_run_time (int, optional): number of seconds for each run. Defaults to 30.
-
-    Returns:
-        AutoSklearnClassifier: _description_
-    """
-    train_time_minute = int(train_time / 60)
-    save_path = f"{save_path}{train_time_minute}minutes/{'_'.join(scoring_function_names)}.pickle"
-    return machine_learning.train(train_csv, scoring_functions, save_path, train_time, per_run_time)
+        logger.info("Started to train a model for %s minutes (%s)",
+                    train_time_minute, ", ".join(scoring_function_names))
+        return machine_learning.train(train_csv=train_csv,
+                                      scoring_functions=scoring_functions,
+                                      save_path=save_path,
+                                      train_time=train_time,
+                                      per_run_time=per_run_time
+                                      )
 
 
 def list_models(path: str) -> Iterator[str]:
@@ -181,6 +183,8 @@ def list_models(path: str) -> Iterator[str]:
 
 
 def generate_random_int_dataframe(nrows: int, ncols: int) -> pd.DataFrame:
+    logger.debug(
+        f"Generating random_int table with {nrows:,d} rows and {ncols:,d} columns")
     min_number = 0
     max_number = nrows
     col_names = [f"Row {i}" for i in range(0, ncols)]
