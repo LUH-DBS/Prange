@@ -4,6 +4,7 @@ import os
 import pickle
 import pandas as pd
 import numpy as np
+from pyarrow.lib import ArrowInvalid
 from typing import Iterable, Iterator
 from pathlib import Path
 from shutil import rmtree
@@ -78,8 +79,18 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             table_path_list.append(table_path)
         except pd.errors.ParserError as e:
             counter -= 1
-            logger.warn(
+            logger.common_error(
                 "ParserError with file %s", table_path)
+            continue
+        except ArrowInvalid as error:
+            counter -= 1
+            logger.common_error(
+                "ArrowInvalid error with file %s", table_path)
+            continue
+        except UnicodeDecodeError:
+            counter -= 1
+            logger.common_error(
+                "UnicodeDecodeError with file %s", table_path)
             continue
     with open(output_path, 'a') as file:
         csv_file = csv.writer(file)
@@ -102,8 +113,18 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                 }
             except pd.errors.ParserError as e:
                 counter -= 1
-                logger.warn(
-                    "ParserError with file %s (theoretically this can't happen at this point)", table_path)
+                logger.common_error(
+                    "ParserError with file %s", table_path)
+                continue
+            except ArrowInvalid as error:
+                counter -= 1
+                logger.common_error(
+                    "ArrowInvalid error with file %s", table_path)
+                continue
+            except UnicodeDecodeError:
+                counter -= 1
+                logger.common_error(
+                    "UnicodeDecodeError with file %s", table_path)
                 continue
 
             ml_values = ml_dict[table_path]
