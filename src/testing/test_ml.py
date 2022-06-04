@@ -24,7 +24,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, files_per_dir: int, skip_tables: int = -1) -> None:
+def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, files_per_dir: int, use_small_tables: bool, skip_tables: int = -1) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -32,6 +32,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         nrows (int): The number of rows the model will be inspecting.
         input_path (str): The path to the directory where the tables are located.
         output_path (str): The filepath where the result csv will be saved.
+        use_small_tables (bool): If True, only the first nrows will be loaded for the model and only positiv columns for the validation.
         skip_tables (int, optional): Skip the first [skip_tables] tables. Defaults to -1.
     """
     logger.info("Started testing of a model with %s rows", nrows)
@@ -41,6 +42,10 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
     ml_dict = {}
     naive_dict = {}
     counter = 0
+    if 'csv' in input_path:
+        use_small_tables = False
+    elif use_small_tables:
+        output_path = output_path.replace('.csv', '_small-tables.csv')
     with open(output_path, 'w') as file:
         csv_file = csv.writer(file)
         row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
@@ -55,14 +60,20 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             # ml_dict: load_time, computing_time, unique_columns
             total_time = -timer()
             load_time = -timer()
-            table = local.get_table(table_path, nrows)
+            if use_small_tables:
+                small_table = local.get_table(table_path, nrows)
+            else:
+                table = local.get_table(table_path)
+                small_table = table.head(nrows)
             load_time += timer()
             computing_time = -timer()
             unique_columns = machine_learning.find_unique_columns(
-                table.head(nrows), ml)
+                small_table, ml)
             computing_time += timer()
             load_time2 = -timer()
-            # TODO: load columns to validate
+            if use_small_tables:
+                table = local.get_table(
+                    table_path, columns=small_table.columns[unique_columns])
             load_time2 += timer()
             # TODO: validate columns
             confirmed_time = -timer()
@@ -264,21 +275,25 @@ def generate_random_int_dataframe(nrows: int, ncols: int) -> pd.DataFrame:
         min_number, max_number, size=(nrows, ncols)), columns=col_names)
 
 
-def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, nrows: int, csv: bool = False) -> None:
+def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, nrows: int, use_small_tables: bool, csv: bool = False, generate_tables: bool = True) -> None:
     path = 'src/data/generated/'
-    if exists(path):
+    if exists(path) and generate_tables:
         rmtree(path)
-    Path(path).mkdir(parents=True)
-    for nrows in row_counts:
-        if csv:
-            filepath = f'src/data/generated/{nrows}-{ncols}.csv'
-            generate_random_int_dataframe(nrows, ncols).to_csv(filepath)
-        else:
-            filepath = f'src/data/generated/{nrows}-{ncols}.parquet'
-            generate_random_int_dataframe(nrows, ncols).to_parquet(filepath)
+    Path(path).mkdir(parents=True, exist_ok=True)
+    if generate_tables:
+        for nrows in row_counts:
+            if csv:
+                filepath = f'src/data/generated/{nrows}-{ncols}.csv'
+                generate_random_int_dataframe(nrows, ncols).to_csv(filepath)
+            else:
+                filepath = f'src/data/generated/{nrows}-{ncols}.parquet'
+                generate_random_int_dataframe(
+                    nrows, ncols).to_parquet(filepath)
     test_model(path_to_model=path_to_model,
                nrows=model_rows,
                input_path=path,
                output_path=out_path,
                files_per_dir=100000,
-               skip_tables=-1)
+               skip_tables=-1,
+               use_small_tables=use_small_tables
+               )

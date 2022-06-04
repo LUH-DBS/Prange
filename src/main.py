@@ -57,7 +57,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
     Path(result_path_long).mkdir(parents=True, exist_ok=True)
 
     if train_model:
-        logger.debug("Started training the models")
+        logger.info("Started training the models")
         testing.prepare_and_train(row_count_iter=nrows_iter,
                                   train_table_count=train_table_count,
                                   data_path=f'src/data/{train_datasource}',
@@ -65,7 +65,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
                                   scoring_strategies=scoring_strategies,
                                   train_time=train_time)
     for nrows in nrows_iter:
-        logger.debug("Testing model with %s rows", nrows)
+        logger.info("Testing model with %s rows", nrows)
         testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{train_table_count}_tables/{train_datasource}/{int(train_time / 60)}minutes/recall_precision.pickle',
                            nrows=nrows,
                            input_path=f'src/data/{test_datasource}/',
@@ -75,13 +75,13 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
     logger.info("Finished Testcase 1")
 
 
-def random_int(max_row_size: int, csv: bool = False):
+def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False):
     if csv:
         filetype = 'csv'
     else:
         filetype = 'parquet'
     logger.info(
-        f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows")
+        f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows (small_table={use_small_tables})")
     ncols = 100
     row_list = [100, 1000, 10000, 100000, 1000000,
                 5000000, 10000000, 50000000, 100000000]
@@ -92,7 +92,10 @@ def random_int(max_row_size: int, csv: bool = False):
                             out_path=f"{out_path}{max_row_size:,.0f}-{ncols:,.0f}.csv",
                             path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
                             model_rows=10,
-                            nrows=10)
+                            nrows=10,
+                            use_small_tables=use_small_tables,
+                            generate_tables=generate_tables
+                            )
     logger.info("Finished random_int test")
 
 
