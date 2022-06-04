@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from shutil import rmtree
 import pandas as pd
+from pyarrow.lib import ArrowInvalid
 
 from autosklearn.metrics import accuracy, precision, recall, f1
 
@@ -30,7 +31,8 @@ def main():
     setup_logging()
     # download_dataset(csv=True)
     # testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
-    random_int(max_row_size=1000000, csv=False)
+    # random_int(max_row_size=1000000, csv=False)
+    dataset_info()
 
 
 def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
@@ -204,6 +206,48 @@ def setup_logging(log_to_file: bool = True, level=logging.DEBUG):
             level=level,
             format='%(levelname)s (%(name)s:%(lineno)d): %(message)s'
         )
+
+
+def dataset_info():
+    logger.info("Starting to gather dataset info")
+    MIN_COLS = 10
+    over_100 = 0
+    over_1000 = 0
+    for dataset in ["gittables-parquet", "gittables-csv"]:
+        counter = 0
+        with open(f'dataset_info-{dataset}.csv', 'w') as file:
+            # file.write("Folder,File,Rows,Columns\n")
+            for path in local.traverse_directory_path(f'src/data/{dataset}/'):
+                counter += 1
+                # print(f"Table {counter}             ", end="\r")
+                try:
+                    table = local.get_table(path)
+                except pd.errors.ParserError as e:
+                    counter -= 1
+                    logger.common_error(
+                        "ParserError with file %s", path)
+                    continue
+                except ArrowInvalid as error:
+                    counter -= 1
+                    logger.common_error(
+                        "ArrowInvalid error with file %s", path)
+                    continue
+                except UnicodeDecodeError:
+                    counter -= 1
+                    logger.common_error(
+                        "UnicodeDecodeError with file %s", path)
+                    continue
+                if len(table.columns) >= MIN_COLS and len(table) > 100:
+                    if len(table) > 1000:
+                        over_1000 += 1
+                    elif len(table) > 100:
+                        over_100 += 1
+                    row = [path.rsplit('/', 2)[1], path.rsplit('/', 1)
+                           [1], len(table), len(table.columns)]
+                    row = [str(x) for x in row]
+                    # file.write(",".join(row) + "\n")
+        logger.info(
+            f"{dataset} has {over_100} tables with > 100 rows and {over_1000} tables with > 1000 rows")
 
 
 if __name__ == '__main__':
