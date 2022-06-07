@@ -274,17 +274,21 @@ def list_models(path: str) -> Iterator[str]:
                 yield f"{root}/{file}"
 
 
-def generate_random_int_dataframe(nrows: int, ncols: int) -> pd.DataFrame:
+def generate_random_int_dataframe(nrows: int, ncols: int, nonunique_percent: int) -> pd.DataFrame:
     logger.info(
-        f"Generating random_int table with {nrows:,d} rows and {ncols:,d} columns")
-    min_number = 0
-    max_number = nrows
-    col_names = [f"Row {i}" for i in range(0, ncols)]
-    return pd.DataFrame(np.random.randint(
-        min_number, max_number, size=(nrows, ncols)), columns=col_names)
+        f"Generating random_int table with {nrows:,d} rows and {ncols:,d} columns ({nonunique_percent}% nuniques)")
+    nonuniques = int(ncols * nonunique_percent / 100)
+    # unique_cols = pd.DataFrame(np.random.randint(nrows, size=(nrows, ncols - nonuniques)),
+    #                            columns=[f"Column {i}" for i in range(0, ncols - nonuniques)])
+    unique_cols = pd.DataFrame([[i] * (ncols - nonuniques)
+                               for i in range(0, nrows)], columns=[f"Column {i}" for i in range(0, ncols - nonuniques)])
+    unique_cols = unique_cols.sample(frac=1).reset_index(drop=True)
+    nonunique_cols = pd.DataFrame(np.ones((nrows, nonuniques)),
+                                  columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
+    return pd.DataFrame(pd.concat([unique_cols, nonunique_cols], axis=1, join='inner'))
 
 
-def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, nrows: int, use_small_tables: bool, csv: bool = False, generate_tables: bool = True) -> None:
+def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, nrows: int, use_small_tables: bool, nonunique_percent: int, csv: bool = False, generate_tables: bool = True) -> None:
     path = 'src/data/generated/'
     if exists(path) and generate_tables:
         rmtree(path)
@@ -293,11 +297,12 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
         for nrows in row_counts:
             if csv:
                 filepath = f'src/data/generated/{nrows}-{ncols}.csv'
-                generate_random_int_dataframe(nrows, ncols).to_csv(filepath)
+                generate_random_int_dataframe(
+                    nrows, ncols, nonunique_percent).to_csv(filepath)
             else:
                 filepath = f'src/data/generated/{nrows}-{ncols}.parquet'
                 generate_random_int_dataframe(
-                    nrows, ncols).to_parquet(filepath)
+                    nrows, ncols, nonunique_percent).to_parquet(filepath)
     test_model(path_to_model=path_to_model,
                nrows=model_rows,
                input_path=path,

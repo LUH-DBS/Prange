@@ -82,7 +82,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
     logger.info("Finished Testcase 1")
 
 
-def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False):
+def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0):
     if csv:
         filetype = 'csv'
     else:
@@ -92,7 +92,7 @@ def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables
     ncols = 100
     row_list = [100, 1000, 10000, 100000, 1000000,
                 5000000, 10000000, 50000000, 100000000]
-    out_path = f"src/result/speed_random-int/{filetype}/"
+    out_path = f"src/result/speed_random-int/{filetype}-{nunique_percent}/"
     Path(out_path).mkdir(parents=True, exist_ok=True)
     testing.test_random_int(row_counts=[x for x in row_list if x <= max_row_size],
                             ncols=ncols,
@@ -102,7 +102,8 @@ def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables
                             nrows=10,
                             use_small_tables=use_small_tables,
                             generate_tables=generate_tables,
-                            csv=csv
+                            csv=csv,
+                            nonunique_percent=nunique_percent
                             )
     logger.info("Finished random_int test")
 
