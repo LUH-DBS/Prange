@@ -29,7 +29,14 @@ db_params = {
 
 def main():
     setup_logging()
-    # download_dataset(csv=True)
+    # download_dataset()
+    dataset_info()
+    random_int(max_row_size=100000000, csv=False,
+               use_small_tables=True)
+    random_int(max_row_size=100000000, csv=False,
+               use_small_tables=False, generate_tables=False)
+    random_int(max_row_size=100000000, csv=True,
+               use_small_tables=False, generate_tables=False)
     # testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
     # random_int(max_row_size=1000000, csv=False)
     dataset_info()
@@ -94,7 +101,8 @@ def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables
                             model_rows=10,
                             nrows=10,
                             use_small_tables=use_small_tables,
-                            generate_tables=generate_tables
+                            generate_tables=generate_tables,
+                            csv=csv
                             )
     logger.info("Finished random_int test")
 
