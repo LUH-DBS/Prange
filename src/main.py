@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from shutil import rmtree
 import pandas as pd
+from pyarrow.lib import ArrowInvalid
 
 from autosklearn.metrics import accuracy, precision, recall, f1
 
@@ -30,7 +31,8 @@ def main():
     setup_logging()
     # download_dataset(csv=True)
     # testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
-    random_int(max_row_size=1000000, csv=False)
+    # random_int(max_row_size=1000000, csv=False)
+    dataset_info()
 
 
 def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
@@ -55,7 +57,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
     Path(result_path_long).mkdir(parents=True, exist_ok=True)
 
     if train_model:
-        logger.debug("Started training the models")
+        logger.info("Started training the models")
         testing.prepare_and_train(row_count_iter=nrows_iter,
                                   train_table_count=train_table_count,
                                   data_path=f'src/data/{train_datasource}',
@@ -63,7 +65,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
                                   scoring_strategies=scoring_strategies,
                                   train_time=train_time)
     for nrows in nrows_iter:
-        logger.debug("Testing model with %s rows", nrows)
+        logger.info("Testing model with %s rows", nrows)
         testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{train_table_count}_tables/{train_datasource}/{int(train_time / 60)}minutes/recall_precision.pickle',
                            nrows=nrows,
                            input_path=f'src/data/{test_datasource}/',
@@ -73,13 +75,13 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
     logger.info("Finished Testcase 1")
 
 
-def random_int(max_row_size: int, csv: bool = False):
+def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False):
     if csv:
         filetype = 'csv'
     else:
         filetype = 'parquet'
     logger.info(
-        f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows")
+        f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows (small_table={use_small_tables})")
     ncols = 100
     row_list = [100, 1000, 10000, 100000, 1000000,
                 5000000, 10000000, 50000000, 100000000]
@@ -90,7 +92,10 @@ def random_int(max_row_size: int, csv: bool = False):
                             out_path=f"{out_path}{max_row_size:,.0f}-{ncols:,.0f}.csv",
                             path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
                             model_rows=10,
-                            nrows=10)
+                            nrows=10,
+                            use_small_tables=use_small_tables,
+                            generate_tables=generate_tables
+                            )
     logger.info("Finished random_int test")
 
 
@@ -117,8 +122,11 @@ def download_dataset(csv: bool = True):
 
     logger.debug("Downloading %s folders", len(download_urls))
 
+    counter = 0
     for filename, url in zip(filenames, download_urls):
-        logger.debug("Downloading: ", filename)
+        counter += 1
+        logger.info("Downloading: %s (%d/%d)", filename,
+                    counter, len(download_urls))
         r = requests.get(url, params={'access_token': ACCESS_TOKEN})
         from zipfile import ZipFile
         with open('tmp/' + filename, 'wb') as f:
@@ -130,6 +138,60 @@ def download_dataset(csv: bool = True):
 
 
 def setup_logging(log_to_file: bool = True, level=logging.DEBUG):
+    def addLoggingLevel(levelName, levelNum, methodName=None):
+        """
+        Comprehensively adds a new logging level to the `logging` module and the
+        currently configured logging class.
+
+        `levelName` becomes an attribute of the `logging` module with the value
+        `levelNum`. `methodName` becomes a convenience method for both `logging`
+        itself and the class returned by `logging.getLoggerClass()` (usually just
+        `logging.Logger`). If `methodName` is not specified, `levelName.lower()` is
+        used.
+
+        To avoid accidental clobberings of existing attributes, this method will
+        raise an `AttributeError` if the level name is already an attribute of the
+        `logging` module or if the method name is already present 
+
+        Example
+        -------
+        >>> addLoggingLevel('TRACE', logging.DEBUG - 5)
+        >>> logging.getLogger(__name__).setLevel("TRACE")
+        >>> logging.getLogger(__name__).trace('that worked')
+        >>> logging.trace('so did this')
+        >>> logging.TRACE
+        5
+
+        """
+        if not methodName:
+            methodName = levelName.lower()
+
+        if hasattr(logging, levelName):
+            raise AttributeError(
+                '{} already defined in logging module'.format(levelName))
+        if hasattr(logging, methodName):
+            raise AttributeError(
+                '{} already defined in logging module'.format(methodName))
+        if hasattr(logging.getLoggerClass(), methodName):
+            raise AttributeError(
+                '{} already defined in logger class'.format(methodName))
+
+        # This method was inspired by the answers to Stack Overflow post
+        # http://stackoverflow.com/q/2183233/2988730, especially
+        # http://stackoverflow.com/a/13638084/2988730
+        def logForLevel(self, message, *args, **kwargs):
+            if self.isEnabledFor(levelNum):
+                self._log(levelNum, message, args, **kwargs)
+
+        def logToRoot(message, *args, **kwargs):
+            logging.log(levelNum, message, *args, **kwargs)
+
+        logging.addLevelName(levelNum, levelName)
+        setattr(logging, levelName, levelNum)
+        setattr(logging.getLoggerClass(), methodName, logForLevel)
+        setattr(logging, methodName, logToRoot)
+
+    addLoggingLevel("COMMON_ERROR", logging.DEBUG + 5)
     if log_to_file:
         Path("src/log/").mkdir(parents=True, exist_ok=True)
         log_path = f"src/log/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}.csv"
@@ -147,6 +209,48 @@ def setup_logging(log_to_file: bool = True, level=logging.DEBUG):
             level=level,
             format='%(levelname)s (%(name)s:%(lineno)d): %(message)s'
         )
+
+
+def dataset_info():
+    logger.info("Starting to gather dataset info")
+    MIN_COLS = 10
+    over_100 = 0
+    over_1000 = 0
+    for dataset in ["gittables-parquet", "gittables-csv"]:
+        counter = 0
+        with open(f'dataset_info-{dataset}.csv', 'w') as file:
+            # file.write("Folder,File,Rows,Columns\n")
+            for path in local.traverse_directory_path(f'src/data/{dataset}/'):
+                counter += 1
+                # print(f"Table {counter}             ", end="\r")
+                try:
+                    table = local.get_table(path)
+                except pd.errors.ParserError as e:
+                    counter -= 1
+                    logger.common_error(
+                        "ParserError with file %s", path)
+                    continue
+                except ArrowInvalid as error:
+                    counter -= 1
+                    logger.common_error(
+                        "ArrowInvalid error with file %s", path)
+                    continue
+                except UnicodeDecodeError:
+                    counter -= 1
+                    logger.common_error(
+                        "UnicodeDecodeError with file %s", path)
+                    continue
+                if len(table.columns) >= MIN_COLS and len(table) > 100:
+                    if len(table) > 1000:
+                        over_1000 += 1
+                    elif len(table) > 100:
+                        over_100 += 1
+                    row = [path.rsplit('/', 2)[1], path.rsplit('/', 1)
+                           [1], len(table), len(table.columns)]
+                    row = [str(x) for x in row]
+                    # file.write(",".join(row) + "\n")
+        logger.info(
+            f"{dataset} has {over_100} tables with > 100 rows and {over_1000} tables with > 1000 rows")
 
 
 if __name__ == '__main__':
