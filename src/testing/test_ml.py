@@ -24,7 +24,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, files_per_dir: int, use_small_tables: bool, skip_tables: int = -1) -> None:
+def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -33,7 +33,11 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         input_path (str): The path to the directory where the tables are located.
         output_path (str): The filepath where the result csv will be saved.
         use_small_tables (bool): If True, only the first nrows will be loaded for the model and only positiv columns for the validation.
-        skip_tables (int, optional): Skip the first [skip_tables] tables. Defaults to -1.
+        max_files (int, optional): The maximum files/tables that will be used. Defaults to -1.
+        files_per_dir (int, optional): Use only this many files for each subdirectory of the datasource. Defaults to -1.
+        skip_tables (int, optional): Skip the first `skip_tables` tables. Defaults to -1.
+        min_rows (int, optional): Skip a table if it has less than `min_rows` rows. Defaults to -1.
+
     """
     logger.info("Started testing of a model with %s rows", nrows)
     with open(path_to_model, 'rb') as file:
@@ -52,6 +56,8 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                "Recall", "F1", "ML: Loading", "ML: Compute Time", "ML: Loading", "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
     for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
+        if max_files > 0 and counter >= max_files:
+            break
         if counter % 100 == 0 and counter != 0:
             logger.info("Finished model testing of %s tables", counter)
         counter += 1
@@ -75,7 +81,10 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                 table = local.get_table(
                     table_path, columns=small_table.columns[unique_columns])
             load_time2 += timer()
-            # TODO: validate columns
+            # skip this table if it is smaller than necessary
+            if len(table) <= min_rows:
+                counter -= 1
+                continue
             confirmed_time = -timer()
             confirmed_time += timer()
             total_time += timer()
