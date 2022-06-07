@@ -65,31 +65,46 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             f"Model on table {counter} ({table_path.rsplit('/', 1)[1]})")
         try:
             total_time = -timer()
+            # load the dataset
             load_time = -timer()
             if use_small_tables:
+                # only get the first rows of the table
                 small_table = local.get_table(table_path, nrows)
             else:
+                # get the whole table
                 table = local.get_table(table_path)
+                # use only the first rows for the model
                 small_table = table.head(nrows)
             load_time += timer()
+            # use the model
             computing_time = -timer()
+            # use the model to guess the unique columns
             unique_columns = machine_learning.find_unique_columns(
                 small_table, ml)
             computing_time += timer()
+            # load the rest of the table if not done in loading 1
             load_time2 = -timer()
             if use_small_tables:
+                # get the columns which the model says are unique
                 table = local.get_table(
                     table_path, columns=small_table.columns[unique_columns])
+            else:
+                # use only the columns which are unique according to the model for validation
+                table = table[table.columns[unique_columns]]
             load_time2 += timer()
             # skip this table if it is smaller than necessary
             if len(table) <= min_rows:
                 counter -= 1
                 continue
+            # confirm the guess of the model
             confirmed_time = -timer()
+            validated_uniques = naive_algorithm.find_unique_columns_in_table(
+                table)
             confirmed_time += timer()
             total_time += timer()
             ml_dict[table_path] = {
                 'unique_columns': unique_columns,
+                'validated_uniques': validated_uniques,
                 'load_time': load_time,
                 'computing_time': computing_time,
                 'load_time2': load_time2,
@@ -161,6 +176,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                         false_neg += 1
                     else:
                         true_neg += 1
+            try:
             accuracy = (true_pos + true_neg) / \
                 (true_pos + true_neg + false_pos + false_neg)
             if true_pos + false_pos != 0:
@@ -172,6 +188,9 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             else:
                 recall = 1.0
             f1 = 2 * precision * recall / (precision + recall)
+            except ZeroDivisionError:
+                logger.error(f"ZeroDivisionError with file {table_path}")
+                continue
             row = [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
                    recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
             csv_file.writerow(row)
