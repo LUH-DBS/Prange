@@ -81,7 +81,7 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
         if all(column[i+1] <= column[i] for i in range(0, len(column)-1)):
             result[2] = 1
     except TypeError:
-        logger.debug(
+        logger.common_error(
             f"Column {column.name} does not just include strings (TypeError)")
         pass
     # handle integer and float
@@ -210,7 +210,7 @@ def train(train_csv: str, scoring_functions: list, save_path: str = "", train_ti
     # automl.fit(X_train, y_train, dataset_name="Test")
     automl.fit(X, y, dataset_name="Test")
     logger.info("Finished training")
-    
+
     if save_path != "":
         Path(save_path.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
         with open(save_path, 'wb') as file:
@@ -239,10 +239,6 @@ def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: b
         path_result, index=False)
     count = 0
     for table in table_iter:
-        # skip tables with less than 15 rows # TODO: do that in local.traverse_directory()
-        # if len(table) < 15:
-        #     continue
-        print(f"Prepare table {count}              ", end="\r")
         count += 1
         if read_tables_max > 0 and count > read_tables_max:
             break

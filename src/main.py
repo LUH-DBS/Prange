@@ -128,7 +128,7 @@ def download_dataset(csv: bool = True):
     download_urls = [f['links']['self'] for f in r.json()['files']]
     filenames = [f['key'] for f in r.json()['files']]
 
-    logger.debug("Downloading %s folders", len(download_urls))
+    logger.info("Downloading %s folders", len(download_urls))
 
     counter = 0
     for filename, url in zip(filenames, download_urls):

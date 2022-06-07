@@ -53,11 +53,11 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         csv_file.writerow(row)
     for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
         if counter % 100 == 0 and counter != 0:
-            logger.debug("Finished model testing of %s tables", counter)
+            logger.info("Finished model testing of %s tables", counter)
         counter += 1
-        print(f"Model on table {counter}              ", end='\r')
+        logger.debug(
+            f"Model on table {counter} ({table_path.rsplit('/', 1)[1]})")
         try:
-            # ml_dict: load_time, computing_time, unique_columns
             total_time = -timer()
             load_time = -timer()
             if use_small_tables:
@@ -266,7 +266,7 @@ def list_models(path: str) -> Iterator[str]:
 
 
 def generate_random_int_dataframe(nrows: int, ncols: int) -> pd.DataFrame:
-    logger.debug(
+    logger.info(
         f"Generating random_int table with {nrows:,d} rows and {ncols:,d} columns")
     min_number = 0
     max_number = nrows
