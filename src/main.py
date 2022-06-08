@@ -38,8 +38,42 @@ def main():
     random_int(max_row_size=100000000, csv=True,
                use_small_tables=False, generate_tables=False)
     # testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
-    # random_int(max_row_size=1000000, csv=False)
-    dataset_info()
+def speed_test():
+    logger.info("Starting speed test")
+    percentages = [60, 70, 80, 90, 95]
+    for percentage in percentages:
+        # parquet, load only whats necessary
+        random_int(max_row_size=100000000,
+                   csv=False,
+                   use_small_tables=True,
+                   generate_tables=True,
+                   nunique_percent=percentage,
+                   rows_model=10
+                   )
+        # parquet, load everything
+        random_int(max_row_size=100000000,
+                   csv=False,
+                   use_small_tables=False,
+                   generate_tables=False,
+                   nunique_percent=percentage,
+                   rows_model=10
+                   )
+        # csv
+        random_int(max_row_size=100000000,
+                   csv=True,
+                   use_small_tables=False,
+                   generate_tables=True,
+                   nunique_percent=percentage,
+                   rows_model=10
+                   )
+    for model in [5, 20]:
+        random_int(max_row_size=100000000,
+                   csv=False,
+                   use_small_tables=True,
+                   generate_tables=True,
+                   nunique_percent=70,
+                   rows_model=model
+                   )
 
 
 def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
@@ -84,7 +118,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
     logger.info("Finished Testcase 1")
 
 
-def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0, ncols: int = 10):
+def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0, ncols: int = 10, rows_model: int = 10):
     if csv:
         filetype = 'csv'
     else:
@@ -93,13 +127,13 @@ def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables
         f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows (small_table={use_small_tables}, {nunique_percent}% nuniques)")
     row_list = [100, 1000, 10000, 100000, 1000000,
                 5000000, 10000000, 50000000, 100000000]
-    out_path = f"src/result/speed_random-int/{ncols}cols/"
+    out_path = f"src/result/speed_random-int/{rows_model}rowModel-{ncols}colTable/"
     Path(out_path).mkdir(parents=True, exist_ok=True)
     testing.test_random_int(row_counts=[x for x in row_list if x <= max_row_size],
                             ncols=ncols,
                             out_path=f"{out_path}{filetype}-{nunique_percent}percent.csv",
                             path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
-                            model_rows=10,
+                            model_rows=rows_model,
                             nrows=10,
                             use_small_tables=use_small_tables,
                             generate_tables=generate_tables,
