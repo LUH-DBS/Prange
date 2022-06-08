@@ -82,21 +82,20 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
     logger.info("Finished Testcase 1")
 
 
-def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0):
+def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0, ncols: int = 10):
     if csv:
         filetype = 'csv'
     else:
         filetype = 'parquet'
     logger.info(
         f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows (small_table={use_small_tables})")
-    ncols = 100
     row_list = [100, 1000, 10000, 100000, 1000000,
                 5000000, 10000000, 50000000, 100000000]
-    out_path = f"src/result/speed_random-int/{filetype}-{nunique_percent}/"
+    out_path = f"src/result/speed_random-int/{ncols}cols/"
     Path(out_path).mkdir(parents=True, exist_ok=True)
     testing.test_random_int(row_counts=[x for x in row_list if x <= max_row_size],
                             ncols=ncols,
-                            out_path=f"{out_path}{max_row_size:,.0f}-{ncols:,.0f}.csv",
+                            out_path=f"{out_path}{filetype}-{nunique_percent}percent.csv",
                             path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
                             model_rows=10,
                             nrows=10,

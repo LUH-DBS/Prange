@@ -129,7 +129,11 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             continue
     with open(output_path, 'a') as file:
         csv_file = csv.writer(file)
+        counter = 0
         for table_path in table_path_list:
+            counter += 1
+            logger.debug(
+                f"Naive algorithm on table {counter} ({table_path.rsplit('/', 1)[1]})")
             try:
                 total_time = -timer()
                 load_time = -timer()
@@ -177,17 +181,17 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                     else:
                         true_neg += 1
             try:
-            accuracy = (true_pos + true_neg) / \
-                (true_pos + true_neg + false_pos + false_neg)
-            if true_pos + false_pos != 0:
-                precision = true_pos / (true_pos + false_pos)
-            else:
-                precision = 0.0
-            if true_pos + false_neg != 0:
-                recall = true_pos / (true_pos + false_neg)
-            else:
-                recall = 1.0
-            f1 = 2 * precision * recall / (precision + recall)
+                accuracy = (true_pos + true_neg) / \
+                    (true_pos + true_neg + false_pos + false_neg)
+                if true_pos + false_pos != 0:
+                    precision = true_pos / (true_pos + false_pos)
+                else:
+                    precision = 0.0
+                if true_pos + false_neg != 0:
+                    recall = true_pos / (true_pos + false_neg)
+                else:
+                    recall = 1.0
+                f1 = 2 * precision * recall / (precision + recall)
             except ZeroDivisionError:
                 logger.error(f"ZeroDivisionError with file {table_path}")
                 continue
@@ -302,8 +306,20 @@ def generate_random_int_dataframe(nrows: int, ncols: int, nonunique_percent: int
     unique_cols = pd.DataFrame([[i] * (ncols - nonuniques)
                                for i in range(0, nrows)], columns=[f"Column {i}" for i in range(0, ncols - nonuniques)])
     unique_cols = unique_cols.sample(frac=1).reset_index(drop=True)
-    nonunique_cols = pd.DataFrame(np.ones((nrows, nonuniques)),
-                                  columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
+    # nonunique_cols = pd.DataFrame(np.ones((nrows, nonuniques)),
+    #                               columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
+    # nonunique_cols_first = pd.DataFrame(np.ones((2, nonuniques)),
+    #                                     columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
+    nonunique_cols_first = pd.DataFrame([[nrows] * nonuniques
+                                        for i in range(0, 2)], columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
+    # nonunique_cols_rest = pd.DataFrame(np.random.randint(nrows, size=(nrows - 2, nonuniques)),
+    #                                    columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
+    nonunique_cols_rest = pd.DataFrame([[i] * nonuniques
+                                        for i in range(0, nrows - 2)], columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
+    nonunique_cols_rest = nonunique_cols_rest.sample(
+        frac=1).reset_index(drop=True)
+    nonunique_cols = pd.concat(
+        [nonunique_cols_first, nonunique_cols_rest], ignore_index=True)
     return pd.DataFrame(pd.concat([unique_cols, nonunique_cols], axis=1, join='inner'))
 
 
