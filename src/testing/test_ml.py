@@ -166,39 +166,65 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                     "UnicodeDecodeError with file %s", table_path)
                 continue
 
-            ml_values = ml_dict[table_path]
-            naive_values = naive_dict[table_path]
-            true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
-            for i in range(0, len(table.columns)):
-                if i in ml_values['unique_columns']:
-                    if i in naive_values['unique_columns']:
-                        true_pos += 1
-                    else:
-                        false_pos += 1
-                else:
-                    if i in naive_values['unique_columns']:
-                        false_neg += 1
-                    else:
-                        true_neg += 1
-            try:
-                accuracy = (true_pos + true_neg) / \
-                    (true_pos + true_neg + false_pos + false_neg)
-                if true_pos + false_pos != 0:
-                    precision = true_pos / (true_pos + false_pos)
-                else:
-                    precision = 0.0
-                if true_pos + false_neg != 0:
-                    recall = true_pos / (true_pos + false_neg)
-                else:
-                    recall = 1.0
-                f1 = 2 * precision * recall / (precision + recall)
-            except ZeroDivisionError:
-                logger.error(f"ZeroDivisionError with file {table_path}")
-                continue
-            row = [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
-                   recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+            row = _make_row(ml_dict=ml_dict,
+                            naive_dict=naive_dict,
+                            speed=speed_test,
+                            table=table,
+                            table_path=table_path
+                            )
             csv_file.writerow(row)
     logger.info("Finished testing")
+
+
+def _make_row(speed: bool, ml_dict, naive_dict, table_path: str, table: pd.DataFrame):
+    ml_values = ml_dict[table_path]
+    naive_values = naive_dict[table_path]
+    true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
+    for i in range(0, len(table.columns)):
+        if i in ml_values['unique_columns']:
+            if i in naive_values['unique_columns']:
+                true_pos += 1
+            else:
+                false_pos += 1
+        else:
+            if i in naive_values['unique_columns']:
+                false_neg += 1
+            else:
+                true_neg += 1
+    try:
+        accuracy = (true_pos + true_neg) / \
+            (true_pos + true_neg + false_pos + false_neg)
+    except ZeroDivisionError:
+        logger.error(f"ZeroDivisionError with file {table_path} (accuracy)")
+        accuracy = -1
+    try:
+        if true_pos + false_pos != 0:
+            precision = true_pos / (true_pos + false_pos)
+        else:
+            precision = 0.0
+    except ZeroDivisionError:
+        logger.error(f"ZeroDivisionError with file {table_path} (precision)")
+        precision = -1
+    try:
+        if true_pos + false_neg != 0:
+            recall = true_pos / (true_pos + false_neg)
+        else:
+            recall = 1.0
+    except ZeroDivisionError:
+        logger.error(f"ZeroDivisionError with file {table_path} (recall)")
+        recall = -1
+    try:
+        f1 = 2 * precision * recall / (precision + recall)
+    except ZeroDivisionError:
+        logger.error(f"ZeroDivisionError with file {table_path} (f1)")
+        f1 = -1
+    if speed:
+        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time']]
+    else:
+        return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
+                recall, f1, ml_values['computing_time'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+        # return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
+        #         recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
 
 
 def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, files_per_dir: int = -1):
@@ -298,7 +324,7 @@ def list_models(path: str) -> Iterator[str]:
 
 
 def generate_random_int_dataframe(nrows: int, ncols: int, nonunique_percent: int) -> pd.DataFrame:
-    logger.info(
+    logger.debug(
         f"Generating random_int table with {nrows:,d} rows and {ncols:,d} columns ({nonunique_percent}% nuniques)")
     nonuniques = int(ncols * nonunique_percent / 100)
     # unique_cols = pd.DataFrame(np.random.randint(nrows, size=(nrows, ncols - nonuniques)),
@@ -344,5 +370,6 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
                output_path=out_path,
                files_per_dir=100000,
                skip_tables=-1,
-               use_small_tables=use_small_tables
+               use_small_tables=use_small_tables,
+               speed_test=True
                )

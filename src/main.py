@@ -57,7 +57,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
 
     train_table_count = 10000
     train_datasource = 'gittables'
-    test_datasource = 'gittables/abstraction_tables_licensed'
+    test_datasource = 'gittables-parquet'
     train_time = 10800  # 3 hours
     result_path = "src/result"
     result_path_long = f"{result_path}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
@@ -77,8 +77,10 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
                            nrows=nrows,
                            input_path=f'src/data/{test_datasource}/',
                            output_path=f'{result_path_long}/{nrows}rows.csv',
-                           files_per_dir=100,
-                           skip_tables=-1)
+                           files_per_dir=10,
+                           skip_tables=-1,
+                           use_small_tables=True,
+                           speed_test=False)
     logger.info("Finished Testcase 1")
 
 
@@ -88,7 +90,7 @@ def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables
     else:
         filetype = 'parquet'
     logger.info(
-        f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows (small_table={use_small_tables})")
+        f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows (small_table={use_small_tables}, {nunique_percent}% nuniques)")
     row_list = [100, 1000, 10000, 100000, 1000000,
                 5000000, 10000000, 50000000, 100000000]
     out_path = f"src/result/speed_random-int/{ncols}cols/"
