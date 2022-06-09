@@ -87,7 +87,11 @@ def find_unique_columns_in_table_with_panda(table: pd.DataFrame) -> list[int]:
 
 def is_unique_column_sorted(column: pd.Series) -> bool:
     sorted_col = column.to_list()
-    sorted_col.sort()
+    try:
+        sorted_col.sort()
+    except TypeError as e:
+        logger.common_error(f"TypeError: {e}")
+        return False
     for i in range(1, len(column)):
         if sorted_col[i-1] == sorted_col[i]:
             return False

@@ -363,7 +363,7 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
             if csv:
                 filepath = f'src/data/generated/{nrows}-{ncols}.csv'
                 generate_random_int_dataframe(
-                    nrows, ncols, nonunique_percent).to_csv(filepath)
+                    nrows, ncols, nonunique_percent).to_csv(filepath, index=False)
             else:
                 filepath = f'src/data/generated/{nrows}-{ncols}.parquet'
                 generate_random_int_dataframe(

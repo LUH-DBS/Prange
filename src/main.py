@@ -40,7 +40,7 @@ def main():
     # testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
 def speed_test():
     logger.info("Starting speed test")
-    percentages = [60, 70, 80, 90, 95]
+    percentages = [60, 70, 80, 90]
     for percentage in percentages:
         # parquet, load only whats necessary
         random_int(max_row_size=100000000,
@@ -121,6 +121,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
 def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0, ncols: int = 10, rows_model: int = 10):
     if csv:
         filetype = 'csv'
+        use_small_tables = False
     else:
         filetype = 'parquet'
     logger.info(
