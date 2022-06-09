@@ -60,6 +60,14 @@ def unique_columns_online(table_range: Iterable, dataset) -> list:
 
 
 def find_unique_columns_in_table(table: pd.DataFrame) -> list[int]:
+    uniques = []
+    for columnname in table.columns:
+        if is_unique_column_sorted(table[columnname]):
+            uniques.append(table.columns.get_loc(columnname))
+    return uniques
+
+
+def find_unique_columns_in_table_with_panda(table: pd.DataFrame) -> list[int]:
     """Generate a list with all column ids which only contain unique values making use of sorting.
 
     Args:
@@ -75,3 +83,21 @@ def find_unique_columns_in_table(table: pd.DataFrame) -> list[int]:
         if value == tablelength:
             unique_columns_list.append(index)
     return unique_columns_list
+
+
+def is_unique_column_sorted(column: pd.Series) -> bool:
+    sorted_col = column.to_list()
+    sorted_col.sort()
+    for i in range(1, len(column)):
+        if sorted_col[i-1] == sorted_col[i]:
+            return False
+    return True
+
+
+def is_unique_column_hash(column: pd.DataFrame) -> bool:
+    value_dict = {}
+    for value in column:
+        if value in value_dict:
+            return False
+        value_dict[value] = 1
+    return True
