@@ -24,7 +24,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1) -> None:
+def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -52,8 +52,12 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         output_path = output_path.replace('.csv', '_small-tables.csv')
     with open(output_path, 'w') as file:
         csv_file = csv.writer(file)
-        row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
-               "Recall", "F1", "ML: Loading", "ML: Compute Time", "ML: Loading", "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
+        if speed_test:
+            row = ["Table Name", "Rows", "Columns", "ML: Loading", "ML: Compute Time", "ML: Loading",
+                   "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
+        else:
+            row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
+                   "Recall", "F1", "ML: Compute Time", "ML: Validation Time", "ML: Total", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
     for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
         if max_files > 0 and counter >= max_files:
@@ -219,7 +223,7 @@ def _make_row(speed: bool, ml_dict, naive_dict, table_path: str, table: pd.DataF
         logger.error(f"ZeroDivisionError with file {table_path} (f1)")
         f1 = -1
     if speed:
-        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time']]
+        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
     else:
         return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
                 recall, f1, ml_values['computing_time'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
