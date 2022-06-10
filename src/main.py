@@ -139,7 +139,7 @@ def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables
     testing.test_random_int(row_counts=[x for x in row_list if x <= max_row_size],
                             ncols=ncols,
                             out_path=f"{out_path}{filetype}-{nunique_percent}percent.csv",
-                            path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
+                            path_to_model=f'src/data/model/{rows_model}_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
                             model_rows=rows_model,
                             nrows=10,
                             use_small_tables=use_small_tables,
