@@ -167,7 +167,7 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
             trivial_cases = data[data["Duplicates"] == 1].index
             data = data.drop(trivial_cases)
         data.to_csv(path, mode='a', header=False, index=False)
-        data = naive_algorithm.find_unique_columns_in_table(table)
+        data = naive_algorithm.find_unique_columns_in_table_with_panda(table)
         filtered_data = []
         for i in range(0, len(table.columns)):
             if i in data:
@@ -248,7 +248,7 @@ def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: b
             trivial_cases = data[data["Duplicates"] == 1].index
             data = data.drop(trivial_cases)
         data.to_csv(out_path, mode='a', header=False, index=False)
-        data = naive_algorithm.find_unique_columns_in_table(table)
+        data = naive_algorithm.find_unique_columns_in_table_with_panda(table)
         filtered_data = []
         for i in range(0, len(table.columns)):
             if i in data:

@@ -24,7 +24,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1) -> None:
+def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -52,8 +52,12 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         output_path = output_path.replace('.csv', '_small-tables.csv')
     with open(output_path, 'w') as file:
         csv_file = csv.writer(file)
-        row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
-               "Recall", "F1", "ML: Loading", "ML: Compute Time", "ML: Loading", "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
+        if speed_test:
+            row = ["Table Name", "Rows", "Columns", "ML: Loading", "ML: Compute Time", "ML: Loading",
+                   "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
+        else:
+            row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
+                   "Recall", "F1", "ML: Compute Time", "ML: Validation Time", "ML: Total", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
     for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
         if max_files > 0 and counter >= max_files:
@@ -219,7 +223,7 @@ def _make_row(speed: bool, ml_dict, naive_dict, table_path: str, table: pd.DataF
         logger.error(f"ZeroDivisionError with file {table_path} (f1)")
         f1 = -1
     if speed:
-        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time']]
+        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
     else:
         return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
                 recall, f1, ml_values['computing_time'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
@@ -326,22 +330,22 @@ def list_models(path: str) -> Iterator[str]:
 def generate_random_int_dataframe(nrows: int, ncols: int, nonunique_percent: int) -> pd.DataFrame:
     logger.debug(
         f"Generating random_int table with {nrows:,d} rows and {ncols:,d} columns ({nonunique_percent}% nuniques)")
-    nonuniques = int(ncols * nonunique_percent / 100)
-    # unique_cols = pd.DataFrame(np.random.randint(nrows, size=(nrows, ncols - nonuniques)),
-    #                            columns=[f"Column {i}" for i in range(0, ncols - nonuniques)])
-    unique_cols = pd.DataFrame([[i] * (ncols - nonuniques)
-                               for i in range(0, nrows)], columns=[f"Column {i}" for i in range(0, ncols - nonuniques)])
-    unique_cols = unique_cols.sample(frac=1).reset_index(drop=True)
-    # nonunique_cols = pd.DataFrame(np.ones((nrows, nonuniques)),
-    #                               columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
-    # nonunique_cols_first = pd.DataFrame(np.ones((2, nonuniques)),
-    #                                     columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
-    nonunique_cols_first = pd.DataFrame([[nrows] * nonuniques
-                                        for i in range(0, 2)], columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
-    # nonunique_cols_rest = pd.DataFrame(np.random.randint(nrows, size=(nrows - 2, nonuniques)),
-    #                                    columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
-    nonunique_cols_rest = pd.DataFrame([[i] * nonuniques
-                                        for i in range(0, nrows - 2)], columns=[f"Column {i}" for i in range(ncols - nonuniques, ncols)])
+    # the number of columns which contain duplicates
+    number_nonuniques = int(ncols * nonunique_percent / 100)
+    # the first 50 rows are in ascending order to help the model guess correctly
+    unique_cols_first = pd.DataFrame([[i] * (ncols - number_nonuniques)
+                                      for i in range(0, 50)], columns=[f"Column {i}" for i in range(0, ncols - number_nonuniques)])
+    unique_cols_rest = pd.DataFrame([[i] * (ncols - number_nonuniques)
+                                     for i in range(50, nrows)], columns=[f"Column {i}" for i in range(0, ncols - number_nonuniques)])
+    # the remaining rows are mixed up
+    unique_cols_rest = unique_cols_rest.sample(frac=1).reset_index(drop=True)
+    unique_cols = pd.concat(
+        [unique_cols_first, unique_cols_rest], ignore_index=True)
+    # the same is happening for the nonunique columns; the first two rows are duplicates
+    nonunique_cols_first = pd.DataFrame([[nrows] * number_nonuniques
+                                        for i in range(0, 2)], columns=[f"Column {i}" for i in range(ncols - number_nonuniques, ncols)])
+    nonunique_cols_rest = pd.DataFrame([[i] * number_nonuniques
+                                        for i in range(0, nrows - 2)], columns=[f"Column {i}" for i in range(ncols - number_nonuniques, ncols)])
     nonunique_cols_rest = nonunique_cols_rest.sample(
         frac=1).reset_index(drop=True)
     nonunique_cols = pd.concat(
@@ -359,7 +363,7 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
             if csv:
                 filepath = f'src/data/generated/{nrows}-{ncols}.csv'
                 generate_random_int_dataframe(
-                    nrows, ncols, nonunique_percent).to_csv(filepath)
+                    nrows, ncols, nonunique_percent).to_csv(filepath, index=False)
             else:
                 filepath = f'src/data/generated/{nrows}-{ncols}.parquet'
                 generate_random_int_dataframe(
