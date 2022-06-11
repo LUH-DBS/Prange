@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def traverse_directory_path(path: str, files_per_dir: int = -1, skip_tables: int = -1) -> Iterator[str]:
+def traverse_directory_path(path: str, files_per_dir: int = -1, skip_tables: int = -1, files_sorted: bool = True) -> Iterator[str]:
     """Returns an Iterator which iterates through local files returning their filepath.
 
     Args:
@@ -23,6 +23,9 @@ def traverse_directory_path(path: str, files_per_dir: int = -1, skip_tables: int
     """
     skipcounter = 0
     for root, dirs, files in os.walk(path):
+        if files_sorted:
+            dirs.sort()
+            files.sort()
         filecounter = 0
         for file in files:
             if skip_tables > 0 and skipcounter < skip_tables:

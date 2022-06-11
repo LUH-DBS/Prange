@@ -24,7 +24,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, files_per_dir: int, use_small_tables: bool, skip_tables: int = -1) -> None:
+def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -33,7 +33,11 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         input_path (str): The path to the directory where the tables are located.
         output_path (str): The filepath where the result csv will be saved.
         use_small_tables (bool): If True, only the first nrows will be loaded for the model and only positiv columns for the validation.
-        skip_tables (int, optional): Skip the first [skip_tables] tables. Defaults to -1.
+        max_files (int, optional): The maximum files/tables that will be used. Defaults to -1.
+        files_per_dir (int, optional): Use only this many files for each subdirectory of the datasource. Defaults to -1.
+        skip_tables (int, optional): Skip the first `skip_tables` tables. Defaults to -1.
+        min_rows (int, optional): Skip a table if it has less than `min_rows` rows. Defaults to -1.
+
     """
     logger.info("Started testing of a model with %s rows", nrows)
     with open(path_to_model, 'rb') as file:
@@ -48,39 +52,63 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         output_path = output_path.replace('.csv', '_small-tables.csv')
     with open(output_path, 'w') as file:
         csv_file = csv.writer(file)
-        row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
-               "Recall", "F1", "ML: Loading", "ML: Compute Time", "ML: Loading", "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
+        if speed_test:
+            row = ["Table Name", "Rows", "Columns", "ML: Loading", "ML: Compute Time", "ML: Loading",
+                   "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
+        else:
+            row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
+                   "Recall", "F1", "ML: Compute Time", "ML: Validation Time", "ML: Total", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
     for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
+        if max_files > 0 and counter >= max_files:
+            break
         if counter % 100 == 0 and counter != 0:
-            logger.debug("Finished model testing of %s tables", counter)
+            logger.info("Finished model testing of %s tables", counter)
         counter += 1
-        print(f"Model on table {counter}              ", end='\r')
+        logger.debug(
+            f"Model on table {counter} ({table_path.rsplit('/', 1)[1]})")
         try:
-            # ml_dict: load_time, computing_time, unique_columns
             total_time = -timer()
+            # load the dataset
             load_time = -timer()
             if use_small_tables:
+                # only get the first rows of the table
                 small_table = local.get_table(table_path, nrows)
             else:
+                # get the whole table
                 table = local.get_table(table_path)
+                # use only the first rows for the model
                 small_table = table.head(nrows)
             load_time += timer()
+            # use the model
             computing_time = -timer()
+            # use the model to guess the unique columns
             unique_columns = machine_learning.find_unique_columns(
                 small_table, ml)
             computing_time += timer()
+            # load the rest of the table if not done in loading 1
             load_time2 = -timer()
             if use_small_tables:
+                # get the columns which the model says are unique
                 table = local.get_table(
                     table_path, columns=small_table.columns[unique_columns])
+            else:
+                # use only the columns which are unique according to the model for validation
+                table = table[table.columns[unique_columns]]
             load_time2 += timer()
-            # TODO: validate columns
+            # skip this table if it is smaller than necessary
+            if len(table) <= min_rows:
+                counter -= 1
+                continue
+            # confirm the guess of the model
             confirmed_time = -timer()
+            validated_uniques = naive_algorithm.find_unique_columns_in_table(
+                table)
             confirmed_time += timer()
             total_time += timer()
             ml_dict[table_path] = {
                 'unique_columns': unique_columns,
+                'validated_uniques': validated_uniques,
                 'load_time': load_time,
                 'computing_time': computing_time,
                 'load_time2': load_time2,
@@ -105,7 +133,11 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             continue
     with open(output_path, 'a') as file:
         csv_file = csv.writer(file)
+        counter = 0
         for table_path in table_path_list:
+            counter += 1
+            logger.debug(
+                f"Naive algorithm on table {counter} ({table_path.rsplit('/', 1)[1]})")
             try:
                 total_time = -timer()
                 load_time = -timer()
@@ -138,35 +170,65 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                     "UnicodeDecodeError with file %s", table_path)
                 continue
 
-            ml_values = ml_dict[table_path]
-            naive_values = naive_dict[table_path]
-            true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
-            for i in range(0, len(table.columns)):
-                if i in ml_values['unique_columns']:
-                    if i in naive_values['unique_columns']:
-                        true_pos += 1
-                    else:
-                        false_pos += 1
-                else:
-                    if i in naive_values['unique_columns']:
-                        false_neg += 1
-                    else:
-                        true_neg += 1
-            accuracy = (true_pos + true_neg) / \
-                (true_pos + true_neg + false_pos + false_neg)
-            if true_pos + false_pos != 0:
-                precision = true_pos / (true_pos + false_pos)
-            else:
-                precision = 0.0
-            if true_pos + false_neg != 0:
-                recall = true_pos / (true_pos + false_neg)
-            else:
-                recall = 1.0
-            f1 = 2 * precision * recall / (precision + recall)
-            row = [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
-                   recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+            row = _make_row(ml_dict=ml_dict,
+                            naive_dict=naive_dict,
+                            speed=speed_test,
+                            table=table,
+                            table_path=table_path
+                            )
             csv_file.writerow(row)
     logger.info("Finished testing")
+
+
+def _make_row(speed: bool, ml_dict, naive_dict, table_path: str, table: pd.DataFrame):
+    ml_values = ml_dict[table_path]
+    naive_values = naive_dict[table_path]
+    true_pos, true_neg, false_pos, false_neg = 0, 0, 0, 0
+    for i in range(0, len(table.columns)):
+        if i in ml_values['unique_columns']:
+            if i in naive_values['unique_columns']:
+                true_pos += 1
+            else:
+                false_pos += 1
+        else:
+            if i in naive_values['unique_columns']:
+                false_neg += 1
+            else:
+                true_neg += 1
+    try:
+        accuracy = (true_pos + true_neg) / \
+            (true_pos + true_neg + false_pos + false_neg)
+    except ZeroDivisionError:
+        logger.error(f"ZeroDivisionError with file {table_path} (accuracy)")
+        accuracy = -1
+    try:
+        if true_pos + false_pos != 0:
+            precision = true_pos / (true_pos + false_pos)
+        else:
+            precision = 0.0
+    except ZeroDivisionError:
+        logger.error(f"ZeroDivisionError with file {table_path} (precision)")
+        precision = -1
+    try:
+        if true_pos + false_neg != 0:
+            recall = true_pos / (true_pos + false_neg)
+        else:
+            recall = 1.0
+    except ZeroDivisionError:
+        logger.error(f"ZeroDivisionError with file {table_path} (recall)")
+        recall = -1
+    try:
+        f1 = 2 * precision * recall / (precision + recall)
+    except ZeroDivisionError:
+        logger.error(f"ZeroDivisionError with file {table_path} (f1)")
+        f1 = -1
+    if speed:
+        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+    else:
+        return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
+                recall, f1, ml_values['computing_time'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+        # return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
+        #         recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
 
 
 def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, files_per_dir: int = -1):
@@ -265,17 +327,33 @@ def list_models(path: str) -> Iterator[str]:
                 yield f"{root}/{file}"
 
 
-def generate_random_int_dataframe(nrows: int, ncols: int) -> pd.DataFrame:
+def generate_random_int_dataframe(nrows: int, ncols: int, nonunique_percent: int) -> pd.DataFrame:
     logger.debug(
-        f"Generating random_int table with {nrows:,d} rows and {ncols:,d} columns")
-    min_number = 0
-    max_number = nrows
-    col_names = [f"Row {i}" for i in range(0, ncols)]
-    return pd.DataFrame(np.random.randint(
-        min_number, max_number, size=(nrows, ncols)), columns=col_names)
+        f"Generating random_int table with {nrows:,d} rows and {ncols:,d} columns ({nonunique_percent}% nuniques)")
+    # the number of columns which contain duplicates
+    number_nonuniques = int(ncols * nonunique_percent / 100)
+    # the first 50 rows are in ascending order to help the model guess correctly
+    unique_cols_first = pd.DataFrame([[i] * (ncols - number_nonuniques)
+                                      for i in range(0, 50)], columns=[f"Column {i}" for i in range(0, ncols - number_nonuniques)])
+    unique_cols_rest = pd.DataFrame([[i] * (ncols - number_nonuniques)
+                                     for i in range(50, nrows)], columns=[f"Column {i}" for i in range(0, ncols - number_nonuniques)])
+    # the remaining rows are mixed up
+    unique_cols_rest = unique_cols_rest.sample(frac=1).reset_index(drop=True)
+    unique_cols = pd.concat(
+        [unique_cols_first, unique_cols_rest], ignore_index=True)
+    # the same is happening for the nonunique columns; the first two rows are duplicates
+    nonunique_cols_first = pd.DataFrame([[nrows] * number_nonuniques
+                                        for i in range(0, 2)], columns=[f"Column {i}" for i in range(ncols - number_nonuniques, ncols)])
+    nonunique_cols_rest = pd.DataFrame([[i] * number_nonuniques
+                                        for i in range(0, nrows - 2)], columns=[f"Column {i}" for i in range(ncols - number_nonuniques, ncols)])
+    nonunique_cols_rest = nonunique_cols_rest.sample(
+        frac=1).reset_index(drop=True)
+    nonunique_cols = pd.concat(
+        [nonunique_cols_first, nonunique_cols_rest], ignore_index=True)
+    return pd.DataFrame(pd.concat([unique_cols, nonunique_cols], axis=1, join='inner'))
 
 
-def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, nrows: int, use_small_tables: bool, csv: bool = False, generate_tables: bool = True) -> None:
+def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, nrows: int, use_small_tables: bool, nonunique_percent: int, csv: bool = False, generate_tables: bool = True) -> None:
     path = 'src/data/generated/'
     if exists(path) and generate_tables:
         rmtree(path)
@@ -284,16 +362,18 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
         for nrows in row_counts:
             if csv:
                 filepath = f'src/data/generated/{nrows}-{ncols}.csv'
-                generate_random_int_dataframe(nrows, ncols).to_csv(filepath)
+                generate_random_int_dataframe(
+                    nrows, ncols, nonunique_percent).to_csv(filepath, index=False)
             else:
                 filepath = f'src/data/generated/{nrows}-{ncols}.parquet'
                 generate_random_int_dataframe(
-                    nrows, ncols).to_parquet(filepath)
+                    nrows, ncols, nonunique_percent).to_parquet(filepath)
     test_model(path_to_model=path_to_model,
                nrows=model_rows,
                input_path=path,
                output_path=out_path,
                files_per_dir=100000,
                skip_tables=-1,
-               use_small_tables=use_small_tables
+               use_small_tables=use_small_tables,
+               speed_test=True
                )

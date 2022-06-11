@@ -29,10 +29,45 @@ db_params = {
 
 def main():
     setup_logging()
-    # download_dataset(csv=True)
+    # download_dataset()
+    speed_test()
     # testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
-    # random_int(max_row_size=1000000, csv=False)
-    dataset_info()
+
+
+def speed_test():
+    ROW_NUMBER = 100000000
+    COL_NUMBER = 10
+    logger.info("Starting speed test")
+    percentages = [60, 70, 80, 90]
+    for model in [5, 10, 20]:
+        for percentage in percentages:
+            # parquet, load only whats necessary
+            random_int(max_row_size=ROW_NUMBER,
+                       csv=False,
+                       use_small_tables=True,
+                       generate_tables=True,
+                       nunique_percent=percentage,
+                       rows_model=model,
+                       ncols=COL_NUMBER
+                       )
+            # parquet, load everything
+            random_int(max_row_size=ROW_NUMBER,
+                       csv=False,
+                       use_small_tables=False,
+                       generate_tables=False,
+                       nunique_percent=percentage,
+                       rows_model=model,
+                       ncols=COL_NUMBER
+                       )
+            # csv
+            random_int(max_row_size=ROW_NUMBER,
+                       csv=True,
+                       use_small_tables=False,
+                       generate_tables=True,
+                       nunique_percent=percentage,
+                       rows_model=model,
+                       ncols=COL_NUMBER
+                       )
 
 
 def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
@@ -50,7 +85,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
 
     train_table_count = 10000
     train_datasource = 'gittables'
-    test_datasource = 'gittables/abstraction_tables_licensed'
+    test_datasource = 'gittables-parquet'
     train_time = 10800  # 3 hours
     result_path = "src/result"
     result_path_long = f"{result_path}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
@@ -70,31 +105,35 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
                            nrows=nrows,
                            input_path=f'src/data/{test_datasource}/',
                            output_path=f'{result_path_long}/{nrows}rows.csv',
-                           files_per_dir=100,
-                           skip_tables=-1)
+                           files_per_dir=10,
+                           skip_tables=-1,
+                           use_small_tables=True,
+                           speed_test=False)
     logger.info("Finished Testcase 1")
 
 
-def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False):
+def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0, ncols: int = 10, rows_model: int = 10):
     if csv:
         filetype = 'csv'
+        use_small_tables = False
     else:
         filetype = 'parquet'
     logger.info(
-        f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows (small_table={use_small_tables})")
-    ncols = 100
+        f"Started random_int test with filetype {filetype} and a maximum of {max_row_size:,d} rows (small_table={use_small_tables}, {nunique_percent}% nuniques)")
     row_list = [100, 1000, 10000, 100000, 1000000,
                 5000000, 10000000, 50000000, 100000000]
-    out_path = f"src/result/speed_random-int/{filetype}/"
+    out_path = f"src/result/speed_random-int/{rows_model}rowModel-{ncols}colTable/"
     Path(out_path).mkdir(parents=True, exist_ok=True)
     testing.test_random_int(row_counts=[x for x in row_list if x <= max_row_size],
                             ncols=ncols,
-                            out_path=f"{out_path}{max_row_size:,.0f}-{ncols:,.0f}.csv",
-                            path_to_model='src/data/model/10_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
-                            model_rows=10,
+                            out_path=f"{out_path}{filetype}-{nunique_percent}percent.csv",
+                            path_to_model=f'src/data/model/{rows_model}_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
+                            model_rows=rows_model,
                             nrows=10,
                             use_small_tables=use_small_tables,
-                            generate_tables=generate_tables
+                            generate_tables=generate_tables,
+                            csv=csv,
+                            nonunique_percent=nunique_percent
                             )
     logger.info("Finished random_int test")
 
@@ -120,7 +159,7 @@ def download_dataset(csv: bool = True):
     download_urls = [f['links']['self'] for f in r.json()['files']]
     filenames = [f['key'] for f in r.json()['files']]
 
-    logger.debug("Downloading %s folders", len(download_urls))
+    logger.info("Downloading %s folders", len(download_urls))
 
     counter = 0
     for filename, url in zip(filenames, download_urls):

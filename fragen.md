@@ -5,10 +5,11 @@
 ## TODO
 
 - Programm überarbeiten
-  - Ausschließen, dass Tabellen gecached werden
-  - Vorteil von parquet Dateien prüfen (Werden tatsächlich nur die ersten x Zeilen gelesen?)
-  - Überprüfung des ML Ergebnisses auf naive Weise mit machen und messen
-  - Wird beim naiven Algorithmus parallelisiert?
+  - Ausschließen, dass Tabellen gecached werden ✅
+  - Vorteil von parquet Dateien prüfen (Werden tatsächlich nur die ersten x Zeilen gelesen?) ✅
+  - Überprüfung des ML Ergebnisses auf naive Weise mit machen und messen ✅
+  - Wird beim naiven Algorithmus parallelisiert? ✅
+    - Nur das Model benutzt mehrere (alle) Threads
 - Tabellenverzeichnis fertig machen
 
 ## Ergebnisse
@@ -41,6 +42,7 @@ Die nicht trivialen Spalten (keine doppelten Werte in den ersten x Zeilen) stamm
 ## Ideen
 
 - Tabellen selber in verschiedenen Größen für Laufzeittests generieren
+
   - auch verschiedene row group Größen bei den .parquet Dateien ausprobieren
 
 - automatisierte Tests

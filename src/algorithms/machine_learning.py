@@ -1,6 +1,7 @@
 """
 This module holds all functions necessary to interact with the ml algorithm.
 """
+from timeit import default_timer as timer
 from typing import Iterable, Iterator, TextIO
 from pathlib import Path
 import pickle
@@ -35,8 +36,14 @@ def find_unique_columns(table: pd.DataFrame, model: AutoSklearnClassifier) -> li
     Returns:
         pd.DataFrame: the indexes of the unique columns
     """
+    preparation_time = -timer()
     prepared_table = prepare_table(table)
+    preparation_time += timer()
+    prediction_time = -timer()
     prediction = model.predict(prepared_table)
+    prediction_time += timer()
+    logger.debug(
+        f"Preparation: {preparation_time}s, prediction: {prediction_time}s")
     return [i for i in range(0, len(prediction)) if prediction[i] == 1]
 
 
@@ -81,7 +88,7 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
         if all(column[i+1] <= column[i] for i in range(0, len(column)-1)):
             result[2] = 1
     except TypeError:
-        logger.debug(
+        logger.common_error(
             f"Column {column.name} does not just include strings (TypeError)")
         pass
     # handle integer and float
@@ -167,7 +174,7 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
             trivial_cases = data[data["Duplicates"] == 1].index
             data = data.drop(trivial_cases)
         data.to_csv(path, mode='a', header=False, index=False)
-        data = naive_algorithm.find_unique_columns_in_table(table)
+        data = naive_algorithm.find_unique_columns_in_table_with_panda(table)
         filtered_data = []
         for i in range(0, len(table.columns)):
             if i in data:
@@ -205,12 +212,13 @@ def train(train_csv: str, scoring_functions: list, save_path: str = "", train_ti
         time_left_for_this_task=train_time,
         per_run_time_limit=per_run_time,
         scoring_functions=scoring_functions,
-        memory_limit=200000  # 200GB
+        memory_limit=200000,  # 200GB
+        n_jobs=10
     )
     # automl.fit(X_train, y_train, dataset_name="Test")
     automl.fit(X, y, dataset_name="Test")
     logger.info("Finished training")
-    
+
     if save_path != "":
         Path(save_path.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
         with open(save_path, 'wb') as file:
@@ -239,10 +247,6 @@ def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: b
         path_result, index=False)
     count = 0
     for table in table_iter:
-        # skip tables with less than 15 rows # TODO: do that in local.traverse_directory()
-        # if len(table) < 15:
-        #     continue
-        print(f"Prepare table {count}              ", end="\r")
         count += 1
         if read_tables_max > 0 and count > read_tables_max:
             break
@@ -252,7 +256,7 @@ def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: b
             trivial_cases = data[data["Duplicates"] == 1].index
             data = data.drop(trivial_cases)
         data.to_csv(out_path, mode='a', header=False, index=False)
-        data = naive_algorithm.find_unique_columns_in_table(table)
+        data = naive_algorithm.find_unique_columns_in_table_with_panda(table)
         filtered_data = []
         for i in range(0, len(table.columns)):
             if i in data:
