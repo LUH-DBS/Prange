@@ -30,56 +30,44 @@ db_params = {
 def main():
     setup_logging()
     # download_dataset()
-    dataset_info()
-    random_int(max_row_size=100000000, csv=False,
-               use_small_tables=True)
-    random_int(max_row_size=100000000, csv=False,
-               use_small_tables=False, generate_tables=False)
-    random_int(max_row_size=100000000, csv=True,
-               use_small_tables=False, generate_tables=False)
+    speed_test()
     # testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
+
+
 def speed_test():
     ROW_NUMBER = 100000000
     COL_NUMBER = 10
     logger.info("Starting speed test")
     percentages = [60, 70, 80, 90]
-    for percentage in percentages:
-        # parquet, load only whats necessary
-        random_int(max_row_size=ROW_NUMBER,
-                   csv=False,
-                   use_small_tables=True,
-                   generate_tables=True,
-                   nunique_percent=percentage,
-                   rows_model=10,
-                   ncols=COL_NUMBER
-                   )
-        # parquet, load everything
-        random_int(max_row_size=ROW_NUMBER,
-                   csv=False,
-                   use_small_tables=False,
-                   generate_tables=False,
-                   nunique_percent=percentage,
-                   rows_model=10,
-                   ncols=COL_NUMBER
-                   )
-        # csv
-        random_int(max_row_size=ROW_NUMBER,
-                   csv=True,
-                   use_small_tables=False,
-                   generate_tables=True,
-                   nunique_percent=percentage,
-                   rows_model=10,
-                   ncols=COL_NUMBER
-                   )
-    for model in [5, 20]:
-        random_int(max_row_size=ROW_NUMBER,
-                   csv=False,
-                   use_small_tables=True,
-                   generate_tables=True,
-                   nunique_percent=70,
-                   rows_model=model,
-                   ncols=COL_NUMBER
-                   )
+    for model in [5, 10, 20]:
+        for percentage in percentages:
+            # parquet, load only whats necessary
+            random_int(max_row_size=ROW_NUMBER,
+                       csv=False,
+                       use_small_tables=True,
+                       generate_tables=True,
+                       nunique_percent=percentage,
+                       rows_model=model,
+                       ncols=COL_NUMBER
+                       )
+            # parquet, load everything
+            random_int(max_row_size=ROW_NUMBER,
+                       csv=False,
+                       use_small_tables=False,
+                       generate_tables=False,
+                       nunique_percent=percentage,
+                       rows_model=model,
+                       ncols=COL_NUMBER
+                       )
+            # csv
+            random_int(max_row_size=ROW_NUMBER,
+                       csv=True,
+                       use_small_tables=False,
+                       generate_tables=True,
+                       nunique_percent=percentage,
+                       rows_model=model,
+                       ncols=COL_NUMBER
+                       )
 
 
 def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
