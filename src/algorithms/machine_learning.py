@@ -1,6 +1,7 @@
 """
 This module holds all functions necessary to interact with the ml algorithm.
 """
+from timeit import default_timer as timer
 from typing import Iterable, Iterator, TextIO
 from pathlib import Path
 import pickle
@@ -35,8 +36,14 @@ def find_unique_columns(table: pd.DataFrame, model: AutoSklearnClassifier) -> li
     Returns:
         pd.DataFrame: the indexes of the unique columns
     """
+    preparation_time = -timer()
     prepared_table = prepare_table(table)
+    preparation_time += timer()
+    prediction_time = -timer()
     prediction = model.predict(prepared_table)
+    prediction_time += timer()
+    logger.debug(
+        f"Preparation: {preparation_time}s, prediction: {prediction_time}s")
     return [i for i in range(0, len(prediction)) if prediction[i] == 1]
 
 
@@ -205,7 +212,8 @@ def train(train_csv: str, scoring_functions: list, save_path: str = "", train_ti
         time_left_for_this_task=train_time,
         per_run_time_limit=per_run_time,
         scoring_functions=scoring_functions,
-        memory_limit=200000  # 200GB
+        memory_limit=200000,  # 200GB
+        n_jobs=10
     )
     # automl.fit(X_train, y_train, dataset_name="Test")
     automl.fit(X, y, dataset_name="Test")
