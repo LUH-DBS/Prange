@@ -119,6 +119,14 @@
 %\def\bflabel#1{{#1\hfill}}
 \def\bflabel#1{{\acsfont{#1}\hfill}}
 \def\aclabelfont#1{\acsfont{#1}}
+\usepackage{siunitx}
+\sisetup{
+  % locale=DE,
+  group-digits = integer,
+  round-mode = places,
+  round-precision = 3,
+  round-pad = false
+}
 % ****************************************************************************************************
 %\usepackage{pgfplots} % External TikZ/PGF support (thanks to Andreas Nautsch)
 %\usetikzlibrary{external}
