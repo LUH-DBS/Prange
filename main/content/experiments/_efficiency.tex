@@ -13,7 +13,7 @@ For the experiments, tables with different sizes were generated. They each had \
 \subsection{Base experiment}\label{subsec:efficiency-base_experiment} % TODO: table number
 For the first experiment, a model which uses 10 rows as its input was used. The experiment data consisted of \num{9} tables with \num{10} columns each and between \num{100} and \num{100000000} rows. Three of the columns where unique, seven contained duplicates.
 
-Table !!! shows that for tables with up to \num{100000} rows, the naive algorithm takes only a fraction of a second and is therefore faster than the proposed machine learning model. However, since the model takes a more or less constant time of half a second, it becomes faster as the tables size surpasses one million rows.
+Table !!! shows that for tables with up to \num{100000} rows, the naive algorithm takes only a fraction of a second and is therefore faster than the proposed machine learning model. However, since the model takes a more or less constant time of half a second, it becomes faster as the table size surpasses one million rows.
 
 Particularly noteworthy is the fact that the validation time for the model takes very close to \SI{30}{\percent} of the time of the naive algorithm. That is because only columns which are unique according to the model are validated, so in this case three.
 
