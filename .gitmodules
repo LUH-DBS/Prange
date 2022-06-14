@@ -1,0 +1,3 @@
+[submodule "src/tably"]
+	path = src/tably
+	url = git@github.com:narimiran/tably.git
