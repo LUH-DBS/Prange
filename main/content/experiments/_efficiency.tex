@@ -1,8 +1,55 @@
-\section{Efficiency}
-\begin{itemize}
-  \item compare the speed to the naive algorithm
-        \begin{itemize}
-          \item with 5, 10 and 20 rows as input
-          \item measure the time with locally saved tables and tables from the database
-        \end{itemize}
-\end{itemize}
+\section{Efficiency}\label{sec:efficiency}
+Another important metric to determine the feasibility of the machine learning model is the efficiency. The main question is, if or from what table size the model is faster than a naive method. This becomes even more interesting as each positive guess of the model has to be verified using the naive algorithm because the model is trained for the highest recall and precision, not accuracy. % TODO: ref to model
+
+
+\subsection{Experiment Data}\label{subsec:efficiency-experiment_data}
+The experiment was conducted on a set of generated tables to control for the size of the table as well as the number of unique and non-unique columns, as can be seen in Table~\ref{table:efficiency-generated_table}.
+
+For the experiments, tables with different sizes were generated. They each had \num{10} columns and between \num{100} and \num{100000000} columns. To ensure the model the correct prediction by the model, the columns where generated in a specific way. The unique columns are evenly incrementing for the first \num{50} rows, while the first two rows of the non-unique columns contain the same value. The rest of each column contains distinct incrementing values which are mixed up to increase the time of the naive algorithm which works by sorting each column.
+
+\input{table-code/experiments/efficiency-generated_table.tex}
+
+
+\subsection{Base experiment}\label{subsec:efficiency-base_experiment} % TODO: table number
+For the first experiment, a model which uses 10 rows as its input was used. The experiment data consisted of \num{9} tables with \num{10} columns each and between \num{100} and \num{100000000} rows. Three of the columns where unique, seven contained duplicates.
+
+Table !!! shows that for tables with up to \num{100000} rows, the naive algorithm takes only a fraction of a second and is therefore faster than the proposed machine learning model. However, since the model takes a more or less constant time of half a second, it becomes faster as the table size surpasses one million rows.
+
+Particularly noteworthy is the fact that the validation time for the model takes very close to \SI{30}{\percent} of the time of the naive algorithm. That is because only columns which are unique according to the model are validated, so in this case three.
+
+In conclusion, it is clear that the most time is used for loading the dataset and checking the columns for duplicates with the naive algorithm. While a possible improvement of the naive algorithm is not part of this thesis, in Section~\ref{subsec:efficiency-shorter_loading_times} two different ways to shorten the loading times will be explored.
+
+
+\subsection{Shortening loading times}\label{subsec:efficiency-shorter_loading_times} % TODO: Writing
+While CSV files are very easy to use, they are not meant to efficiently store large quantities of data. Parquet files are a substantially more suitable file format to handle large datasets. As an additional benefit, this file format makes it possible to read only some columns because the data is saved column wise in contrast to CSV files. % TODO: is a citation necessary? (https://parquet.apache.org/)
+Through the use of row groups it is possible to read only some rows too.
+
+This property enables the model to first read only the first rows before the model makes its prediction and in a second step read only the columns which need to be validated.
+
+The Tables !!! and !!! show the result of the experiment from Section~\ref{subsec:efficiency-base_experiment} repeated with the changes applied. It is obvious from the results in Table !!! that the load times can be improved significantly by using file formats which suit the application.
+
+Difference to the second experiment. Probably need to write a better experiment description.
+
+Conclusion: The load times are better with better file format. In this case, loading only the rows/columns needed did not make much of a difference. When \io{} is slow, this could be different (Network filer or similar).
+
+
+\subsection{Comparing models with different input sizes}\label{subsec:efficiency-comparing_models} % TODO: Writing
+Short description of what \enquote{different input sizes} means (long explanation in earlier section).
+
+Compare times for \SI{70}{\percent}.
+
+Conclusion: No large difference, the difference may correlate with the larger file size of the model itself.
+
+
+\subsection{Changing the ratio of unique columns}\label{subsec:efficiency-changing_uniques} % TODO: Writing
+Description of the experiment setup: Parquet with small table and 60, 70, 80, 90\%.
+
+Description of what is happening.
+
+What percentage of unique columns in the gittables dataset?
+
+Conclusion: The increased efficiency depends mainly on the low fraction of unique columns (next to number of rows). Probably is the real world percentage low enough.
+
+
+\subsection{Summarized results}\label{subsec:efficiency-summarized_results} % TODO: Writing
+The proposed model is more efficient for large enough tables. The percentages are good enough in the real world. Only loading necessary rows/columns has not been a large advantage in this case, but it could be with slow \io{}.

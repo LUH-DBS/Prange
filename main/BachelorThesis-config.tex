@@ -51,9 +51,9 @@
 \newcommand{\mySubtitle}{\xspace}
 \newcommand{\myDegree}{Bachelor Thesis\xspace}
 \newcommand{\myName}{Janek Prange\xspace}
-\newcommand{\myProf}{Prof. Dr. Ziawasch Abedjan\xspace}
-\newcommand{\myOtherProf}{Prof. Dr. Sören Auer\xspace}
-\newcommand{\mySupervisor}{Prof. Dr. Ziawasch Abedjan\xspace}
+\newcommand{\myProf}{Prof.~Dr.~Ziawasch Abedjan\xspace}
+\newcommand{\myOtherProf}{Prof.~Dr.~Sören Auer\xspace}
+\newcommand{\mySupervisor}{Prof.~Dr.~Ziawasch Abedjan\xspace}
 \newcommand{\myFaculty}{Fakultät für Elektrotechnik und Informatik\xspace}
 \newcommand{\myDepartment}{Institut für Praktische Informatik\xspace}
 \newcommand{\myUni}{Leibniz Universität Hannover\xspace}
@@ -69,6 +69,7 @@
 \newcommand{\Ie}{I.\,e.}
 \newcommand{\eg}{e.\,g.}
 \newcommand{\Eg}{E.\,g.}
+\newcommand{\io}{\nicefrac{I}{O}}
 % ****************************************************************************************************
 
 
@@ -119,6 +120,17 @@
 %\def\bflabel#1{{#1\hfill}}
 \def\bflabel#1{{\acsfont{#1}\hfill}}
 \def\aclabelfont#1{\acsfont{#1}}
+\usepackage{siunitx}
+\sisetup{
+  % locale=DE,
+  group-digits = integer,
+  round-mode = places,
+  round-precision = 3,
+  round-pad = false
+}
+\usepackage{nicefrac}
+\usepackage{rotating}
+\usepackage[inline]{enumitem}
 % ****************************************************************************************************
 %\usepackage{pgfplots} % External TikZ/PGF support (thanks to Andreas Nautsch)
 %\usetikzlibrary{external}
@@ -157,7 +169,7 @@
   breaklines=true,
   %frameround=ftff,
   %frame=single,
-  belowcaptionskip=.75\baselineskip
+  belowcaptionskip=.75\baselineskip%
   %frame=L
 }
 % ****************************************************************************************************
@@ -177,7 +189,7 @@
 }
 \theoremstyle{plain} {\theorembodyfont{\normalfont}
   \newtheorem{Definition}{Definition}}
-\newcommand{\qed}{\hfill \mbox{\raggedright \rule{.07in}{.1in}}}
+\newcommand{\qed}{\hfill \mbox{\raggedright{} \rule{.07in}{.1in}}}
 \newenvironment{proof}{\vspace{1ex}\noindent{\textbf{Proof}}\hspace{0.5em}}
 {\hfill\qed\vspace{2ex}}
 
