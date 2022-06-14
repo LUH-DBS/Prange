@@ -292,5 +292,30 @@ def dataset_info():
             f"{dataset} has {over_100} tables with > 100 rows and {over_1000} tables with > 1000 rows")
 
 
+def get_example_features(max_count: int = 2, table_count: int = 1000, out_path: str = 'features.csv'):
+    pd.DataFrame([], columns=machine_learning.header).to_csv(
+        out_path, index=False)
+    datatype_dict = {}
+    counter = 0
+    for table in local.traverse_directory("src/data/gittables-parquet"):
+        counter += 1
+        if counter > table_count:
+            break
+        prepared = machine_learning.prepare_table(table)
+        result = pd.DataFrame()
+        for row in prepared.values:
+            dt = row[1]
+            if dt in datatype_dict:
+                if datatype_dict[dt] >= max_count:
+                    continue
+                else:
+                    datatype_dict[dt] += 1
+                    result = pd.concat([result, pd.DataFrame([row])])
+            else:
+                datatype_dict[dt] = 1
+                result = pd.concat([result, pd.DataFrame([row])])
+        result.to_csv(out_path, index=False, mode='a', header=False)
+
+
 if __name__ == '__main__':
     main()
