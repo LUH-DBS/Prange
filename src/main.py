@@ -292,5 +292,71 @@ def dataset_info():
             f"{dataset} has {over_100} tables with > 100 rows and {over_1000} tables with > 1000 rows")
 
 
+def get_example_features(max_count: int = 2, table_count: int = 1000, out_path: str = 'features.csv'):
+    pd.DataFrame([], columns=machine_learning.header).to_csv(
+        out_path, index=False)
+    datatype_dict = {}
+    counter = 0
+    for table in local.traverse_directory("src/data/gittables-parquet"):
+        counter += 1
+        if counter > table_count:
+            break
+        prepared = machine_learning.prepare_table(table)
+        result = pd.DataFrame()
+        for row in prepared.values:
+            dt = row[1]
+            if dt in datatype_dict:
+                if datatype_dict[dt] >= max_count:
+                    continue
+                else:
+                    datatype_dict[dt] += 1
+                    result = pd.concat([result, pd.DataFrame([row])])
+            else:
+                datatype_dict[dt] = 1
+                result = pd.concat([result, pd.DataFrame([row])])
+        result.to_csv(out_path, index=False, mode='a', header=False)
+
+
+def speed_test_to_csv(input_path: str = 'src/result/speed_random-int',):
+    tmp_path = '/tmp/thesis-tmp'
+    keep_columns = ['Rows', 'Columns', 'ML: Loading', 'ML: Compute Time', 'ML: Loading',
+                    'ML: Validation Time', 'ML: Total', 'Naive: Loading', 'Naive: Compute Time', 'Naive: Total']
+    for table_path in local.traverse_directory_path(input_path):
+        table = local.get_table(table_path)
+        keep_table = table[keep_columns]
+        tmp_file = table_path.replace(input_path, tmp_path)
+        Path(tmp_file.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
+        keep_table.to_csv(tmp_file, index=False)
+    csv_to_tex(input_path=tmp_path,
+               output_path='main/table-code/result/efficiency')
+    rmtree(tmp_path)
+
+
+def csv_to_tex(input_path: str = 'src/result/speed_random-int', output_path: str = 'main/table-code/result/efficiency'):
+    from tably import Tably, AttrDict
+    options = {
+        'outfile': None,
+        'align': 'c',
+        'caption': None,
+        'no_indent': False,
+        'skip': 0,
+        'label': None,
+        'no_header': False,
+        'preamble': False,
+        'sep': ',',
+        'units': None,
+        'no_escape': False,
+        'fragment': False,
+        'fragment_skip_header': False,
+        'replace': True
+    }
+    for root, dirs, files in os.walk(input_path):
+        outdir = root.replace(input_path, output_path)
+        Path(outdir).mkdir(parents=True, exist_ok=True)
+        args = AttrDict(**options, files=[root + '/' + file for file in files],
+                        separate_outfiles=[outdir])
+        Tably(args).run()
+
+
 if __name__ == '__main__':
     main()

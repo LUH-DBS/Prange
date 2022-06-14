@@ -91,6 +91,10 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
         logger.common_error(
             f"Column {column.name} does not just include strings (TypeError)")
         pass
+    except KeyError as error:
+        logger.common_error(
+            f"KeyError with column {column.name}")
+        pass
     # handle integer and float
     if is_bool_dtype(column):
         result[1] = 3
