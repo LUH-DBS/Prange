@@ -205,14 +205,13 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
         result.to_csv(path_result, mode='a', header=False, index=False)
 
 
-def train(train_csv: str, scoring_functions: list, save_path: str = "", train_time=120, per_run_time=30) -> AutoSklearnClassifier:
+def train(train_csv: str, scoring_functions: list, save_path: str = "", train_time=120) -> AutoSklearnClassifier:
     """Train a network on a feature table.
 
     Args:
         train_csv (str): the path to the feature table
         save_path (str, optional): the path to save the model to (as a pickle file). Defaults to "".
         train_time (int, optional): number of seconds to train the network. Defaults to 120.
-        per_run_time (int, optional): number of seconds for each run. Defaults to 30.
 
     Returns:
         AutoSklearnClassifier: the trained model
@@ -221,14 +220,12 @@ def train(train_csv: str, scoring_functions: list, save_path: str = "", train_ti
     y = pd.read_csv(train_csv.replace('.csv', '-result.csv'))
 
     # X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-    logger.info("Starting Training for %d minutes", train_time)
+    logger.info("Starting Training for %d seconds", train_time)
 
     automl = AutoSklearnClassifier(
         time_left_for_this_task=train_time,
-        per_run_time_limit=per_run_time,
         scoring_functions=scoring_functions,
         memory_limit=200000,  # 200GB
-        n_jobs=10
     )
     # automl.fit(X_train, y_train, dataset_name="Test")
     automl.fit(X, y, dataset_name="Test")

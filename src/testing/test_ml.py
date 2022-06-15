@@ -24,7 +24,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1, min_cols: int = -1, log_false_guesses: bool = False) -> None:
+def test_model(path_to_model: str, model_rows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1, min_cols: int = -1, log_false_guesses: bool = False) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -40,7 +40,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         min_cols (int, optional): Skip a table if it has less than `min_cols` columns. Defaults to -1.
 
     """
-    logger.info("Started testing of a model with %s rows", nrows)
+    logger.info("Started testing of a model with %s rows", model_rows)
     with open(path_to_model, 'rb') as file:
         ml = pickle.load(file)
     table_path_list: list[str] = []
@@ -75,12 +75,12 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             load_time = -timer()
             if use_small_tables:
                 # only get the first rows of the table
-                small_table = local.get_table(table_path, nrows)
+                small_table = local.get_table(table_path, model_rows)
             else:
                 # get the whole table
                 table = local.get_table(table_path)
                 # use only the first rows for the model
-                small_table = table.head(nrows)
+                small_table = table.head(model_rows)
             load_time += timer()
             # skip this table if it is smaller than necessary
             if len(small_table.columns) < min_cols:
@@ -167,7 +167,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                     if len(false_neg) > 0:
                         logger.error(
                             "False Negativ (column '{}')".format("', '".join(table.columns[false_neg])))
-                        log_path = f"src/result/correctness/false_neg/{nrows}rows/"
+                        log_path = f"src/result/correctness/false_neg/{model_rows}rows/"
                         Path(log_path).mkdir(parents=True, exist_ok=True)
                         false_neg_table = table[table.columns[false_neg]]
                         false_neg_table.to_csv(
@@ -178,7 +178,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                     if len(false_pos) > 0:
                         logger.debug(
                             "False Positiv (column '{}')".format("', '".join(table.columns[false_pos])))
-                        log_path = f"src/result/correctness/false_pos/{nrows}rows/"
+                        log_path = f"src/result/correctness/false_pos/{model_rows}rows/"
                         Path(log_path).mkdir(parents=True, exist_ok=True)
                         false_pos_table = table[table.columns[false_pos]]
                         false_pos_table.to_csv(
@@ -302,8 +302,6 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
         train_envenly (bool): If True, the tables will be evenly from the subdirectories of [data_path].
         train_time (int): Number of seconds to train the model.
     """
-    # per_run_time = 300  # 5 minutes
-    per_run_time = int(train_time / 10)
     files_per_dir = -1
     number_of_subdirs = len(
         [f.path for f in os.scandir(data_path) if f.is_dir()])
@@ -322,12 +320,11 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
                         scoring_functions=strategy[1],
                         save_path=model_path,
                         train_time=train_time,
-                        per_run_time=per_run_time,
                         train_if_exists=True
                         )
 
 
-def train_model(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, per_run_time: int = 30, train_if_exists: bool = False) -> AutoSklearnClassifier:
+def train_model(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, train_if_exists: bool = False) -> AutoSklearnClassifier:
     """Train and save a ml model if it doesn't already exist.
 
     Args:
@@ -336,7 +333,6 @@ def train_model(train_csv: str, save_path: str, scoring_function_names: list[str
         scoring_function_names (list[str]): A list with the names of the scoring functions for the filenames.
         scoring_functions (list): A list with the scoring functions for the training.
         train_time (int, optional): number of seconds to train the network. Defaults to 120.
-        per_run_time (int, optional): number of seconds for each run. Defaults to 30.
         train_if_exists (bool, optional): If True, a new model will be trained even if one with the given parameters already exists. Defaults to False.
 
     Returns:
@@ -354,8 +350,7 @@ def train_model(train_csv: str, save_path: str, scoring_function_names: list[str
         model = machine_learning.train(train_csv=train_csv,
                                        scoring_functions=scoring_functions,
                                        save_path=save_path,
-                                       train_time=train_time,
-                                       per_run_time=per_run_time
+                                       train_time=train_time
                                        )
         logger.info("Finished training")
         return model
@@ -410,7 +405,7 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
                 generate_random_int_dataframe(
                     nrows, ncols, nonunique_percent).to_parquet(filepath)
     test_model(path_to_model=path_to_model,
-               nrows=model_rows,
+               model_rows=model_rows,
                input_path=path,
                output_path=out_path,
                files_per_dir=100000,

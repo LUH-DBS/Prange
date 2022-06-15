@@ -26,12 +26,39 @@ db_params = {
     'password': os.getenv('DB_PASSWORD'),
 }
 
+MODEL_ROWS_LIST = [5, 10, 20, 50]
+TRAIN_TABLE_COUNT = 10000
+TEST_TABLE_COUNT = -1  # as much as possible
+BASE_PATH_DATA = 'src/data/'
+TRAIN_DATASOURCE = 'gittables-parquet'
+TEST_DATASOURCE = 'gittables-parquet'
+TRAIN_TIME = 3 * 60 * 60  # 3 hours
+SCORING_STRATEGIES = [
+    [['recall', 'precision'], [recall, precision]],
+    # [['recall', 'recall', 'precision'], [recall, recall, precision]]
+]
+
 
 def main():
-    setup_logging()
-    # download_dataset()
-    speed_test()
-    # testcase_1(nrows_iter=[5, 10, 20], test_table_count=1000)
+    TRAIN_MODEL = True  # ! training has to be seperate, otherwise logging will not work
+    if TRAIN_MODEL:
+        testing.prepare_and_train(row_count_iter=MODEL_ROWS_LIST,
+                                  train_table_count=TRAIN_TABLE_COUNT,
+                                  data_path=BASE_PATH_DATA + TRAIN_DATASOURCE,
+                                  train_envenly=False,
+                                  scoring_strategies=SCORING_STRATEGIES,
+                                  train_time=TRAIN_TIME
+                                  )
+    else:
+        setup_logging(log_to_file=True, level=logging.INFO)
+        # download_dataset()
+        # dataset_info()
+        # logger.setLevel(logging.DEBUG)
+        # speed_test()
+        # logger.setLevel(logging.INFO)
+        # speed_test_to_tex()
+        correctness_test(log_false_guesses=True)
+        # correctness_test_to_tex()
 
 
 def speed_test():
@@ -70,51 +97,32 @@ def speed_test():
                        )
 
 
-def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False, log_false_guesses: bool = False, skip_tables: int = -1):
+def correctness_test(log_false_guesses: bool = False, skip_tables: int = TRAIN_TABLE_COUNT):
     """Train and test models which look at nrows rows for their prediction.
 
     Args:
         nrows_iter (Iterable[int]): A model will be trained/tested for each item in the Iterable.
         train_model (bool, optional): Only train the models if True. Defaults to False.
     """
-    logger.info("Started Testcase 1")
-    scoring_strategies = [
-        [['recall', 'precision'], [recall, precision]],
-        # [['recall', 'recall', 'precision'], [recall, recall, precision]]
-    ]
-
-    TRAIN_TABLE_COUNT = 10000
-    TRAIN_DATASOURCE = 'gittables'
-    TEST_DATASOURCE = 'gittables-parquet'
-    TRAIN_TIME = 10800  # 3 hours
     MIN_ROWS = 100
     MIN_COLS = 3
     RESULT_PATH = "src/result/correctness"
-
-    if train_model:
-        logger.info("Started training the models")
-        testing.prepare_and_train(row_count_iter=nrows_iter,
-                                  train_table_count=TRAIN_TABLE_COUNT,
-                                  data_path=f'src/data/{TRAIN_DATASOURCE}',
-                                  train_envenly=False,
-                                  scoring_strategies=scoring_strategies,
-                                  train_time=TRAIN_TIME)
+    logger.info("Started the correctness test")
     if log_false_guesses:
-        rmtree('src/result/correctness/false_pos', ignore_errors=True)
-        rmtree('src/result/correctness/false_neg', ignore_errors=True)
-    for nrows in nrows_iter:
+        rmtree(f'{RESULT_PATH}/false_pos', ignore_errors=True)
+        rmtree(f'{RESULT_PATH}/false_neg', ignore_errors=True)
+    for nrows in MODEL_ROWS_LIST:
         result_path_long = f"{RESULT_PATH}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
         Path(result_path_long).mkdir(parents=True, exist_ok=True)
-        logger.info("Testing model with %s rows", nrows)
         testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{TRAIN_TABLE_COUNT}_tables/{TRAIN_DATASOURCE}/{int(TRAIN_TIME / 60)}minutes/recall_precision.pickle',
-                           nrows=nrows,
-                           input_path=f'src/data/{TEST_DATASOURCE}/',
+                           model_rows=nrows,
+                           input_path=BASE_PATH_DATA + TEST_DATASOURCE,
                            output_path=f'{result_path_long}/{nrows}rows.csv',
                            files_per_dir=-1,
                            skip_tables=skip_tables,
                            use_small_tables=True,
                            speed_test=False,
-                           max_files=test_table_count,
+                           max_files=TEST_TABLE_COUNT,
                            min_rows=MIN_ROWS,
                            min_cols=MIN_COLS,
                            log_false_guesses=log_false_guesses
