@@ -87,7 +87,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
     train_datasource = 'gittables'
     test_datasource = 'gittables-parquet'
     train_time = 10800  # 3 hours
-    result_path = "src/result"
+    result_path = "src/result/correctness"
     result_path_long = f"{result_path}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
     Path(result_path_long).mkdir(parents=True, exist_ok=True)
 
@@ -105,7 +105,7 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
                            nrows=nrows,
                            input_path=f'src/data/{test_datasource}/',
                            output_path=f'{result_path_long}/{nrows}rows.csv',
-                           files_per_dir=10,
+                           files_per_dir=-1,
                            skip_tables=-1,
                            use_small_tables=True,
                            speed_test=False)
@@ -129,7 +129,6 @@ def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables
                             out_path=f"{out_path}{filetype}-{nunique_percent}percent.csv",
                             path_to_model=f'src/data/model/{rows_model}_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
                             model_rows=rows_model,
-                            nrows=10,
                             use_small_tables=use_small_tables,
                             generate_tables=generate_tables,
                             csv=csv,
@@ -317,7 +316,7 @@ def get_example_features(max_count: int = 2, table_count: int = 1000, out_path: 
         result.to_csv(out_path, index=False, mode='a', header=False)
 
 
-def speed_test_to_csv(input_path: str = 'src/result/speed_random-int',):
+def speed_test_to_tex(input_path: str = 'src/result/speed_random-int',):
     tmp_path = '/tmp/thesis-tmp'
     keep_columns = ['Rows', 'Columns', 'ML: Loading', 'ML: Compute Time', 'ML: Loading',
                     'ML: Validation Time', 'ML: Total', 'Naive: Loading', 'Naive: Compute Time', 'Naive: Total']

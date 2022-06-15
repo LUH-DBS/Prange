@@ -98,6 +98,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             load_time2 += timer()
             # skip this table if it is smaller than necessary
             if len(table) <= min_rows:
+                logger.debug("Table to small, aborting")
                 counter -= 1
                 continue
             # confirm the guess of the model
@@ -353,7 +354,7 @@ def generate_random_int_dataframe(nrows: int, ncols: int, nonunique_percent: int
     return pd.DataFrame(pd.concat([unique_cols, nonunique_cols], axis=1, join='inner'))
 
 
-def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, nrows: int, use_small_tables: bool, nonunique_percent: int, csv: bool = False, generate_tables: bool = True) -> None:
+def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, use_small_tables: bool, nonunique_percent: int, csv: bool = False, generate_tables: bool = True) -> None:
     path = 'src/data/generated/'
     if exists(path) and generate_tables:
         rmtree(path)
