@@ -3,6 +3,7 @@
 import sys
 from typing import Iterable
 import pandas as pd
+import numpy as np
 
 from datasets.sql import csv_cache
 import logging
@@ -86,13 +87,16 @@ def find_unique_columns_in_table_with_panda(table: pd.DataFrame) -> list[int]:
 
 
 def is_unique_column_sorted(column: pd.Series) -> bool:
+    def is_nan(x):
+        return (x is np.nan or x != x)
     sorted_col = column.to_list()
     try:
-        sorted_col.sort()
+        sorted_col = sorted(sorted_col, key=lambda x: float(
+            '-inf') if is_nan(x) else x)
     except TypeError as e:
         logger.common_error(f"TypeError: {e}")
         return False
-    for i in range(1, len(column)):
+    for i in range(1, len(sorted_col)):
         if sorted_col[i-1] == sorted_col[i]:
             return False
     return True
