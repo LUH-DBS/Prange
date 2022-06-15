@@ -97,6 +97,9 @@ def is_unique_column_sorted(column: pd.Series) -> bool:
         logger.common_error(f"TypeError: {e}")
         return False
     for i in range(1, len(sorted_col)):
+        # use this code to recognize tables containing a single NaN as not unique
+        if is_nan(sorted_col[i-1]):
+            return False
         if sorted_col[i-1] == sorted_col[i]:
             return False
     return True

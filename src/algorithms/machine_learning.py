@@ -84,12 +84,11 @@ def prepare_column(column: pd.Series) -> pd.DataFrame:
     for value in column.values:
         if value == None or value == np.NaN:
             if none_value:
-                print(column.values)
                 return pd.DataFrame([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]], columns=header, index=[column.name])
             else:
                 none_value = True
 
-    # if this is commented out, columns containing NaN will never be recognized as sorted
+    # use this code to recognize tables containing a single NaN as sorted (if the rest is sorted)
     # if none_value:
     #     column = column.copy().dropna()
 
