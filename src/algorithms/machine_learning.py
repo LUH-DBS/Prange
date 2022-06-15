@@ -12,7 +12,7 @@ import numpy as np
 
 # from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier as AutoSklearnClassifier
-
+from autosklearn.metrics import recall
 from datasets.sql import csv_cache
 from algorithms import naive_algorithm
 import logging
@@ -224,11 +224,11 @@ def train(train_csv: str, scoring_functions: list, save_path: str = "", train_ti
 
     automl = AutoSklearnClassifier(
         time_left_for_this_task=train_time,
+        metric=recall,
         scoring_functions=scoring_functions,
         memory_limit=200000,  # 200GB
     )
-    # automl.fit(X_train, y_train, dataset_name="Test")
-    automl.fit(X, y, dataset_name="Test")
+    automl.fit(X, y)
     logger.info("Finished training")
 
     if save_path != "":
