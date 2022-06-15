@@ -70,7 +70,7 @@ def speed_test():
                        )
 
 
-def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
+def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False, log_false_guesses: bool = False):
     """Train and test models which look at nrows rows for their prediction.
 
     Args:
@@ -101,6 +101,9 @@ def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_mod
                                   train_envenly=False,
                                   scoring_strategies=scoring_strategies,
                                   train_time=TRAIN_TIME)
+    if log_false_guesses:
+        rmtree('src/result/correctness/false_pos', ignore_errors=True)
+        rmtree('src/result/correctness/false_neg', ignore_errors=True)
     for nrows in nrows_iter:
         logger.info("Testing model with %s rows", nrows)
         testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{TRAIN_TABLE_COUNT}_tables/{TRAIN_DATASOURCE}/{int(TRAIN_TIME / 60)}minutes/recall_precision.pickle',
@@ -113,7 +116,8 @@ def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_mod
                            speed_test=False,
                            max_files=test_table_count,
                            min_rows=MIN_ROWS,
-                           min_cols=MIN_COLS
+                           min_cols=MIN_COLS,
+                           log_false_guesses=log_false_guesses
                            )
     logger.info("Finished Testcase 1")
 

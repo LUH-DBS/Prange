@@ -24,7 +24,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1, min_cols: int = -1) -> None:
+def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1, min_cols: int = -1, log_false_guesses: bool = False) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -155,16 +155,29 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                     table)
                 computing_time += timer()
                 total_time += timer()
-                false_neg = [
-                    i for i in unique_columns if i not in ml_dict[table_path]['unique_columns']]
-                if len(false_neg) > 0:
-                    logger.error(
-                        "False Negativ (column '{}')".format("', '".join(table.columns[false_neg])))
-                    log_path = "src/result/correctness/false_neg/"
-                    Path(log_path).mkdir(parents=True, exist_ok=True)
-                    false_neg_table = table[table.columns[false_neg]]
-                    false_neg_table.to_csv(
-                        log_path + table_path.rsplit('/', 1)[1] + '.csv')
+                if log_false_guesses:
+                    # log false negatives
+                    false_neg = [
+                        i for i in unique_columns if i not in ml_dict[table_path]['unique_columns']]
+                    if len(false_neg) > 0:
+                        logger.error(
+                            "False Negativ (column '{}')".format("', '".join(table.columns[false_neg])))
+                        log_path = f"src/result/correctness/false_neg/{nrows}rows/"
+                        Path(log_path).mkdir(parents=True, exist_ok=True)
+                        false_neg_table = table[table.columns[false_neg]]
+                        false_neg_table.to_csv(
+                            log_path + table_path.rsplit('/', 1)[1] + '.csv')
+                    # log false positives
+                    false_pos = [
+                        i for i in ml_dict[table_path]['unique_columns'] if i not in unique_columns]
+                    if len(false_pos) > 0:
+                        logger.debug(
+                            "False Positiv (column '{}')".format("', '".join(table.columns[false_pos])))
+                        log_path = f"src/result/correctness/false_pos/{nrows}rows/"
+                        Path(log_path).mkdir(parents=True, exist_ok=True)
+                        false_pos_table = table[table.columns[false_pos]]
+                        false_pos_table.to_csv(
+                            log_path + table_path.rsplit('/', 1)[1] + '.csv')
                 naive_dict[table_path] = {
                     'unique_columns': unique_columns,
                     'load_time': load_time,
@@ -429,5 +442,6 @@ def correctness_summary(input_dir: str, output_file: str):
         result.append([model_name, *avg_rows.values,
                        *sum_cols.values, *stats])  # , *times.values
 
-    result = pd.DataFrame(result, columns=summary_columns)
+    result = pd.DataFrame(result, columns=summary_columns).sort_values(
+        summary_columns[0])
     result.to_csv(output_file, index=False)

@@ -11,6 +11,7 @@ test.csv
 /tmp.py
 /src/result/correctness/long/
 /src/result/correctness/false_neg/
+/src/result/correctness/false_pos/
 /src/log/
 ## Core latex/pdflatex auxiliary files:
 *.aux
