@@ -8,6 +8,7 @@ import pickle
 
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_string_dtype, is_bool_dtype
+import numpy as np
 
 # from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier as AutoSklearnClassifier
@@ -63,7 +64,7 @@ def prepare_table(table: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
+def prepare_column(column: pd.Series) -> pd.DataFrame:
     """Extract the features of a single column.
 
     Args:
@@ -79,6 +80,19 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
     if column.duplicated().any():
         # 10
         return pd.DataFrame([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]], columns=header, index=[column.name])
+    none_value = False
+    for value in column.values:
+        if value == None or value == np.NaN:
+            if none_value:
+                print(column.values)
+                return pd.DataFrame([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]], columns=header, index=[column.name])
+            else:
+                none_value = True
+
+    # if this is commented out, columns containing NaN will never be recognized as sorted
+    # if none_value:
+    #     column = column.copy().dropna()
+
     # duplicate = 0, data type and sorted will be changed
     result = [0, 0, 0]
     # check if entries are sorted
@@ -90,11 +104,9 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
     except TypeError:
         logger.common_error(
             f"Column {column.name} does not just include strings (TypeError)")
-        pass
     except KeyError as error:
         logger.common_error(
             f"KeyError with column {column.name}")
-        pass
     # handle integer and float
     if is_bool_dtype(column):
         result[1] = 3
