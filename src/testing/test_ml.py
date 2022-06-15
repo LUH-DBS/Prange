@@ -24,7 +24,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1) -> None:
+def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1, min_cols: int = -1) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -37,6 +37,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         files_per_dir (int, optional): Use only this many files for each subdirectory of the datasource. Defaults to -1.
         skip_tables (int, optional): Skip the first `skip_tables` tables. Defaults to -1.
         min_rows (int, optional): Skip a table if it has less than `min_rows` rows. Defaults to -1.
+        min_cols (int, optional): Skip a table if it has less than `min_cols` columns. Defaults to -1.
 
     """
     logger.info("Started testing of a model with %s rows", nrows)
@@ -80,6 +81,11 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                 # use only the first rows for the model
                 small_table = table.head(nrows)
             load_time += timer()
+            # skip this table if it is smaller than necessary
+            if len(small_table.columns) < min_cols:
+                logger.debug("Table to small (columns), aborting")
+                counter -= 1
+                continue
             # use the model
             computing_time = -timer()
             # use the model to guess the unique columns
@@ -97,8 +103,8 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                 table = table[table.columns[unique_columns]]
             load_time2 += timer()
             # skip this table if it is smaller than necessary
-            if len(table) <= min_rows:
-                logger.debug("Table to small, aborting")
+            if len(table) < min_rows:
+                logger.debug("Table to small (rows), aborting")
                 counter -= 1
                 continue
             # confirm the guess of the model

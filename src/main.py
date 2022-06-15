@@ -70,7 +70,7 @@ def speed_test():
                        )
 
 
-def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
+def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False):
     """Train and test models which look at nrows rows for their prediction.
 
     Args:
@@ -83,32 +83,38 @@ def testcase_1(nrows_iter: Iterable[int], test_table_count: int, train_model: bo
         # [['recall', 'recall', 'precision'], [recall, recall, precision]]
     ]
 
-    train_table_count = 10000
-    train_datasource = 'gittables'
-    test_datasource = 'gittables-parquet'
-    train_time = 10800  # 3 hours
-    result_path = "src/result/correctness"
-    result_path_long = f"{result_path}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
-    Path(result_path_long).mkdir(parents=True, exist_ok=True)
+    TRAIN_TABLE_COUNT = 10000
+    TRAIN_DATASOURCE = 'gittables'
+    TEST_DATASOURCE = 'gittables-parquet'
+    TRAIN_TIME = 10800  # 3 hours
+    RESULT_PATH = "src/result/correctness"
+    RESULT_PATH_LONG = f"{RESULT_PATH}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
+    MIN_ROWS = 100
+    MIN_COLS = 3
+    Path(RESULT_PATH_LONG).mkdir(parents=True, exist_ok=True)
 
     if train_model:
         logger.info("Started training the models")
         testing.prepare_and_train(row_count_iter=nrows_iter,
-                                  train_table_count=train_table_count,
-                                  data_path=f'src/data/{train_datasource}',
+                                  train_table_count=TRAIN_TABLE_COUNT,
+                                  data_path=f'src/data/{TRAIN_DATASOURCE}',
                                   train_envenly=False,
                                   scoring_strategies=scoring_strategies,
-                                  train_time=train_time)
+                                  train_time=TRAIN_TIME)
     for nrows in nrows_iter:
         logger.info("Testing model with %s rows", nrows)
-        testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{train_table_count}_tables/{train_datasource}/{int(train_time / 60)}minutes/recall_precision.pickle',
+        testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{TRAIN_TABLE_COUNT}_tables/{TRAIN_DATASOURCE}/{int(TRAIN_TIME / 60)}minutes/recall_precision.pickle',
                            nrows=nrows,
-                           input_path=f'src/data/{test_datasource}/',
-                           output_path=f'{result_path_long}/{nrows}rows.csv',
+                           input_path=f'src/data/{TEST_DATASOURCE}/',
+                           output_path=f'{RESULT_PATH_LONG}/{nrows}rows.csv',
                            files_per_dir=-1,
                            skip_tables=-1,
                            use_small_tables=True,
-                           speed_test=False)
+                           speed_test=False,
+                           max_files=test_table_count,
+                           min_rows=MIN_ROWS,
+                           min_cols=MIN_COLS
+                           )
     logger.info("Finished Testcase 1")
 
 
