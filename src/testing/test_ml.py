@@ -5,7 +5,7 @@ import pickle
 import pandas as pd
 import numpy as np
 from pyarrow.lib import ArrowInvalid
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, Tuple
 from pathlib import Path
 from shutil import rmtree
 from genericpath import exists
@@ -212,6 +212,18 @@ def _make_row(speed: bool, ml_dict, naive_dict, table_path: str, table: pd.DataF
                 false_neg += 1
             else:
                 true_neg += 1
+    (accuracy, precision, recall, f1) = _compute_statistics(
+        true_pos, true_neg, false_pos, false_neg, table_path)
+    if speed:
+        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+    else:
+        return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
+                recall, f1, ml_values['computing_time'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+        # return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
+        #         recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+
+
+def _compute_statistics(true_pos: int, true_neg: int, false_pos: int, false_neg: int, table_path: str = "") -> Tuple[float, float, float, float]:
     try:
         accuracy = (true_pos + true_neg) / \
             (true_pos + true_neg + false_pos + false_neg)
@@ -239,13 +251,7 @@ def _make_row(speed: bool, ml_dict, naive_dict, table_path: str, table: pd.DataF
     except ZeroDivisionError:
         logger.error(f"ZeroDivisionError with file {table_path} (f1)")
         f1 = -1
-    if speed:
-        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
-    else:
-        return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
-                recall, f1, ml_values['computing_time'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
-        # return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
-        #         recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+    return (accuracy, precision, recall, f1)
 
 
 def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, files_per_dir: int = -1):
@@ -394,3 +400,34 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
                use_small_tables=use_small_tables,
                speed_test=True
                )
+
+
+def correctness_summary(input_dir: str, output_file: str):
+    Path(output_file.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
+    summary_columns = ['Model input size', 'Avg. rows', 'Columns', 'Accuracy', 'Precision', 'Recall',
+                       'F1']  # , 'ML Time', 'Naive Time', 'True Pos', 'True Neg', 'False Pos', 'False Neg'
+    result = []
+    for tablepath in local.traverse_directory_path(input_dir):
+        table = local.get_table(tablepath)
+        avg_rows = table[['Rows']].sum() / table[['Rows']].count()
+        sum_cols = table[['Columns']].sum()
+        sum_results = table[['True Pos', 'True Neg',
+                             'False Pos', 'False Neg']].sum()
+        stats = _compute_statistics(*sum_results.values)
+        times = table[['ML: Total', 'Naive: Total']].sum()
+        match tablepath.rsplit('/', 1)[1]:
+            case x if '5rows' in x:
+                model_name = 5
+            case x if '10rows' in x:
+                model_name = 10
+            case x if '20rows' in x:
+                model_name = 20
+            case x if '50rows' in x:
+                model_name = 50
+            case _:
+                raise NotImplementedError("This model is not implemented")
+        result.append([model_name, *avg_rows.values,
+                       *sum_cols.values, *stats])  # , *times.values
+
+    result = pd.DataFrame(result, columns=summary_columns)
+    result.to_csv(output_file, index=False)
