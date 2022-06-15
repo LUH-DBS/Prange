@@ -47,6 +47,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
     ml_dict = {}
     naive_dict = {}
     counter = 0
+    skipcounter = 0
     if 'csv' in input_path:
         use_small_tables = False
     elif use_small_tables:
@@ -60,7 +61,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
                    "Recall", "F1", "ML: Compute Time", "ML: Validation Time", "ML: Total", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
-    for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
+    for table_path in local.traverse_directory_path(input_path, files_per_dir=files_per_dir):
         if max_files > 0 and counter >= max_files:
             break
         if counter % 100 == 0 and counter != 0:
@@ -105,6 +106,10 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             # skip this table if it is smaller than necessary
             if len(table) < min_rows:
                 logger.debug("Table to small (rows), aborting")
+                counter -= 1
+                continue
+            if skipcounter < skip_tables:
+                skipcounter += 1
                 counter -= 1
                 continue
             # confirm the guess of the model

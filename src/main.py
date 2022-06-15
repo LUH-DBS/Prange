@@ -70,7 +70,7 @@ def speed_test():
                        )
 
 
-def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False, log_false_guesses: bool = False):
+def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_model: bool = False, log_false_guesses: bool = False, skip_tables: int = -1):
     """Train and test models which look at nrows rows for their prediction.
 
     Args:
@@ -87,11 +87,9 @@ def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_mod
     TRAIN_DATASOURCE = 'gittables'
     TEST_DATASOURCE = 'gittables-parquet'
     TRAIN_TIME = 10800  # 3 hours
-    RESULT_PATH = "src/result/correctness"
-    RESULT_PATH_LONG = f"{RESULT_PATH}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
     MIN_ROWS = 100
     MIN_COLS = 3
-    Path(RESULT_PATH_LONG).mkdir(parents=True, exist_ok=True)
+    RESULT_PATH = "src/result/correctness"
 
     if train_model:
         logger.info("Started training the models")
@@ -105,13 +103,15 @@ def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_mod
         rmtree('src/result/correctness/false_pos', ignore_errors=True)
         rmtree('src/result/correctness/false_neg', ignore_errors=True)
     for nrows in nrows_iter:
+        result_path_long = f"{RESULT_PATH}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
+        Path(result_path_long).mkdir(parents=True, exist_ok=True)
         logger.info("Testing model with %s rows", nrows)
         testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{TRAIN_TABLE_COUNT}_tables/{TRAIN_DATASOURCE}/{int(TRAIN_TIME / 60)}minutes/recall_precision.pickle',
                            nrows=nrows,
                            input_path=f'src/data/{TEST_DATASOURCE}/',
-                           output_path=f'{RESULT_PATH_LONG}/{nrows}rows.csv',
+                           output_path=f'{result_path_long}/{nrows}rows.csv',
                            files_per_dir=-1,
-                           skip_tables=-1,
+                           skip_tables=skip_tables,
                            use_small_tables=True,
                            speed_test=False,
                            max_files=test_table_count,
@@ -119,6 +119,8 @@ def correctness_test(nrows_iter: Iterable[int], test_table_count: int, train_mod
                            min_cols=MIN_COLS,
                            log_false_guesses=log_false_guesses
                            )
+        testing.correctness_summary(
+            input_dir=result_path_long, output_file=f'{RESULT_PATH}/summary/{nrows}rows/summary-correctness.csv')
     logger.info("Finished Testcase 1")
 
 
