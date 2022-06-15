@@ -149,6 +149,16 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                     table)
                 computing_time += timer()
                 total_time += timer()
+                false_neg = [
+                    i for i in unique_columns if i not in ml_dict[table_path]['unique_columns']]
+                if len(false_neg) > 0:
+                    logger.error(
+                        "False Negativ (column '{}')".format("', '".join(table.columns[false_neg])))
+                    log_path = "src/result/correctness/false_neg/"
+                    Path(log_path).mkdir(parents=True, exist_ok=True)
+                    false_neg_table = table[table.columns[false_neg]]
+                    false_neg_table.to_csv(
+                        log_path + table_path.rsplit('/', 1)[1] + '.csv')
                 naive_dict[table_path] = {
                     'unique_columns': unique_columns,
                     'load_time': load_time,
