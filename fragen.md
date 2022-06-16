@@ -2,56 +2,13 @@
 
 # Fragen und Themen zur Bachelorarbeit
 
-## TODO
-
-- Programm überarbeiten
-  - Ausschließen, dass Tabellen gecached werden ✅
-  - Vorteil von parquet Dateien prüfen (Werden tatsächlich nur die ersten x Zeilen gelesen?) ✅
-  - Überprüfung des ML Ergebnisses auf naive Weise mit machen und messen ✅
-  - Wird beim naiven Algorithmus parallelisiert? ✅
-    - Nur das Model benutzt mehrere (alle) Threads
-- Tabellenverzeichnis fertig machen
-
-## Ergebnisse
-
-Ergebnisse nach zwei Minuten Training mit Spalten aus 900 Tabellen (100-999 aus gittables).
-Die nicht trivialen Spalten (keine doppelten Werte in den ersten x Zeilen) stammen aus 500 Tabellen (1000-1499 aus gittables).
-
-- 5 Spalten
-  - Accuracy score: 0.9703825586178527
-  - Non trivial accuracy score: 0.9196687370600414
-- 10 Spalten
-  - Accuracy score: 0.9831345125462773
-  - Non trivial accuracy score: 0.9569767441860465
-- 20 Spalten
-  - Accuracy score: 0.9987659399424106
-  - Non trivial accuracy score: 0.9955357142857143
-- 50 Spalten
-  - Accuracy score: 0.9995886466474702
-  - Non trivial accuracy score: 1.0
-
-| Spalten | Accuracy | n.t. Accuracy |
-| ------- | -------- | ------------- |
-| 5       | 97.04%   | 91.97%        |
-| 10      | 98.31%   | 95.70%        |
-| 20      | 99.88%   | 99.55%        |
-| 50      | 99.96%   | 100%          |
-
-## Fragen
-
-## Ideen
-
-- Tabellen selber in verschiedenen Größen für Laufzeittests generieren
-
-  - auch verschiedene row group Größen bei den .parquet Dateien ausprobieren
-
-- automatisierte Tests
-- Training und Test mit 5, 10, 20 Spalten
-- Ergebnis CSV mit table_id, accuracy, precision, Anzahl Zeilen, Anzahl Spalten
-  - evtl. Datentypen von Spalten
-  - evtl. Zeit Model und Zeit naiver Algorithmus
-  - evtl. eine CSV pro Tabellenkategorie
-- zusätzlich Gesamtübersicht mit accuracy und precision
+- bei der Angabe von false positives etc. die Werte vor der Validation nehmen? Ansonsten gibt es keine false positives mehr -> ja
+- Meinung zu mit einem None/NaN ist eine Spalte nicht mehr unique, da sie praktisch nicht mehr als primary key verwendet werden kann
+  - evtl. noch einen Absatz dazu schreiben was sich ändern würde wenn es anders wäre
+- Ist section Hardware nötig/so ausreichend?
+  - Abschnitt Experiment Setup Section mit Hardware, Software, Metriken (Accuracy, Precision etc.)
+- Git Repo verlinken
+- Auch den eigenen Code zur detaillierten Erklärung verwenden, insbesondere in Kapitel Proposed Method
 
 ## Anmerkungen
 
