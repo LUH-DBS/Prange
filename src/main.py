@@ -35,8 +35,9 @@ TEST_DATASOURCE = 'gittables-parquet'
 TRAIN_TIME = 3 * 60 * 60  # 3 hours
 SCORING_STRATEGIES = [
     [['recall', 'precision'], [recall, precision]],
-    # [['recall', 'recall', 'precision'], [recall, recall, precision]]
 ]
+MIN_ROWS = 100
+MIN_COLS = 3
 
 
 def main():
@@ -107,31 +108,33 @@ def correctness_test(log_false_guesses: bool = False, skip_tables: int = TRAIN_T
         nrows_iter (Iterable[int]): A model will be trained/tested for each item in the Iterable.
         train_model (bool, optional): Only train the models if True. Defaults to False.
     """
-    MIN_ROWS = 100
-    MIN_COLS = 3
     RESULT_PATH = "src/result/correctness"
     logger.info("Started the correctness test")
     if log_false_guesses:
         rmtree(f'{RESULT_PATH}/false_pos', ignore_errors=True)
         rmtree(f'{RESULT_PATH}/false_neg', ignore_errors=True)
-    for nrows in MODEL_ROWS_LIST:
-        result_path_long = f"{RESULT_PATH}/long/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
-        Path(result_path_long).mkdir(parents=True, exist_ok=True)
-        testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{TRAIN_TABLE_COUNT}_tables/{TRAIN_DATASOURCE}/{int(TRAIN_TIME / 60)}minutes/recall_precision.pickle',
-                           model_rows=nrows,
-                           input_path=BASE_PATH_DATA + TEST_DATASOURCE,
-                           output_path=f'{result_path_long}/{nrows}rows.csv',
-                           files_per_dir=-1,
-                           skip_tables=skip_tables,
-                           use_small_tables=True,
-                           speed_test=False,
-                           max_files=TEST_TABLE_COUNT,
-                           min_rows=MIN_ROWS,
-                           min_cols=MIN_COLS,
-                           log_false_guesses=log_false_guesses
-                           )
-        testing.correctness_summary(
-            input_dir=result_path_long, output_file=f'{RESULT_PATH}/summary/{nrows}rows/summary-correctness.csv')
+    for strategy in SCORING_STRATEGIES:
+        strategy = '_'.join(strategy[0])
+        for nrows in MODEL_ROWS_LIST:
+            logger.info(
+                f"Correctness Testing with a {nrows}rows model with strategy {strategy}")
+            result_path_long = f"{RESULT_PATH}/long/{nrows}rows"
+            Path(result_path_long).mkdir(parents=True, exist_ok=True)
+            testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{TRAIN_TABLE_COUNT}_tables/{TRAIN_DATASOURCE}/{int(TRAIN_TIME / 60)}minutes/{strategy}.pickle',
+                               model_rows=nrows,
+                               input_path=BASE_PATH_DATA + TEST_DATASOURCE,
+                               output_path=f'{result_path_long}/{strategy}.csv',
+                               files_per_dir=-1,
+                               skip_tables=skip_tables,
+                               use_small_tables=True,
+                               speed_test=False,
+                               max_files=TEST_TABLE_COUNT,
+                               min_rows=MIN_ROWS,
+                               min_cols=MIN_COLS,
+                               log_false_guesses=log_false_guesses
+                               )
+            testing.correctness_summary(
+                input_dir=result_path_long, output_file=f'{RESULT_PATH}/summary/{nrows}rows/summary-{strategy}.csv')
     logger.info("Finished Testcase 1")
 
 

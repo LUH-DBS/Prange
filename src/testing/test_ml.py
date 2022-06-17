@@ -11,6 +11,7 @@ from shutil import rmtree
 from genericpath import exists
 import csv
 from timeit import default_timer as timer
+from datetime import datetime
 
 from autosklearn.classification import AutoSklearnClassifier
 
@@ -40,7 +41,6 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
         min_cols (int, optional): Skip a table if it has less than `min_cols` columns. Defaults to -1.
 
     """
-    logger.info("Started testing of a model with %s rows", model_rows)
     with open(path_to_model, 'rb') as file:
         ml = pickle.load(file)
     table_path_list: list[str] = []
@@ -48,6 +48,8 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
     naive_dict = {}
     counter = 0
     skipcounter = 0
+    abortcounter = 0
+    TIME_STRING = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     if 'csv' in input_path:
         use_small_tables = False
     elif use_small_tables:
@@ -62,6 +64,45 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
                    "Recall", "F1", "ML: Compute Time", "ML: Validation Time", "ML: Total", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
     for table_path in local.traverse_directory_path(input_path, files_per_dir=files_per_dir):
+        try:
+            table = local.get_table(table_path)
+        except pd.errors.ParserError as e:
+            counter -= 1
+            logger.common_error(
+                "ParserError with file %s", table_path)
+            continue
+        except ArrowInvalid as error:
+            counter -= 1
+            logger.common_error(
+                "ArrowInvalid error with file %s", table_path)
+            continue
+        except UnicodeDecodeError:
+            counter -= 1
+            logger.common_error(
+                "UnicodeDecodeError with file %s", table_path)
+            continue
+        # skip this table if it is smaller than necessary
+        if len(table.columns) < min_cols:
+            # logger.debug("Table to small (columns), aborting")
+            abortcounter += 1
+            continue
+        # skip this table if it is smaller than necessary
+        if len(table) < min_rows:
+            # logger.debug("Table to small (rows), aborting")
+            abortcounter += 1
+            continue
+        if skipcounter < skip_tables:
+            skipcounter += 1
+            continue
+        if max_files > -1 and counter >= max_files:
+            break
+        counter += 1
+        table_path_list.append(table_path)
+    logger.info(
+        f"Aborted {abortcounter} too small tables and skipped {skipcounter} tables to get to {counter} tables.")
+    counter = 0
+    logger.info("Started testing of a model with %s rows", model_rows)
+    for table_path in table_path_list:
         if max_files > 0 and counter >= max_files:
             break
         if counter % 100 == 0 and counter != 0:
@@ -82,11 +123,6 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
                 # use only the first rows for the model
                 small_table = table.head(model_rows)
             load_time += timer()
-            # skip this table if it is smaller than necessary
-            if len(small_table.columns) < min_cols:
-                logger.debug("Table to small (columns), aborting")
-                counter -= 1
-                continue
             # use the model
             computing_time = -timer()
             # use the model to guess the unique columns
@@ -103,15 +139,6 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
                 # use only the columns which are unique according to the model for validation
                 table = table[table.columns[unique_columns]]
             load_time2 += timer()
-            # skip this table if it is smaller than necessary
-            if len(table) < min_rows:
-                logger.debug("Table to small (rows), aborting")
-                counter -= 1
-                continue
-            if skipcounter < skip_tables:
-                skipcounter += 1
-                counter -= 1
-                continue
             # confirm the guess of the model
             confirmed_time = -timer()
             validated_uniques = naive_algorithm.find_unique_columns_in_table(
@@ -127,7 +154,6 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
                 'confirmed_time': confirmed_time,
                 'total_time': total_time
             }
-            table_path_list.append(table_path)
         except pd.errors.ParserError as e:
             counter -= 1
             logger.common_error(
@@ -146,6 +172,7 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
     with open(output_path, 'a') as file:
         csv_file = csv.writer(file)
         counter = 0
+        logger.info("Started testing of the naive algorithm")
         for table_path in table_path_list:
             counter += 1
             logger.debug(
@@ -167,7 +194,7 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
                     if len(false_neg) > 0:
                         logger.error(
                             "False Negativ (column '{}')".format("', '".join(table.columns[false_neg])))
-                        log_path = f"src/result/correctness/false_neg/{model_rows}rows/"
+                        log_path = f"src/result/correctness/false_neg/{TIME_STRING}/{model_rows}rows/"
                         Path(log_path).mkdir(parents=True, exist_ok=True)
                         false_neg_table = table[table.columns[false_neg]]
                         false_neg_table.to_csv(
@@ -178,7 +205,7 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
                     if len(false_pos) > 0:
                         logger.debug(
                             "False Positiv (column '{}')".format("', '".join(table.columns[false_pos])))
-                        log_path = f"src/result/correctness/false_pos/{model_rows}rows/"
+                        log_path = f"src/result/correctness/false_pos/{TIME_STRING}/{model_rows}rows/"
                         Path(log_path).mkdir(parents=True, exist_ok=True)
                         false_pos_table = table[table.columns[false_pos]]
                         false_pos_table.to_csv(
@@ -425,7 +452,7 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
 
 def correctness_summary(input_dir: str, output_file: str):
     Path(output_file.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
-    summary_columns = ['Model input size', 'Avg. rows', 'Columns', 'Accuracy', 'Precision', 'Recall',
+    summary_columns = ['File Name', 'Model input size', 'Avg. rows', 'Columns', 'Accuracy', 'Precision', 'Recall',
                        'F1']  # , 'ML Time', 'Naive Time', 'True Pos', 'True Neg', 'False Pos', 'False Neg'
     result = []
     for tablepath in local.traverse_directory_path(input_dir):
@@ -436,7 +463,7 @@ def correctness_summary(input_dir: str, output_file: str):
                              'False Pos', 'False Neg']].sum()
         stats = _compute_statistics(*sum_results.values)
         times = table[['ML: Total', 'Naive: Total']].sum()
-        match tablepath.rsplit('/', 1)[1]:
+        match tablepath:
             case x if '5rows' in x:
                 model_name = 5
             case x if '10rows' in x:
@@ -447,7 +474,7 @@ def correctness_summary(input_dir: str, output_file: str):
                 model_name = 50
             case _:
                 raise NotImplementedError("This model is not implemented")
-        result.append([model_name, *avg_rows.values,
+        result.append([tablepath.rsplit('/', 1)[1], model_name, *avg_rows.values,
                        *sum_cols.values, *stats])  # , *times.values
 
     result = pd.DataFrame(result, columns=summary_columns).sort_values(
