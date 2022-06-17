@@ -42,12 +42,15 @@ SCORING_STRATEGIES = [
 def main():
     TRAIN_MODEL = True  # ! training has to be seperate, otherwise logging will not work
     if TRAIN_MODEL:
+        setup_logging(log_to_file=False, level=logging.DEBUG)
         testing.prepare_and_train(row_count_iter=MODEL_ROWS_LIST,
                                   train_table_count=TRAIN_TABLE_COUNT,
                                   data_path=BASE_PATH_DATA + TRAIN_DATASOURCE,
                                   train_envenly=False,
                                   scoring_strategies=SCORING_STRATEGIES,
-                                  train_time=TRAIN_TIME
+                                  train_time=TRAIN_TIME,
+                                  min_rows=MIN_ROWS,
+                                  min_cols=MIN_COLS
                                   )
     else:
         setup_logging(log_to_file=True, level=logging.INFO)

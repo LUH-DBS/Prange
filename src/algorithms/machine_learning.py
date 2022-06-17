@@ -8,11 +8,13 @@ import pickle
 
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_string_dtype, is_bool_dtype
+from pyarrow.lib import ArrowInvalid
 import numpy as np
 
 # from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier as AutoSklearnClassifier
 from autosklearn.metrics import recall
+from datasets import local
 from datasets.sql import csv_cache
 from algorithms import naive_algorithm
 import logging
@@ -238,7 +240,7 @@ def train(train_csv: str, scoring_functions: list, save_path: str = "", train_ti
     return automl
 
 
-def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: bool, read_tables_max: int, out_path='src/training/'):
+def prepare_training_iterator(table_path_iter: Iterator[str], non_trivial: bool, read_tables_max: int, min_rows: int, min_cols: int, out_path='src/training/'):
     """Prepare a feature table for training a model.
 
     Args:
@@ -258,7 +260,32 @@ def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: b
     pd.DataFrame([], columns=["PK Candidates"]).to_csv(
         path_result, index=False)
     count = 0
-    for table in table_iter:
+    for table_path in table_path_iter:
+        try:
+            table = local.get_table(table_path)
+        except pd.errors.ParserError as e:
+            counter -= 1
+            logger.common_error(
+                "ParserError with file %s", table_path)
+            continue
+        except ArrowInvalid as error:
+            counter -= 1
+            logger.common_error(
+                "ArrowInvalid error with file %s", table_path)
+            continue
+        except UnicodeDecodeError:
+            counter -= 1
+            logger.common_error(
+                "UnicodeDecodeError with file %s", table_path)
+            continue
+        # skip this table if it is smaller than necessary
+        if len(table.columns) < min_cols:
+            # logger.debug("Table to small (columns), aborting")
+            continue
+        # skip this table if it is smaller than necessary
+        if len(table) < min_rows:
+            # logger.debug("Table to small (rows), aborting")
+            continue
         count += 1
         if read_tables_max > 0 and count > read_tables_max:
             break

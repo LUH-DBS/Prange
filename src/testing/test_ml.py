@@ -272,7 +272,7 @@ def _compute_statistics(true_pos: int, true_neg: int, false_pos: int, false_neg:
     return (accuracy, precision, recall, f1)
 
 
-def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, files_per_dir: int = -1):
+def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, min_rows: int, min_cols: int, files_per_dir: int = -1):
     """Prepare the training data. One trainingsset will be generated for each item in [row_count_iter].
 
     Args:
@@ -285,14 +285,19 @@ def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_
         logger.info("Started preparing trainingsdata from %s tables using %s rows",
                     train_table_count, row_count)
         training_csv_path = f'{BASE_PATH_TRAINING}{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-        table_iter = local.traverse_directory(
+        table_path_iter = local.traverse_directory_path(
             data_path, row_count, files_per_dir)
-        machine_learning.prepare_training_iterator(
-            table_iter, False, train_table_count, training_csv_path)
+        machine_learning.prepare_training_iterator(table_path_iter=table_path_iter,
+                                                   non_trivial=False,
+                                                   read_tables_max=train_table_count,
+                                                   out_path=training_csv_path,
+                                                   min_rows=min_rows,
+                                                   min_cols=min_cols
+                                                   )
         logger.info("Finished preparation")
 
 
-def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]], train_time: int):
+def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]], train_time: int, min_rows: int, min_cols: int):
     """Prepare and execute the training of one ml model per value of [row_count_iter] and per value of [scoring_strategies].
 
     Args:
@@ -310,7 +315,10 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
     prepare_by_rows(row_count_iter=row_count_iter,
                     train_table_count=train_table_count,
                     data_path=data_path,
-                    files_per_dir=files_per_dir)
+                    files_per_dir=files_per_dir,
+                    min_rows=min_rows,
+                    min_cols=min_cols
+                    )
     for row_count in row_count_iter:
         for strategy in scoring_strategies:
             training_csv_path = f'src/data/training/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
