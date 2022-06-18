@@ -58,7 +58,7 @@ def test_model(path_to_model: str, model_rows: int, input_path: str, output_path
     with open(output_path, 'w') as file:
         csv_file = csv.writer(file)
         if speed_test:
-            row = ["Table Name", "Rows", "Columns", "ML: Loading", "ML: Compute Time", "ML: Loading",
+            row = ["Table Name", "Rows", "Columns", "ML: Loading I", "ML: Compute Time", "ML: Loading II",
                    "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         else:
             row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
@@ -447,7 +447,7 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
                model_rows=model_rows,
                input_path=path,
                output_path=out_path,
-               files_per_dir=100000,
+               files_per_dir=-1,
                skip_tables=-1,
                use_small_tables=use_small_tables,
                speed_test=True

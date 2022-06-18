@@ -127,40 +127,60 @@ def compare_training_time(train_model: bool = False):
         # correctness_test_to_tex()
 
 
-def speed_test():
+def speed_test(train_model: bool = False):
+    model_rows_list = [5, 10, 20]
+    train_table_count = TRAIN_TABLE_COUNT
+    train_time_list = [3 * 60 * 60]
     ROW_NUMBER = 100000000
     COL_NUMBER = 10
     logger.info("Starting speed test")
     percentages = [60, 70, 80, 90]
-    for model in [5, 10, 20]:
-        for percentage in percentages:
-            # parquet, load only whats necessary
-            random_int(max_row_size=ROW_NUMBER,
-                       csv=False,
-                       use_small_tables=True,
-                       generate_tables=True,
-                       nunique_percent=percentage,
-                       rows_model=model,
-                       ncols=COL_NUMBER
-                       )
-            # parquet, load everything
-            random_int(max_row_size=ROW_NUMBER,
-                       csv=False,
-                       use_small_tables=False,
-                       generate_tables=False,
-                       nunique_percent=percentage,
-                       rows_model=model,
-                       ncols=COL_NUMBER
-                       )
-            # csv
-            random_int(max_row_size=ROW_NUMBER,
-                       csv=True,
-                       use_small_tables=False,
-                       generate_tables=True,
-                       nunique_percent=percentage,
-                       rows_model=model,
-                       ncols=COL_NUMBER
-                       )
+    if train_model:
+        setup_logging(log_to_file=False, level=logging.DEBUG)
+        testing.prepare_and_train(row_count_iter=model_rows_list,
+                                  train_table_count=train_table_count,
+                                  data_path=BASE_PATH_DATA + TRAIN_DATASOURCE,
+                                  train_envenly=False,
+                                  scoring_strategies=SCORING_STRATEGIES,
+                                  train_time_list=train_time_list,
+                                  min_rows=MIN_ROWS,
+                                  min_cols=MIN_COLS
+                                  )
+    else:
+        for scoring_strategy_name, scoring_strategy in SCORING_STRATEGIES:
+            for train_time in train_time_list:
+                for model in model_rows_list:
+                    for percentage in percentages:
+                        # parquet, load only whats necessary
+                        random_int(max_row_size=ROW_NUMBER,
+                                   csv=False,
+                                   use_small_tables=True,
+                                   generate_tables=True,
+                                   nunique_percent=percentage,
+                                   rows_model=model,
+                                   ncols=COL_NUMBER,
+                                   path_to_model=f'src/data/model/{model}_rows/{train_table_count}_tables/{TRAIN_DATASOURCE}/{int(train_time/60)}minutes/{"_".join(scoring_strategy_name)}.pickle'
+                                   )
+                        # parquet, load everything
+                        random_int(max_row_size=ROW_NUMBER,
+                                   csv=False,
+                                   use_small_tables=False,
+                                   generate_tables=False,
+                                   nunique_percent=percentage,
+                                   rows_model=model,
+                                   ncols=COL_NUMBER,
+                                   path_to_model=f'src/data/model/{model}_rows/{train_table_count}_tables/{TRAIN_DATASOURCE}/{int(train_time/60)}minutes/{"_".join(scoring_strategy_name)}.pickle'
+                                   )
+                        # csv
+                        random_int(max_row_size=ROW_NUMBER,
+                                   csv=True,
+                                   use_small_tables=False,
+                                   generate_tables=True,
+                                   nunique_percent=percentage,
+                                   rows_model=model,
+                                   ncols=COL_NUMBER,
+                                   path_to_model=f'src/data/model/{model}_rows/{train_table_count}_tables/{TRAIN_DATASOURCE}/{int(train_time/60)}minutes/{"_".join(scoring_strategy_name)}.pickle'
+                                   )
 
 
 def correctness_test(experiment_name: str, model_rows_list: List[int], train_table_count: int, test_table_count: int, train_time_list: List[int], skip_tables: int, result_file_name: str, log_false_guesses: bool = False):
@@ -201,7 +221,7 @@ def correctness_test(experiment_name: str, model_rows_list: List[int], train_tab
     logger.info(f"Finished correctness test for '{experiment_name}'")
 
 
-def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0, ncols: int = 10, rows_model: int = 10):
+def random_int(max_row_size: int, path_to_model: str, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0, ncols: int = 10, rows_model: int = 10):
     if csv:
         filetype = 'csv'
         use_small_tables = False
@@ -216,7 +236,7 @@ def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables
     testing.test_random_int(row_counts=[x for x in row_list if x <= max_row_size],
                             ncols=ncols,
                             out_path=f"{out_path}{filetype}-{nunique_percent}percent.csv",
-                            path_to_model=f'src/data/model/{rows_model}_rows/10000_tables/gittables/180minutes/recall_precision.pickle',
+                            path_to_model=path_to_model,
                             model_rows=rows_model,
                             use_small_tables=use_small_tables,
                             generate_tables=generate_tables,
