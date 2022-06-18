@@ -1,24 +1,36 @@
-\section{Correctness}
-\begin{itemize}
-  \item measure accuracy and precision of the method
-        \begin{itemize}
-          \item with 5, 10 and 20 rows as input (do more rows make a difference with large tables?)
-          \item overall and only non trivial
-          \item trained on one dataset and used on another
-          \item trained on multiple datasets
-        \end{itemize}
-  \item explore the weaknesses of the method
-        \begin{itemize}
-          \item what does a column look like which causes problems
-        \end{itemize}
-\end{itemize}
+\section{Correctness}\label{sec:correctness}
+The correctness of the model is probably the most important metric to determine its usability. While a false positive is not a major problem because each positive guess is verified (see Chapter~\ref{chap:proposed_method}), a false negative will mean that a primary key candidate gets ignored.
 
-\subsection{Experiment Data}
+In this section, different experiments will be conducted to determine which parameters are the best to train the model. Additionally, in Section~\ref{subsec:correctness_examine-false-guesses} the column which led to false guesses by the model will be examined.
 
-\subsection{Comparing models with different input sizes}
 
-\subsection{Altering the training time}
+\subsection{Experiment Data}\label{subsec:correctness_experiment-data} % TODO: Writing
+The experiments where performed on the gittables dataset\cite{gittables-article}. It contains around one million tables taken from %TODO: describe the dataset
 
-\subsection{Changing the scoring functions}
+For these experiments, only the tables with at least 100 rows and 3 columns where used. % TODO: how many exist in the dataset?
 
-\subsection{Conclusions}
+
+\subsection{Comparing models with different input sizes}\label{subsec:correctness_comparing-input-size} % TODO: Writing
+Experiment Setup
+
+Result
+
+Conclusion
+
+\subsection{Altering the training time}\label{subsec:correctness_comparing-training-time} % TODO: Writing
+Experiment Setup
+
+Result
+
+Conclusion
+
+\subsection{Testing only non-trivial columns}\label{subsec:correctness_non-trivial-columns} % TODO: Writing
+Experiment Setup
+
+Result
+
+Conclusion
+
+\subsection{Summarized Results}\label{subsec:correctness_conclusions} % TODO: Writing
+
+\subsection{Examine columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: Writing
