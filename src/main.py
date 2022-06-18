@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Iterable
+from typing import Iterable, List
 from dotenv import load_dotenv
 from pathlib import Path
 from shutil import rmtree
@@ -26,13 +26,10 @@ db_params = {
     'password': os.getenv('DB_PASSWORD'),
 }
 
-MODEL_ROWS_LIST = [5, 10, 20, 50]
-TRAIN_TABLE_COUNT = 10000
-TEST_TABLE_COUNT = -1  # as much as possible
 BASE_PATH_DATA = 'src/data/'
 TRAIN_DATASOURCE = 'gittables-parquet'
 TEST_DATASOURCE = 'gittables-parquet'
-TRAIN_TIME = 3 * 60 * 60  # 3 hours
+RESULT_PATH_CORRECTNESS = "src/result/correctness"
 SCORING_STRATEGIES = [
     [['recall', 'precision'], [recall, precision]],
 ]
@@ -62,6 +59,36 @@ def main():
         # logger.setLevel(logging.INFO)
         # speed_test_to_tex()
         correctness_test(log_false_guesses=True)
+        # correctness_test_to_tex()
+
+
+def compare_input_sizes(train_model: bool = False):
+    model_rows_list = [5, 10, 20, 50]
+    train_table_count = 10000
+    test_table_count = 1000  # -1 is as much as possible
+    train_time = 5 * 60 * 60  # 5 hours
+    if train_model:
+        setup_logging(log_to_file=False, level=logging.DEBUG)
+        testing.prepare_and_train(row_count_iter=model_rows_list,
+                                  train_table_count=train_table_count,
+                                  data_path=BASE_PATH_DATA + TRAIN_DATASOURCE,
+                                  train_envenly=False,
+                                  scoring_strategies=SCORING_STRATEGIES,
+                                  train_time=train_time,
+                                  min_rows=MIN_ROWS,
+                                  min_cols=MIN_COLS
+                                  )
+    else:
+        rmtree(f'{RESULT_PATH_CORRECTNESS}/long/compare-input-sizes',
+               ignore_errors=True)
+        setup_logging(log_to_file=True, level=logging.INFO)
+        correctness_test(experiment_name='compare-input-sizes',
+                         model_rows_list=model_rows_list,
+                         train_table_count=train_table_count,
+                         test_table_count=test_table_count,
+                         train_time=train_time,
+                         skip_tables=train_table_count,
+                         log_false_guesses=True)
         # correctness_test_to_tex()
 
 
@@ -101,26 +128,25 @@ def speed_test():
                        )
 
 
-def correctness_test(log_false_guesses: bool = False, skip_tables: int = TRAIN_TABLE_COUNT):
+def correctness_test(experiment_name: str, model_rows_list: List[int], train_table_count: int, test_table_count: int, train_time: int, skip_tables: int, log_false_guesses: bool = False):
     """Train and test models which look at nrows rows for their prediction.
 
     Args:
         nrows_iter (Iterable[int]): A model will be trained/tested for each item in the Iterable.
         train_model (bool, optional): Only train the models if True. Defaults to False.
     """
-    RESULT_PATH = "src/result/correctness"
     logger.info("Started the correctness test")
     if log_false_guesses:
-        rmtree(f'{RESULT_PATH}/false_pos', ignore_errors=True)
-        rmtree(f'{RESULT_PATH}/false_neg', ignore_errors=True)
+        rmtree(f'{RESULT_PATH_CORRECTNESS}/false_pos', ignore_errors=True)
+        rmtree(f'{RESULT_PATH_CORRECTNESS}/false_neg', ignore_errors=True)
     for strategy in SCORING_STRATEGIES:
         strategy = '_'.join(strategy[0])
-        for nrows in MODEL_ROWS_LIST:
+        for nrows in model_rows_list:
             logger.info(
-                f"Correctness Testing with a {nrows}rows model with strategy {strategy}")
-            result_path_long = f"{RESULT_PATH}/long/{nrows}rows"
+                f"Correctness Testing for '{experiment_name}' with a {nrows}rows model with strategy {strategy}")
+            result_path_long = f"{RESULT_PATH_CORRECTNESS}/long/{experiment_name}/{nrows}rows"
             Path(result_path_long).mkdir(parents=True, exist_ok=True)
-            testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{TRAIN_TABLE_COUNT}_tables/{TRAIN_DATASOURCE}/{int(TRAIN_TIME / 60)}minutes/{strategy}.pickle',
+            testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{train_table_count}_tables/{TRAIN_DATASOURCE}/{int(train_time / 60)}minutes/{strategy}.pickle',
                                model_rows=nrows,
                                input_path=BASE_PATH_DATA + TEST_DATASOURCE,
                                output_path=f'{result_path_long}/{strategy}.csv',
@@ -128,14 +154,14 @@ def correctness_test(log_false_guesses: bool = False, skip_tables: int = TRAIN_T
                                skip_tables=skip_tables,
                                use_small_tables=True,
                                speed_test=False,
-                               max_files=TEST_TABLE_COUNT,
+                               max_files=test_table_count,
                                min_rows=MIN_ROWS,
                                min_cols=MIN_COLS,
                                log_false_guesses=log_false_guesses
                                )
-            testing.correctness_summary(
-                input_dir=result_path_long, output_file=f'{RESULT_PATH}/summary/{nrows}rows/summary-{strategy}.csv')
-    logger.info("Finished Testcase 1")
+    testing.correctness_summary(input_dir=f"{RESULT_PATH_CORRECTNESS}/long/{experiment_name}",
+                                output_file=f'{RESULT_PATH_CORRECTNESS}/summary/{experiment_name}.csv')
+    logger.info(f"Finished correctness test for '{experiment_name}'")
 
 
 def random_int(max_row_size: int, generate_tables: bool = True, use_small_tables: bool = True, csv: bool = False, nunique_percent: int = 0, ncols: int = 10, rows_model: int = 10):
