@@ -5,13 +5,14 @@ import pickle
 import pandas as pd
 import numpy as np
 from pyarrow.lib import ArrowInvalid
-from typing import Iterable, Iterator, Tuple
+from typing import Iterable, Iterator, List, Tuple
 from pathlib import Path
 from shutil import rmtree
 from genericpath import exists
 import csv
 from timeit import default_timer as timer
 from datetime import datetime
+import re
 
 from autosklearn.classification import AutoSklearnClassifier
 
@@ -324,7 +325,7 @@ def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_
         logger.info("Finished preparation")
 
 
-def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]], train_time: int, min_rows: int, min_cols: int):
+def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]], train_time_list: List[int], min_rows: int, min_cols: int):
     """Prepare and execute the training of one ml model per value of [row_count_iter] and per value of [scoring_strategies].
 
     Args:
@@ -348,15 +349,18 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
                     )
     for row_count in row_count_iter:
         for strategy in scoring_strategies:
-            training_csv_path = f'src/data/training/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-            model_path = f'src/data/model/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-            train_model(train_csv=training_csv_path + 'training.csv',
-                        scoring_function_names=strategy[0],
-                        scoring_functions=strategy[1],
-                        save_path=model_path,
-                        train_time=train_time,
-                        train_if_exists=True
-                        )
+            for train_time in train_time_list:
+                logger.info(
+                    f"Training model with {row_count} rows with strategy {strategy} for {int(train_time / 60)}minutes")
+                training_csv_path = f'src/data/training/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
+                model_path = f'src/data/model/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
+                train_model(train_csv=training_csv_path + 'training.csv',
+                            scoring_function_names=strategy[0],
+                            scoring_functions=strategy[1],
+                            save_path=model_path,
+                            train_time=train_time,
+                            train_if_exists=True
+                            )
 
 
 def train_model(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, train_if_exists: bool = False) -> AutoSklearnClassifier:
@@ -452,9 +456,11 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
 
 def correctness_summary(input_dir: str, output_file: str):
     Path(output_file.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
-    summary_columns = ['File Name', 'Model input size', 'Avg. rows', 'Columns', 'Accuracy', 'Precision', 'Recall',
+    summary_columns = ['Avg. rows', 'Columns', 'Accuracy', 'Precision', 'Recall',
                        'F1']  # , 'ML Time', 'Naive Time', 'True Pos', 'True Neg', 'False Pos', 'False Neg'
     result = []
+    training_time = False
+    input_size = False
     for tablepath in local.traverse_directory_path(input_dir):
         table = local.get_table(tablepath)
         avg_rows = table[['Rows']].sum() / table[['Rows']].count()
@@ -462,21 +468,25 @@ def correctness_summary(input_dir: str, output_file: str):
         sum_results = table[['True Pos', 'True Neg',
                              'False Pos', 'False Neg']].sum()
         stats = _compute_statistics(*sum_results.values)
-        times = table[['ML: Total', 'Naive: Total']].sum()
-        match tablepath:
-            case x if '5rows' in x:
-                model_name = 5
-            case x if '10rows' in x:
-                model_name = 10
-            case x if '20rows' in x:
-                model_name = 20
-            case x if '50rows' in x:
-                model_name = 50
-            case _:
-                raise NotImplementedError("This model is not implemented")
-        result.append([tablepath.rsplit('/', 1)[1], model_name, *avg_rows.values,
-                       *sum_cols.values, *stats])  # , *times.values
-
+        # times = table[['ML: Total', 'Naive: Total']].sum()
+        row = [*avg_rows.values, *sum_cols.values, *stats]  # , *times.values
+        # Training Time
+        tmp = re.findall("\d+minutes", tablepath)
+        tmp = [re.findall("\d+", x) for x in tmp]
+        if tmp and tmp[0]:
+            training_time = True
+            row.insert(0, tmp[0][0])
+        # Model Input Size
+        tmp = re.findall("\d+rows", tablepath)
+        tmp = [re.findall("\d+", x) for x in tmp]
+        if tmp and tmp[0]:
+            input_size = True
+            row.insert(0, tmp[0][0])
+        result.append(row)
+    if training_time:
+        summary_columns.insert(0, 'Training Time')
+    if input_size:
+        summary_columns.insert(0, 'Model Input Size')
     result = pd.DataFrame(result, columns=summary_columns).sort_values(
         summary_columns[0])
     result.to_csv(output_file, index=False)

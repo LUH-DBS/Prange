@@ -35,6 +35,8 @@ SCORING_STRATEGIES = [
 ]
 MIN_ROWS = 100
 MIN_COLS = 3
+TRAIN_TABLE_COUNT = 10000
+TEST_TABLE_COUNT = 1000
 
 
 def main():
@@ -64,9 +66,9 @@ def main():
 
 def compare_input_sizes(train_model: bool = False):
     model_rows_list = [5, 10, 20, 50]
-    train_table_count = 10000
-    test_table_count = 1000  # -1 is as much as possible
-    train_time = 5 * 60 * 60  # 5 hours
+    train_table_count = TRAIN_TABLE_COUNT
+    test_table_count = TEST_TABLE_COUNT  # -1 is as much as possible
+    train_time = [5 * 60 * 60]  # 5 hours
     if train_model:
         setup_logging(log_to_file=False, level=logging.DEBUG)
         testing.prepare_and_train(row_count_iter=model_rows_list,
@@ -74,7 +76,7 @@ def compare_input_sizes(train_model: bool = False):
                                   data_path=BASE_PATH_DATA + TRAIN_DATASOURCE,
                                   train_envenly=False,
                                   scoring_strategies=SCORING_STRATEGIES,
-                                  train_time=train_time,
+                                  train_time_list=train_time,
                                   min_rows=MIN_ROWS,
                                   min_cols=MIN_COLS
                                   )
@@ -86,8 +88,41 @@ def compare_input_sizes(train_model: bool = False):
                          model_rows_list=model_rows_list,
                          train_table_count=train_table_count,
                          test_table_count=test_table_count,
-                         train_time=train_time,
+                         train_time_list=train_time,
                          skip_tables=train_table_count,
+                         result_file_name="{nrows}rows.csv",
+                         log_false_guesses=True)
+        # correctness_test_to_tex()
+
+
+def compare_training_time(train_model: bool = False):
+    model_rows_list = [10]
+    train_table_count = TRAIN_TABLE_COUNT
+    test_table_count = TEST_TABLE_COUNT  # -1 is as much as possible
+    train_time = [5*60, 10*60, 20*60, 40*60,
+                  1*60*60, 2*60*60, 3*60*60, 5*60*60]
+    if train_model:
+        setup_logging(log_to_file=False, level=logging.DEBUG)
+        testing.prepare_and_train(row_count_iter=model_rows_list,
+                                  train_table_count=train_table_count,
+                                  data_path=BASE_PATH_DATA + TRAIN_DATASOURCE,
+                                  train_envenly=False,
+                                  scoring_strategies=SCORING_STRATEGIES,
+                                  train_time_list=train_time,
+                                  min_rows=MIN_ROWS,
+                                  min_cols=MIN_COLS
+                                  )
+    else:
+        rmtree(f'{RESULT_PATH_CORRECTNESS}/long/compare-training-time',
+               ignore_errors=True)
+        setup_logging(log_to_file=True, level=logging.INFO)
+        correctness_test(experiment_name='compare-training-time',
+                         model_rows_list=model_rows_list,
+                         train_table_count=train_table_count,
+                         test_table_count=test_table_count,
+                         train_time_list=train_time,
+                         skip_tables=train_table_count,
+                         result_file_name="{train_time}minutes.csv",
                          log_false_guesses=True)
         # correctness_test_to_tex()
 
@@ -128,7 +163,7 @@ def speed_test():
                        )
 
 
-def correctness_test(experiment_name: str, model_rows_list: List[int], train_table_count: int, test_table_count: int, train_time: int, skip_tables: int, log_false_guesses: bool = False):
+def correctness_test(experiment_name: str, model_rows_list: List[int], train_table_count: int, test_table_count: int, train_time_list: List[int], skip_tables: int, result_file_name: str, log_false_guesses: bool = False):
     """Train and test models which look at nrows rows for their prediction.
 
     Args:
@@ -142,23 +177,25 @@ def correctness_test(experiment_name: str, model_rows_list: List[int], train_tab
     for strategy in SCORING_STRATEGIES:
         strategy = '_'.join(strategy[0])
         for nrows in model_rows_list:
-            logger.info(
-                f"Correctness Testing for '{experiment_name}' with a {nrows}rows model with strategy {strategy}")
-            result_path_long = f"{RESULT_PATH_CORRECTNESS}/long/{experiment_name}/{nrows}rows"
-            Path(result_path_long).mkdir(parents=True, exist_ok=True)
-            testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{train_table_count}_tables/{TRAIN_DATASOURCE}/{int(train_time / 60)}minutes/{strategy}.pickle',
-                               model_rows=nrows,
-                               input_path=BASE_PATH_DATA + TEST_DATASOURCE,
-                               output_path=f'{result_path_long}/{strategy}.csv',
-                               files_per_dir=-1,
-                               skip_tables=skip_tables,
-                               use_small_tables=True,
-                               speed_test=False,
-                               max_files=test_table_count,
-                               min_rows=MIN_ROWS,
-                               min_cols=MIN_COLS,
-                               log_false_guesses=log_false_guesses
-                               )
+            for train_time in train_time_list:
+                logger.info(
+                    f"Correctness Testing for '{experiment_name}' with a {nrows}rows model with strategy {strategy} ({int(train_time / 60)}minutes train time)")
+                result_file_path = f"{RESULT_PATH_CORRECTNESS}/long/{experiment_name}/{result_file_name.format(strategy=strategy, nrows=nrows, train_time=int(train_time / 60))}"
+                Path(result_file_path.rsplit('/', 1)
+                     [0]).mkdir(parents=True, exist_ok=True)
+                testing.test_model(path_to_model=f'src/data/model/{nrows}_rows/{train_table_count}_tables/{TRAIN_DATASOURCE}/{int(train_time / 60)}minutes/{strategy}.pickle',
+                                   model_rows=nrows,
+                                   input_path=BASE_PATH_DATA + TEST_DATASOURCE,
+                                   output_path=result_file_path,
+                                   files_per_dir=-1,
+                                   skip_tables=skip_tables,
+                                   use_small_tables=False,
+                                   speed_test=False,
+                                   max_files=test_table_count,
+                                   min_rows=MIN_ROWS,
+                                   min_cols=MIN_COLS,
+                                   log_false_guesses=log_false_guesses
+                                   )
     testing.correctness_summary(input_dir=f"{RESULT_PATH_CORRECTNESS}/long/{experiment_name}",
                                 output_file=f'{RESULT_PATH_CORRECTNESS}/summary/{experiment_name}.csv')
     logger.info(f"Finished correctness test for '{experiment_name}'")
