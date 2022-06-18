@@ -1,6 +1,7 @@
 \section{Efficiency}\label{sec:efficiency}
 Another important metric to determine the feasibility of the machine learning model is the efficiency. The main question is, if or from what table size the model is faster than a naive method. This becomes even more interesting as each positive guess of the model has to be verified using the naive algorithm because the model is trained for the highest recall and precision, not accuracy. % TODO: ref to model
 
+% TODO: Describe which model where used -> 3 hours, 10.000 tables, recall_precision
 
 \subsection{Experiment Data}\label{subsec:efficiency-experiment_data}
 The experiment was conducted on a set of generated tables to control for the size of the table as well as the number of unique and non-unique columns, as can be seen in Table~\ref{table:efficiency-generated_table}.

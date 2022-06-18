@@ -1,5 +1,6 @@
 \chapter{Proposed Method}\label{chap:proposed_method}
 % \section{Overview}\label{sec:overview}
+%! A Column containing a NaN or None is not 'unqiue' (because it can not be a primary key)
 In this thesis I present a method to increase the efficiency of finding unique columns in a table. The method is based on a machine learning model which uses the first few rows to guess if each column will have any duplicate values. Each positive guess will subsequently be validated using a conventional naive method.
 
 The proposed method works in three steps. First, the features are extracted from the first rows of the table. After that, the model tries to predict the existence of duplicate values from the features. Finally, the columns which are unique according to the model are checked with a naive method.
