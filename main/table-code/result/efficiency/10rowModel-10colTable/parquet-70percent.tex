@@ -1,6 +1,7 @@
 \begin{table}[ht]
     \caption{The result of the efficiency test with a generated table with \SI{30}{\percent} unique columns in a parquet file format. The test was conducted on a model with an input size of 10 rows on tables with 10 columns.}
-    \small
+    % \small
+    \setlength{\tabcolsep}{5.5pt}
     \begin{tabular}{@{}S[table-format=9]SSSSSSSS@{}}
         \toprule
         {\shortstack{Rows}} & {\shortstack{Model:\\Loading}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\

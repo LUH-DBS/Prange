@@ -1,7 +1,8 @@
 \begin{table}[ht]
     \caption{The result of the efficiency test with a generated table with \SI{30}{\percent} unique columns in a parquet file format. The test was conducted on a model with an input size of 10 rows on tables with 10 columns.}
     \small
-    \begin{tabular}{@{}S[table-format=9]SSSSSSSS@{}}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular*}{\linewidth}{@{}S[table-format=9]SSSSSSSS@{}}
         \toprule
         {\shortstack{Rows}} & {\shortstack{Model:\\Loading I}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Loading II}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
         \midrule
@@ -15,5 +16,5 @@
         50000000 & 1.1834049336612225 & 0.447280365973711 & 1.3086804077029228 & 114.8945118971169 & 117.83388417959212 & 2.2251016534864902 & 379.7313333004713 & 381.9564390294254 \\
         100000000 & 1.6024668291211128 & 0.4462943933904171 & 2.42531206831336 & 256.9933520145714 & 261.4674338325858 & 4.437270112335682 & 856.736768040806 & 861.1740412451327 \\
         \bottomrule
-    \end{tabular}\label{table:efficiency_parquet-70percent_small-tables}
+    \end{tabular*}\label{table:efficiency_parquet-70percent_small-tables}
 \end{table}
