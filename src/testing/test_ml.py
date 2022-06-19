@@ -5,12 +5,14 @@ import pickle
 import pandas as pd
 import numpy as np
 from pyarrow.lib import ArrowInvalid
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, List, Tuple
 from pathlib import Path
 from shutil import rmtree
 from genericpath import exists
 import csv
 from timeit import default_timer as timer
+from datetime import datetime
+import re
 
 from autosklearn.classification import AutoSklearnClassifier
 
@@ -24,7 +26,7 @@ BASE_PATH_TRAINING = 'src/data/training/'
 BASE_PATH_MODEL = 'src/data/model/'
 
 
-def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1) -> None:
+def test_model(path_to_model: str, model_rows: int, input_path: str, output_path: str, use_small_tables: bool, speed_test: bool, max_files: int = -1, files_per_dir: int = -1, skip_tables: int = -1, min_rows: int = -1, min_cols: int = -1, log_false_guesses: bool = False) -> None:
     """Test a model and print the results into a csv file.
 
     Args:
@@ -37,15 +39,18 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
         files_per_dir (int, optional): Use only this many files for each subdirectory of the datasource. Defaults to -1.
         skip_tables (int, optional): Skip the first `skip_tables` tables. Defaults to -1.
         min_rows (int, optional): Skip a table if it has less than `min_rows` rows. Defaults to -1.
+        min_cols (int, optional): Skip a table if it has less than `min_cols` columns. Defaults to -1.
 
     """
-    logger.info("Started testing of a model with %s rows", nrows)
     with open(path_to_model, 'rb') as file:
         ml = pickle.load(file)
     table_path_list: list[str] = []
     ml_dict = {}
     naive_dict = {}
     counter = 0
+    skipcounter = 0
+    abortcounter = 0
+    TIME_STRING = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     if 'csv' in input_path:
         use_small_tables = False
     elif use_small_tables:
@@ -53,13 +58,52 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
     with open(output_path, 'w') as file:
         csv_file = csv.writer(file)
         if speed_test:
-            row = ["Table Name", "Rows", "Columns", "ML: Loading", "ML: Compute Time", "ML: Loading",
+            row = ["Table Name", "Rows", "Columns", "ML: Loading I", "ML: Compute Time", "ML: Loading II",
                    "ML: Validation Time", "ML: Total", "Naive: Loading", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         else:
             row = ["Table Name", "Rows", "Columns", "Accuracy", "Precision",
                    "Recall", "F1", "ML: Compute Time", "ML: Validation Time", "ML: Total", "Naive: Compute Time", "Naive: Total", "True Pos", "True Neg", "False Pos", "False Neg"]
         csv_file.writerow(row)
-    for table_path in local.traverse_directory_path(input_path, skip_tables=skip_tables, files_per_dir=files_per_dir):
+    for table_path in local.traverse_directory_path(input_path, files_per_dir=files_per_dir):
+        try:
+            table = local.get_table(table_path)
+        except pd.errors.ParserError as e:
+            counter -= 1
+            logger.common_error(
+                "ParserError with file %s", table_path)
+            continue
+        except ArrowInvalid as error:
+            counter -= 1
+            logger.common_error(
+                "ArrowInvalid error with file %s", table_path)
+            continue
+        except UnicodeDecodeError:
+            counter -= 1
+            logger.common_error(
+                "UnicodeDecodeError with file %s", table_path)
+            continue
+        # skip this table if it is smaller than necessary
+        if len(table.columns) < min_cols:
+            # logger.debug("Table to small (columns), aborting")
+            abortcounter += 1
+            continue
+        # skip this table if it is smaller than necessary
+        if len(table) < min_rows:
+            # logger.debug("Table to small (rows), aborting")
+            abortcounter += 1
+            continue
+        if skipcounter < skip_tables:
+            skipcounter += 1
+            continue
+        if max_files > -1 and counter >= max_files:
+            break
+        counter += 1
+        table_path_list.append(table_path)
+    logger.info(
+        f"Aborted {abortcounter} too small tables and skipped {skipcounter} tables to get to {counter} tables.")
+    counter = 0
+    logger.info("Started testing of a model with %s rows", model_rows)
+    for table_path in table_path_list:
         if max_files > 0 and counter >= max_files:
             break
         if counter % 100 == 0 and counter != 0:
@@ -73,12 +117,12 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
             load_time = -timer()
             if use_small_tables:
                 # only get the first rows of the table
-                small_table = local.get_table(table_path, nrows)
+                small_table = local.get_table(table_path, model_rows)
             else:
                 # get the whole table
                 table = local.get_table(table_path)
                 # use only the first rows for the model
-                small_table = table.head(nrows)
+                small_table = table.head(model_rows)
             load_time += timer()
             # use the model
             computing_time = -timer()
@@ -96,10 +140,6 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                 # use only the columns which are unique according to the model for validation
                 table = table[table.columns[unique_columns]]
             load_time2 += timer()
-            # skip this table if it is smaller than necessary
-            if len(table) <= min_rows:
-                counter -= 1
-                continue
             # confirm the guess of the model
             confirmed_time = -timer()
             validated_uniques = naive_algorithm.find_unique_columns_in_table(
@@ -115,7 +155,6 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                 'confirmed_time': confirmed_time,
                 'total_time': total_time
             }
-            table_path_list.append(table_path)
         except pd.errors.ParserError as e:
             counter -= 1
             logger.common_error(
@@ -134,6 +173,7 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
     with open(output_path, 'a') as file:
         csv_file = csv.writer(file)
         counter = 0
+        logger.info("Started testing of the naive algorithm")
         for table_path in table_path_list:
             counter += 1
             logger.debug(
@@ -148,6 +188,29 @@ def test_model(path_to_model: str, nrows: int, input_path: str, output_path: str
                     table)
                 computing_time += timer()
                 total_time += timer()
+                if log_false_guesses:
+                    # log false negatives
+                    false_neg = [
+                        i for i in unique_columns if i not in ml_dict[table_path]['unique_columns']]
+                    if len(false_neg) > 0:
+                        logger.error(
+                            "False Negativ (column '{}')".format("', '".join(table.columns[false_neg])))
+                        log_path = f"src/result/correctness/false_neg/{TIME_STRING}/{model_rows}rows/"
+                        Path(log_path).mkdir(parents=True, exist_ok=True)
+                        false_neg_table = table[table.columns[false_neg]]
+                        false_neg_table.to_csv(
+                            log_path + table_path.rsplit('/', 1)[1] + '.csv')
+                    # log false positives
+                    false_pos = [
+                        i for i in ml_dict[table_path]['unique_columns'] if i not in unique_columns]
+                    if len(false_pos) > 0:
+                        logger.debug(
+                            "False Positiv (column '{}')".format("', '".join(table.columns[false_pos])))
+                        log_path = f"src/result/correctness/false_pos/{TIME_STRING}/{model_rows}rows/"
+                        Path(log_path).mkdir(parents=True, exist_ok=True)
+                        false_pos_table = table[table.columns[false_pos]]
+                        false_pos_table.to_csv(
+                            log_path + table_path.rsplit('/', 1)[1] + '.csv')
                 naive_dict[table_path] = {
                     'unique_columns': unique_columns,
                     'load_time': load_time,
@@ -195,6 +258,18 @@ def _make_row(speed: bool, ml_dict, naive_dict, table_path: str, table: pd.DataF
                 false_neg += 1
             else:
                 true_neg += 1
+    (accuracy, precision, recall, f1) = _compute_statistics(
+        true_pos, true_neg, false_pos, false_neg, table_path)
+    if speed:
+        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+    else:
+        return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
+                recall, f1, ml_values['computing_time'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+        # return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
+        #         recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+
+
+def _compute_statistics(true_pos: int, true_neg: int, false_pos: int, false_neg: int, table_path: str = "") -> Tuple[float, float, float, float]:
     try:
         accuracy = (true_pos + true_neg) / \
             (true_pos + true_neg + false_pos + false_neg)
@@ -222,16 +297,10 @@ def _make_row(speed: bool, ml_dict, naive_dict, table_path: str, table: pd.DataF
     except ZeroDivisionError:
         logger.error(f"ZeroDivisionError with file {table_path} (f1)")
         f1 = -1
-    if speed:
-        return [table_path.rsplit('/', 1)[1], *table.shape, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
-    else:
-        return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
-                recall, f1, ml_values['computing_time'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
-        # return [table_path.rsplit('/', 1)[1], *table.shape, accuracy, precision,
-        #         recall, f1, ml_values['load_time'], ml_values['computing_time'], ml_values['load_time2'], ml_values['confirmed_time'], ml_values['total_time'], naive_values['load_time'], naive_values['computing_time'], naive_values['total_time'], true_pos, true_neg, false_pos, false_neg]
+    return (accuracy, precision, recall, f1)
 
 
-def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, files_per_dir: int = -1):
+def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_path: str, min_rows: int, min_cols: int, files_per_dir: int = -1):
     """Prepare the training data. One trainingsset will be generated for each item in [row_count_iter].
 
     Args:
@@ -244,14 +313,19 @@ def prepare_by_rows(row_count_iter: Iterable[int], train_table_count: int, data_
         logger.info("Started preparing trainingsdata from %s tables using %s rows",
                     train_table_count, row_count)
         training_csv_path = f'{BASE_PATH_TRAINING}{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-        table_iter = local.traverse_directory(
+        table_path_iter = local.traverse_directory_path(
             data_path, row_count, files_per_dir)
-        machine_learning.prepare_training_iterator(
-            table_iter, False, train_table_count, training_csv_path)
+        machine_learning.prepare_training_iterator(table_path_iter=table_path_iter,
+                                                   non_trivial=False,
+                                                   read_tables_max=train_table_count,
+                                                   out_path=training_csv_path,
+                                                   min_rows=min_rows,
+                                                   min_cols=min_cols
+                                                   )
         logger.info("Finished preparation")
 
 
-def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]], train_time: int):
+def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, data_path: str, train_envenly: bool, scoring_strategies: list[list[list]], train_time_list: List[int], min_rows: int, min_cols: int):
     """Prepare and execute the training of one ml model per value of [row_count_iter] and per value of [scoring_strategies].
 
     Args:
@@ -261,8 +335,6 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
         train_envenly (bool): If True, the tables will be evenly from the subdirectories of [data_path].
         train_time (int): Number of seconds to train the model.
     """
-    # per_run_time = 300  # 5 minutes
-    per_run_time = int(train_time / 10)
     files_per_dir = -1
     number_of_subdirs = len(
         [f.path for f in os.scandir(data_path) if f.is_dir()])
@@ -271,22 +343,27 @@ def prepare_and_train(row_count_iter: Iterable[int], train_table_count: int, dat
     prepare_by_rows(row_count_iter=row_count_iter,
                     train_table_count=train_table_count,
                     data_path=data_path,
-                    files_per_dir=files_per_dir)
+                    files_per_dir=files_per_dir,
+                    min_rows=min_rows,
+                    min_cols=min_cols
+                    )
     for row_count in row_count_iter:
         for strategy in scoring_strategies:
-            training_csv_path = f'src/data/training/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-            model_path = f'src/data/model/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
-            train_model(train_csv=training_csv_path + 'training.csv',
-                        scoring_function_names=strategy[0],
-                        scoring_functions=strategy[1],
-                        save_path=model_path,
-                        train_time=train_time,
-                        per_run_time=per_run_time,
-                        train_if_exists=True
-                        )
+            for train_time in train_time_list:
+                logger.info(
+                    f"Training model with {row_count} rows with strategy {strategy} for {int(train_time / 60)}minutes")
+                training_csv_path = f'src/data/training/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
+                model_path = f'src/data/model/{row_count}_rows/{train_table_count}_tables/{data_path.replace("src/data/", "")}/'
+                train_model(train_csv=training_csv_path + 'training.csv',
+                            scoring_function_names=strategy[0],
+                            scoring_functions=strategy[1],
+                            save_path=model_path,
+                            train_time=train_time,
+                            train_if_exists=True
+                            )
 
 
-def train_model(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, per_run_time: int = 30, train_if_exists: bool = False) -> AutoSklearnClassifier:
+def train_model(train_csv: str, save_path: str, scoring_function_names: list[str], scoring_functions: list, train_time: int = 120, train_if_exists: bool = False) -> AutoSklearnClassifier:
     """Train and save a ml model if it doesn't already exist.
 
     Args:
@@ -295,7 +372,6 @@ def train_model(train_csv: str, save_path: str, scoring_function_names: list[str
         scoring_function_names (list[str]): A list with the names of the scoring functions for the filenames.
         scoring_functions (list): A list with the scoring functions for the training.
         train_time (int, optional): number of seconds to train the network. Defaults to 120.
-        per_run_time (int, optional): number of seconds for each run. Defaults to 30.
         train_if_exists (bool, optional): If True, a new model will be trained even if one with the given parameters already exists. Defaults to False.
 
     Returns:
@@ -313,8 +389,7 @@ def train_model(train_csv: str, save_path: str, scoring_function_names: list[str
         model = machine_learning.train(train_csv=train_csv,
                                        scoring_functions=scoring_functions,
                                        save_path=save_path,
-                                       train_time=train_time,
-                                       per_run_time=per_run_time
+                                       train_time=train_time
                                        )
         logger.info("Finished training")
         return model
@@ -353,7 +428,7 @@ def generate_random_int_dataframe(nrows: int, ncols: int, nonunique_percent: int
     return pd.DataFrame(pd.concat([unique_cols, nonunique_cols], axis=1, join='inner'))
 
 
-def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, nrows: int, use_small_tables: bool, nonunique_percent: int, csv: bool = False, generate_tables: bool = True) -> None:
+def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_model: str, model_rows: int, use_small_tables: bool, nonunique_percent: int, csv: bool = False, generate_tables: bool = True) -> None:
     path = 'src/data/generated/'
     if exists(path) and generate_tables:
         rmtree(path)
@@ -369,11 +444,49 @@ def test_random_int(row_counts: list[int], ncols: int, out_path: str, path_to_mo
                 generate_random_int_dataframe(
                     nrows, ncols, nonunique_percent).to_parquet(filepath)
     test_model(path_to_model=path_to_model,
-               nrows=model_rows,
+               model_rows=model_rows,
                input_path=path,
                output_path=out_path,
-               files_per_dir=100000,
+               files_per_dir=-1,
                skip_tables=-1,
                use_small_tables=use_small_tables,
                speed_test=True
                )
+
+
+def correctness_summary(input_dir: str, output_file: str):
+    Path(output_file.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
+    summary_columns = ['Avg. rows', 'Columns', 'Accuracy', 'Precision', 'Recall',
+                       'F1']  # , 'ML Time', 'Naive Time', 'True Pos', 'True Neg', 'False Pos', 'False Neg'
+    result = []
+    training_time = False
+    input_size = False
+    for tablepath in local.traverse_directory_path(input_dir):
+        table = local.get_table(tablepath)
+        avg_rows = table[['Rows']].sum() / table[['Rows']].count()
+        sum_cols = table[['Columns']].sum()
+        sum_results = table[['True Pos', 'True Neg',
+                             'False Pos', 'False Neg']].sum()
+        stats = _compute_statistics(*sum_results.values)
+        # times = table[['ML: Total', 'Naive: Total']].sum()
+        row = [*avg_rows.values, *sum_cols.values, *stats]  # , *times.values
+        # Training Time
+        tmp = re.findall("\d+minutes", tablepath)
+        tmp = [re.findall("\d+", x) for x in tmp]
+        if tmp and tmp[0]:
+            training_time = True
+            row.insert(0, tmp[0][0])
+        # Model Input Size
+        tmp = re.findall("\d+rows", tablepath)
+        tmp = [re.findall("\d+", x) for x in tmp]
+        if tmp and tmp[0]:
+            input_size = True
+            row.insert(0, tmp[0][0])
+        result.append(row)
+    if training_time:
+        summary_columns.insert(0, 'Training Time')
+    if input_size:
+        summary_columns.insert(0, 'Model Input Size')
+    result = pd.DataFrame(result, columns=summary_columns).sort_values(
+        summary_columns[0])
+    result.to_csv(output_file, index=False)

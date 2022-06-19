@@ -1,8 +1,10 @@
+\message{LaTeX Warning: This table needs to be manually checked}
 \begin{table}[htb]
     \centering
-    \begin{tabular}{@{}cccccccccc@{}}
+    \caption{The result of the efficiency test with a generated table with \SI{40}{\percent} unique columns in a csv file format. The test was conducted on a model with an input size of 5 rows on tables with 10 columns.}
+    \begin{tabular}{@{}SSSSSSSSSS@{}}
         \toprule
-        Rows & Columns & ML: Loading & ML: Compute Time & ML: Loading & ML: Validation Time & ML: Total & Naive: Loading & Naive: Compute Time & Naive: Total \\
+        {Rows} & {Columns} & {ML: Loading} & {ML: Compute Time} & {ML: Loading} & {ML: Validation Time} & {ML: Total} & {Naive: Loading} & {Naive: Compute Time} & {Naive: Total} \\
         \midrule
         100 & 10 & 0.0261773355305194 & 0.9034415036439896 & 0.0261773355305194 & 0.000167928636074 & 0.9300924949347972 & 0.0041834823787212 & 0.0005484074354171 & 0.0047346837818622 \\
         1000 & 10 & 0.0023728162050247 & 0.9001376889646053 & 0.0023728162050247 & 0.0007483139634132 & 0.903766717761755 & 0.002537477761507 & 0.0021191276609897 & 0.0046574473381042 \\
@@ -14,5 +16,5 @@
         5000000 & 10 & 2.594939287751913 & 0.8982557207345963 & 2.594939287751913 & 11.615731418132782 & 15.136124204844236 & 2.620808284729719 & 29.08551327884197 & 31.70632591471076 \\
         50000000 & 10 & 28.357596579939127 & 0.8960278816521168 & 28.357596579939127 & 152.41384679079056 & 181.92915973067284 & 28.464854553341866 & 378.6478861495853 & 407.1127446554601 \\
         \bottomrule
-    \end{tabular}
+    \end{tabular}\label{table:efficiency_csv-60percent}
 \end{table}

@@ -8,10 +8,13 @@ import pickle
 
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_string_dtype, is_bool_dtype
+from pyarrow.lib import ArrowInvalid
+import numpy as np
 
 # from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier as AutoSklearnClassifier
-
+from autosklearn.metrics import recall
+from datasets import local
 from datasets.sql import csv_cache
 from algorithms import naive_algorithm
 import logging
@@ -63,7 +66,7 @@ def prepare_table(table: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
+def prepare_column(column: pd.Series) -> pd.DataFrame:
     """Extract the features of a single column.
 
     Args:
@@ -79,6 +82,18 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
     if column.duplicated().any():
         # 10
         return pd.DataFrame([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]], columns=header, index=[column.name])
+    none_value = False
+    for value in column.values:
+        if value == None or value == np.NaN:
+            if none_value:
+                return pd.DataFrame([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]], columns=header, index=[column.name])
+            else:
+                none_value = True
+
+    # use this code to recognize tables containing a single NaN as sorted (if the rest is sorted)
+    # if none_value:
+    #     column = column.copy().dropna()
+
     # duplicate = 0, data type and sorted will be changed
     result = [0, 0, 0]
     # check if entries are sorted
@@ -90,11 +105,9 @@ def prepare_column(column: pd.DataFrame) -> pd.DataFrame:
     except TypeError:
         logger.common_error(
             f"Column {column.name} does not just include strings (TypeError)")
-        pass
     except KeyError as error:
         logger.common_error(
             f"KeyError with column {column.name}")
-        pass
     # handle integer and float
     if is_bool_dtype(column):
         result[1] = 3
@@ -194,14 +207,13 @@ def prepare_training(table_range: Iterable, number_rows: int, non_trivial: bool,
         result.to_csv(path_result, mode='a', header=False, index=False)
 
 
-def train(train_csv: str, scoring_functions: list, save_path: str = "", train_time=120, per_run_time=30) -> AutoSklearnClassifier:
+def train(train_csv: str, scoring_functions: list, save_path: str = "", train_time=120) -> AutoSklearnClassifier:
     """Train a network on a feature table.
 
     Args:
         train_csv (str): the path to the feature table
         save_path (str, optional): the path to save the model to (as a pickle file). Defaults to "".
         train_time (int, optional): number of seconds to train the network. Defaults to 120.
-        per_run_time (int, optional): number of seconds for each run. Defaults to 30.
 
     Returns:
         AutoSklearnClassifier: the trained model
@@ -210,17 +222,15 @@ def train(train_csv: str, scoring_functions: list, save_path: str = "", train_ti
     y = pd.read_csv(train_csv.replace('.csv', '-result.csv'))
 
     # X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-    logger.info("Starting Training for %d minutes", train_time)
+    logger.info("Starting Training for %d seconds", train_time)
 
     automl = AutoSklearnClassifier(
         time_left_for_this_task=train_time,
-        per_run_time_limit=per_run_time,
+        metric=recall,
         scoring_functions=scoring_functions,
         memory_limit=200000,  # 200GB
-        n_jobs=10
     )
-    # automl.fit(X_train, y_train, dataset_name="Test")
-    automl.fit(X, y, dataset_name="Test")
+    automl.fit(X, y)
     logger.info("Finished training")
 
     if save_path != "":
@@ -230,7 +240,7 @@ def train(train_csv: str, scoring_functions: list, save_path: str = "", train_ti
     return automl
 
 
-def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: bool, read_tables_max: int, out_path='src/training/'):
+def prepare_training_iterator(table_path_iter: Iterator[str], non_trivial: bool, read_tables_max: int, min_rows: int, min_cols: int, out_path='src/training/'):
     """Prepare a feature table for training a model.
 
     Args:
@@ -250,7 +260,32 @@ def prepare_training_iterator(table_iter: Iterator[pd.DataFrame], non_trivial: b
     pd.DataFrame([], columns=["PK Candidates"]).to_csv(
         path_result, index=False)
     count = 0
-    for table in table_iter:
+    for table_path in table_path_iter:
+        try:
+            table = local.get_table(table_path)
+        except pd.errors.ParserError as e:
+            counter -= 1
+            logger.common_error(
+                "ParserError with file %s", table_path)
+            continue
+        except ArrowInvalid as error:
+            counter -= 1
+            logger.common_error(
+                "ArrowInvalid error with file %s", table_path)
+            continue
+        except UnicodeDecodeError:
+            counter -= 1
+            logger.common_error(
+                "UnicodeDecodeError with file %s", table_path)
+            continue
+        # skip this table if it is smaller than necessary
+        if len(table.columns) < min_cols:
+            # logger.debug("Table to small (columns), aborting")
+            continue
+        # skip this table if it is smaller than necessary
+        if len(table) < min_rows:
+            # logger.debug("Table to small (rows), aborting")
+            continue
         count += 1
         if read_tables_max > 0 and count > read_tables_max:
             break
