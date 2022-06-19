@@ -47,15 +47,15 @@ Compare times for \SI{70}{\percent}.
 Conclusion: No large difference, the difference may correlate with the larger file size of the model itself.
 
 
-\subsection{Changing the ratio of unique columns}\label{subsec:efficiency-changing_uniques} % TODO: Writing
-Description of the experiment setup: Parquet with small table and 60, 70, 80, 90\%.
+\subsection{Changing the ratio of unique columns}\label{subsec:efficiency-changing_uniques}
+The last variable that has an impact on the time it takes the model to predict is the percentage of unique columns in the table. Since every positive guess of the model has to be verified using the naive algorithm, the prediction of the model takes longer the more unique columns the model detects which correlates roughly with the amount of actual unique columns in the table. % ref to section under correctness test?
 
-Description of what is happening.
+In this experiment, a model with an input size of 10 rows is used on 4 tables which are saved as parquet files. The difference between these tables is the percentage of unique columns, which range from \SI{60}{\percent} to \SI{90}{\percent}. Each table has \num{100000000} rows and \num{10} columns.
 
-What percentage of unique columns in the gittables dataset?
+Table~\ref{table:efficiency-changing_uniques-table} shows that nearly every step of the process takes the same amount of time, just the validation step is proportional to the amount of unique columns.
 
-Conclusion: The increased efficiency depends mainly on the low fraction of unique columns (next to number of rows). Probably is the real world percentage low enough.
+In the gittables dataset which is used in the correctness test, the ratio of unique columns is \SI{10}{\percent}. The positive guesses of the model are quite a bit higher since its priority is to avoid false negatives, not false positives. Still, the share of positive guesses during tests on the gittables dataset is around \SI{30}{\percent}, which is low enough to be feasible with large enough tables. %! TODO: percentage of positive guesses
 
 
-\subsection{Summarized results}\label{subsec:efficiency-summarized_results} % TODO: Writing
-The proposed model is more efficient for large enough tables. The percentages are good enough in the real world. Only loading necessary rows/columns has not been a large advantage in this case, but it could be with slow \io{}.
+\subsection{Summarized results}\label{subsec:efficiency-summarized_results}
+The experiments in this section show that the proposed method of finding primary key candidates is suitable for some cases. If the tables which will be examined contain mostly less than \num{1000000} rows or the ratio of unique columns is high, the model is probably slower than the naive algorithm. On very large tables with \num{100000000} or more rows however the model can improve the time it takes to find all unique columns significantly. % maybe something about i/o?

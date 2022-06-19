@@ -1,0 +1,27 @@
+\begin{table}[ht]
+    \caption{The result of the efficiency test where each table has a size of \num{100000000} rows and \num{10} columns and is read from a parquet file. The only thing that is changing is the number of unique columns.}
+    \begin{tabular}{@{}SSSSSSSS@{}}
+        \toprule
+        {\shortstack{Unique\\Columns}} & {\shortstack{Model:\\Loading}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
+        \midrule
+        4 & 4.48926031216979 & 1.3078778870403769 & 344.74235140904784 & 351.12746534124017 & 4.492683906108141 & 861.110518924892 & 865.6032059267163 \\
+        3 & 4.47317860648036 & 1.5488394163548946 & 257.4711396209896 & 263.89783180877566 & 4.395280238240957 & 857.4373284652829 & 861.8326124921441 \\
+        2 & 4.445464082062244 & 1.1798789985477924 & 171.9837566949427 & 177.8809516504407 & 4.387704025954008 & 862.4403069019318 & 866.8280142992735 \\
+        1 & 4.5677355751395226 & 0.4685130454599857 & 87.07020292803645 & 92.24436162412168 & 4.497119572013617 & 856.5085486248136 & 861.0056716166437 \\
+        \bottomrule
+    \end{tabular}\label{table:efficiency-changing_uniques-table}
+\end{table}
+
+% \begin{table}[ht]
+%     \caption{The result of the efficiency test where each table has a size of \num{100000000} rows and \num{10} columns and is read from a parquet file. The only thing that is changing is the number of unique columns.}
+%     \begin{tabular}{@{}S[table-format=9]SSSSSSSS@{}}
+%         \toprule
+%         {\shortstack{Rows}} & {\shortstack{Uniques}} & {\shortstack{Model:\\Loading}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
+%         \midrule
+%         100000000 & 4 & 4.48926031216979 & 1.3078778870403769 & 344.74235140904784 & 351.12746534124017 & 4.492683906108141 & 861.110518924892 & 865.6032059267163 \\
+%         100000000 & 3 & 4.47317860648036 & 1.5488394163548946 & 257.4711396209896 & 263.89783180877566 & 4.395280238240957 & 857.4373284652829 & 861.8326124921441 \\
+%         100000000 & 2 & 4.445464082062244 & 1.1798789985477924 & 171.9837566949427 & 177.8809516504407 & 4.387704025954008 & 862.4403069019318 & 866.8280142992735 \\
+%         100000000 & 1 & 4.5677355751395226 & 0.4685130454599857 & 87.07020292803645 & 92.24436162412168 & 4.497119572013617 & 856.5085486248136 & 861.0056716166437 \\
+%         \bottomrule
+%     \end{tabular}\label{table:efficiency-changing_uniques-table}
+% \end{table}
