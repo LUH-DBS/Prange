@@ -6,6 +6,7 @@ from pathlib import Path
 from shutil import rmtree
 import pandas as pd
 from pyarrow.lib import ArrowInvalid
+import re
 
 from autosklearn.metrics import accuracy, precision, recall, f1
 
@@ -128,6 +129,7 @@ def compare_training_time(train_model: bool = False):
 
 
 def speed_test(train_model: bool = False):
+    logger.setLevel(logging.DEBUG)
     model_rows_list = [5, 10, 20]
     train_table_count = TRAIN_TABLE_COUNT
     train_time_list = [3 * 60 * 60]
@@ -181,6 +183,8 @@ def speed_test(train_model: bool = False):
                                    ncols=COL_NUMBER,
                                    path_to_model=f'src/data/model/{model}_rows/{train_table_count}_tables/{TRAIN_DATASOURCE}/{int(train_time/60)}minutes/{"_".join(scoring_strategy_name)}.pickle'
                                    )
+    logger.setLevel(logging.INFO)
+    speed_test_to_tex()
 
 
 def correctness_test(experiment_name: str, model_rows_list: List[int], train_table_count: int, test_table_count: int, train_time_list: List[int], skip_tables: int, result_file_name: str, log_false_guesses: bool = False):
@@ -436,34 +440,58 @@ def speed_test_to_tex(input_path: str = 'src/result/speed_random-int',):
         Path(tmp_file.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
         keep_table.to_csv(tmp_file, index=False)
     csv_to_tex(input_path=tmp_path,
-               output_path='main/table-code/result/efficiency')
+               output_path='main/table-code/result/efficiency',
+               align='S',
+               )
     rmtree(tmp_path)
 
 
-def csv_to_tex(input_path: str = 'src/result/speed_random-int', output_path: str = 'main/table-code/result/efficiency'):
+def csv_to_tex(input_path: str = 'src/result/speed_random-int', output_path: str = 'main/table-code/result/efficiency', align: str = 'c'):
     from tably import Tably, AttrDict
     options = {
         'outfile': None,
-        'align': 'c',
-        'caption': None,
         'no_indent': False,
         'skip': 0,
-        'label': None,
         'no_header': False,
         'preamble': False,
         'sep': ',',
         'units': None,
-        'no_escape': False,
+        'no_escape': True,
         'fragment': False,
         'fragment_skip_header': False,
         'replace': True
     }
     for root, dirs, files in os.walk(input_path):
-        outdir = root.replace(input_path, output_path)
-        Path(outdir).mkdir(parents=True, exist_ok=True)
-        args = AttrDict(**options, files=[root + '/' + file for file in files],
-                        separate_outfiles=[outdir])
-        Tably(args).run()
+        for file in files:
+            filepath = root + '/' + file
+            file_format = 'csv'
+            small_tables = False
+            match file:
+                case x if 'parquet' in x:
+                    file_format = 'parquet'
+                case x if 'small-tables' in x:
+                    small_tables = True
+            tmp = re.findall("\d+rowModel", filepath)
+            tmp = [re.findall("\d+", x) for x in tmp]
+            if tmp and tmp[0]:
+                model_rows = tmp[0][0]
+            tmp = re.findall("\d+colTable", filepath)
+            tmp = [re.findall("\d+", x) for x in tmp]
+            if tmp and tmp[0]:
+                table_cols = tmp[0][0]
+            tmp = re.findall("\d+percent", filepath)
+            tmp = [re.findall("\d+", x) for x in tmp]
+            if tmp and tmp[0]:
+                nonunique_percent = tmp[0][0]
+            caption = f'The result of the efficiency test with a generated table with \SI{{{100-int(nonunique_percent)}}}{{\\percent}} unique columns in a {file_format} file format. The test was conducted on a model with an input size of {model_rows} rows on tables with {table_cols} columns.'
+            if small_tables:
+                caption += ' In this experiment, only the necessary rows were loaded in a first and only the necessary columns in a second step.'
+            label = f'table:efficiency_{file.replace(".csv", "")}'
+            outdir = root.replace(input_path, output_path)
+            Path(outdir).mkdir(parents=True, exist_ok=True)
+            args = AttrDict(**options, files=[filepath],
+                            separate_outfiles=[outdir], align=align, caption=caption, label=label)
+            Tably(args).run()
 
 
 if __name__ == '__main__':

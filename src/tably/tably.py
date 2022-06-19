@@ -13,7 +13,9 @@ PREAMBLE = r"""\documentclass[11pt, a4paper]{article}
 \usepackage{booktabs}
 \begin{document}"""
 
-HEADER = r"""\begin{{table}}[htb]
+WARNING = "\\message{{LaTeX Warning: This table needs to be manually checked}}\n"
+
+HEADER = WARNING + r"""\begin{{table}}[ht]
 {indent}\centering{caption}
 {indent}\begin{{tabular}}{{@{{}}{align}@{{}}}}
 {indent}{indent}\toprule"""
