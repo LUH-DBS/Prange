@@ -429,7 +429,7 @@ def get_example_features(max_count: int = 2, table_count: int = 1000, out_path: 
         result.to_csv(out_path, index=False, mode='a', header=False)
 
 
-def speed_test_to_tex(input_path: str = 'src/result/speed_random-int',):
+def speed_test_to_tex(input_path: str = 'src/result/speed_random-int'):
     tmp_path = '/tmp/thesis-tmp'
     for table_path in local.traverse_directory_path(input_path):
         if 'small-tables' in table_path:
@@ -474,7 +474,7 @@ def csv_to_tex(input_path: str = 'src/result/speed_random-int', output_path: str
     for root, dirs, files in os.walk(input_path):
         for file in files:
             filepath = root + '/' + file
-            file_format = 'csv'
+            file_format = 'CSV'
             small_tables = False
             match file:
                 case x if 'parquet' in x:
