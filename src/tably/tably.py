@@ -192,6 +192,10 @@ class Tably:
         match value:
             case "ML: Loading":
                 return r"Model:\\Loading"
+            case "ML: Loading I":
+                return r"Model:\\Loading I"
+            case "ML: Loading II":
+                return r"Model:\\Loading II"
             case "ML: Compute Time":
                 return r"Model:\\Computing"
             case "ML: Validation Time":

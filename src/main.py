@@ -431,11 +431,20 @@ def get_example_features(max_count: int = 2, table_count: int = 1000, out_path: 
 
 def speed_test_to_tex(input_path: str = 'src/result/speed_random-int',):
     tmp_path = '/tmp/thesis-tmp'
-    keep_columns = ['Rows', 'ML: Loading', 'ML: Compute Time', 'ML: Loading',
-                    'ML: Validation Time', 'ML: Total', 'Naive: Loading', 'Naive: Compute Time', 'Naive: Total']
     for table_path in local.traverse_directory_path(input_path):
+        if 'small-tables' in table_path:
+            keep_columns = ['Rows', 'ML: Loading I', 'ML: Compute Time', 'ML: Loading II',
+                            'ML: Validation Time', 'ML: Total', 'Naive: Loading', 'Naive: Compute Time', 'Naive: Total']
+            small_table = True
+        else:
+            keep_columns = ['Rows', 'ML: Loading I', 'ML: Compute Time', 'ML: Validation Time',
+                            'ML: Total', 'Naive: Loading', 'Naive: Compute Time', 'Naive: Total']
+            small_table = False
         table = local.get_table(table_path)
         keep_table = table[keep_columns]
+        if not small_table:
+            keep_table = keep_table.rename(
+                columns={'ML: Loading I': 'ML: Loading'})
         keep_table = keep_table.sort_values(["Rows"])
         tmp_file = table_path.replace(input_path, tmp_path)
         Path(tmp_file.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
