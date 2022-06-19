@@ -8,9 +8,12 @@ The proposed method works in three steps. First, the features are extracted from
 \section{Extracted Features}\label{sec:extracted_features} % TODO: Writing
 The feature extraction is necessary as explained in Section~\ref{sec:machine_learning}
 
-It differentiates between 4 cases
+Explain the feature extraction with the function in Listing~\ref{lst:proposed_method-prepare_column}.
 
 An example of a table with the extracted features is the Table~\ref{table:feature_table_example}.
+
+\lstinputlisting[float, language=Python, caption={[Preparing a column]This code shows how a column is prepared for the model. This process is repeated for each row; the result forms the feature table. The variable \texttt{column} contains the first \textit{n} rows of the column where \textit{n} is the input size of the model.}, label={lst:proposed_method-prepare_column}]{table-code/proposed-method/prepare-columns.py}
+
 
 \section{Training the Model}\label{sec:traing_the_model} % TODO: Writing
 How was the model trained? What settings where used for the training and why?
