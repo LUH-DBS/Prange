@@ -1,16 +1,31 @@
 \chapter{Proposed Method}\label{chap:proposed_method}
-% \section{Overview}\label{sec:overview}
-%! A Column containing a NaN or None is not 'unqiue' (because it can not be a primary key)
-In this thesis I present a method to increase the efficiency of finding unique columns in a table. The method is based on a machine learning model which uses the first few rows to guess if each column will have any duplicate values. Each positive guess will subsequently be validated using a conventional naive method.
+\section{Overview}\label{sec:overview}
+In this thesis I present a method to increase the efficiency of finding unique columns in a table. The method is based on a machine learning model which uses the first few rows of a row to guess if it will have any duplicate values anywhere in the column. Each positive guess will subsequently be validated using a conventional naive method. % TODO: the "I present" here or in problem statement?
+
+For the purpose of this method a column that contains only distinct values and a single empty row is not unique as it can not be used as a primary key. %? is here the best place for that? or better in fundamental knowledge? or both?
 
 The proposed method works in three steps. First, the features are extracted from the first rows of the table. After that, the model tries to predict the existence of duplicate values from the features. Finally, the columns which are unique according to the model are checked with a naive method.
 
-\section{Extracted Features}\label{sec:extracted_features} % TODO: Writing
-The feature extraction is necessary as explained in Section~\ref{sec:machine_learning}
+% ["Duplicates", "Data Type", "Sorted",
+%           # number
+%           "Min. value", "Max. value", "Mean", "Std. Deviation",
+%           # string
+%           "Avg. string length", "Min. string length", "Max. string length"
+%           ]  # 10
+\section{Extracting Features}\label{sec:extracted_features} % TODO: Writing
+The feature extraction is necessary as explained in Section~\ref{sec:machine_learning}\ldots % TODO
 
-Explain the feature extraction with the function in Listing~\ref{lst:proposed_method-prepare_column}.
+The feature extraction of the proposed method works in different steps which are executed on after the other. First all columns which contain duplicate values in the first rows are sorted out by setting the feature \enquote{Duplicates} to \num{1} and all other features to \num{0}.
 
-An example of a table with the extracted features is the Table~\ref{table:feature_table_example}.
+The remaining rows are checked in order to determine whether they are sorted or not. During this step, it is possible that an error occurs because two values in the column can not be compared. This is mostly the case if there is an empty/None value in the column.
+
+Next, a distinction is made between the different types of values. If the column contains only boolean values, the feature \enquote{Data Type} is set to \num{3}, all other features stay on \num{0}. Although it is very unlikely that a column contains exclusively boolean values without any duplicate values, there are tables in the gittables dataset to which this applies. % TODO: keep boolean values?
+
+Numeric values
+
+String values, mixed types
+
+The algorithm to extract features from a column can be found in Listing~\ref{lst:proposed_method-prepare_column} and an example of a table with the extracted features is the Table~\ref{table:feature_table_example}. Explanation\ldots
 
 \lstinputlisting[float, language=Python, caption={[Preparing a column]This code shows how a column is prepared for the model. This process is repeated for each row; the result forms the feature table. The variable \texttt{column} contains the first \textit{n} rows of the column where \textit{n} is the input size of the model.}, label={lst:proposed_method-prepare_column}]{table-code/proposed-method/prepare-columns.py}
 
