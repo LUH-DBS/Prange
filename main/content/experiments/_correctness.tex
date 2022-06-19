@@ -5,32 +5,45 @@ In this section, different experiments will be conducted to determine which para
 
 
 \subsection{Experiment Data}\label{subsec:correctness_experiment-data} % TODO: Writing
-The experiments where performed on the gittables dataset\cite{gittables-article}. It contains around one million tables taken from %TODO: describe the dataset
+The experiments where performed on the gittables dataset, which is a large corpus of relational tables extracted from CSV files in GitHub\cite{gittables-article}.
 
 For these experiments, only the tables with at least 100 rows and 3 columns where used. % TODO: how many exist in the dataset?
 
 
 \subsection{Comparing models with different input sizes}\label{subsec:correctness_comparing-input-size} % TODO: Writing
-Experiment Setup
+As described in Section~\ref{sec:extracted_features}, the proposed method works by extracting features from the first rows of a table and using a machine learning model to guess if a column has duplicate values based on those features. This experiment compares different models which use \num{5}, \num{10}, \num{20} and \num{50} rows to extract features. Each of the models was trained for \num{5} hours.
+
+During the experiment, \num{5000} tables with a total of XX rows were used to test each model.
 
 Result
 
 Conclusion
 
 \subsection{Altering the training time}\label{subsec:correctness_comparing-training-time} % TODO: Writing
-Experiment Setup
+In this experiment, different models with an input size of \num{10} rows are being trained for different amounts of time. Each model is trained on \num{10000} tables with at least \num{100} rows and \num{3} columns. Subsequently, each of the models is tested on \num{5000} different tables.
 
 Result
 
 Conclusion
 
-\subsection{Testing only non-trivial columns}\label{subsec:correctness_non-trivial-columns} % TODO: Writing
-Experiment Setup
+% \subsection{Testing only non-trivial columns}\label{subsec:correctness_non-trivial-columns} % TODO: Writing
+% Experiment Setup
 
-Result
+% Result
 
-Conclusion
+% Conclusion
 
 \subsection{Summarized Results}\label{subsec:correctness_conclusions} % TODO: Writing
 
+
 \subsection{Examine columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: Writing
+False guesses are the largest weakness of the proposed method as false negatives lead to a column being completely ignored and false positives to reduced efficiency, which will be explored further in Section~\ref{subsec:efficiency-changing_uniques}. It is therefore very important to examine the columns which lead to false guesses to improve the model if possible.
+
+False positive guesses occur very often as the model is trained to avoid any false negative guesses. Of the guesses the model makes roughly \SI{10}{\percent} are true positives and \SI{20}{\percent} are false positives. % TODO: table to back this up
+The false guesses are unfortunately mostly unavoidable as they are caused by empty cells which are located after the input rows of the model. As the column would be a primary key candidate without these missing values, there is nothing that can be changed to improve the correctness of the model in this case.
+
+Another example for a column leading to a false positive guess is one containing the name of authors. For the model, this column contains short strings which do not have any duplicates in the first rows. % TODO: write further
+
+False negatives
+
+% Maybe a summarizing paragraph
