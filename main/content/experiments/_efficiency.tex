@@ -14,13 +14,14 @@ For the experiments, tables with different sizes were generated. They each had \
 \subsection{Base experiment}\label{subsec:efficiency-base_experiment}
 For the first experiment, a model which uses 10 rows as its input was used. The experiment data consisted of \num{9} tables with \num{10} columns each and between \num{100} and \num{100000000} rows. Three of the columns where unique, seven contained duplicates.
 
-Table~\ref{table:efficiency_csv-70percent} shows that for tables with up to \num{100000} rows, the naive algorithm takes only a fraction of a second and is therefore faster than the proposed machine learning model. However, since the model takes a roughly constant time of half a second, it becomes faster as the table size surpasses one million rows.
+Figure~\ref{fig:efficiency-base_experiment-plot} and Table~\ref{table:efficiency_csv-70percent} show that for tables with up to \num{100000} rows, the naive algorithm takes only a fraction of a second and is therefore faster than the proposed machine learning model. However, since the model takes a roughly constant time of half a second, it becomes faster as the table size surpasses one million rows.
 
 Particularly noteworthy is the fact that the validation time for the model takes very close to \SI{30}{\percent} of the time of the naive algorithm. That is because only columns which are unique according to the model are validated, so in this case three.
 
 In conclusion, it is clear that for large tables the most time is used loading the dataset and checking the columns for duplicates with the naive algorithm. While a possible improvement of the naive algorithm is not part of this thesis, in Section~\ref{subsec:efficiency-shorter_loading_times} two different ways to shorten the loading times will be explored. % TODO: write better
 
-% TODO: plot
+\input{table-code/experiments/efficiency-base_experiment_plot.tex}
+
 
 \subsection{Shorten loading times}\label{subsec:efficiency-shorter_loading_times} % TODO: Writing
 While CSV files are very easy to use, they are not meant to efficiently store large quantities of data. A file format which is substantially more suitable to handle large datasets is the parquet format\cite{parquet-book}.
