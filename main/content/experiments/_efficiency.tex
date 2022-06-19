@@ -23,7 +23,7 @@ In conclusion, it is clear that for large tables the most time is used loading t
 \input{table-code/experiments/efficiency-base_experiment_plot.tex}
 
 
-\subsection{Shorten loading times}\label{subsec:efficiency-shorter_loading_times} % TODO: Writing
+\subsection{Shorten loading times}\label{subsec:efficiency-shorter_loading_times}
 While CSV files are very easy to use, they are not meant to efficiently store large quantities of data. A file format which is substantially more suitable to handle large datasets is the parquet format\cite{parquet-book}.
 
 It achieves this through the use of various features such as column wise compression, which tends to be more efficient since the values in the same column are usually very similar. This has the additional benefit of enabling the algorithm to only read the required columns which may decrease \io{} as only positive guesses need to be loaded for the validation.
@@ -34,9 +34,9 @@ The Table~\ref{table:efficiency_parquet-70percent} shows the result of the base 
 
 Table~\ref{table:efficiency_parquet-70percent_small-tables} presents the result for the experiment using the advantages of the file format by loading only the necessary rows and columns. That is why in this case, there are two loading times for the model. The first time only the first row group is being loaded while the second time only the columns which are unique according to the model are loaded for validation. However, this does not make any difference except for the largest table and even then the total time is hardly changing.
 
-In summary, although the reduced \io{} does not make a significant difference, using a good file format leads to a large improvement. The reduced \io{} could however be an important improvement if the file is not on a local hard drive but for example on a network attached storage and the file reading speed is slow. % TODO: write better
+In summary, although the reduced \io{} does make a notable difference, it is not very large compared to the efficiency gain through the use of the model, as can be seen in Figure~\ref{fig:efficiency-shorter_loading_time-plot}. This could change, however, if the file reading speed would be slower, for example because they have to be read over the internet. In this case, reading only the necessary rows and columns could make a larger difference too.
 
-% TODO :plot
+\input{table-code/experiments/efficiency-shorter_loading_time_plot.tex}
 
 
 \subsection{Comparing models with different input sizes}\label{subsec:efficiency-comparing_models} % TODO: Writing
