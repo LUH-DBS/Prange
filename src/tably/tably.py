@@ -200,6 +200,10 @@ class Tably:
                 return r"Model:\\Total"
             case "Naive: Loading":
                 return r"Naive:\\Loading"
+            case "Naive: Loading I":
+                return r"Naive:\\Loading I"
+            case "Naive: Loading II":
+                return r"Naive:\\Loading II"
             case "Naive: Compute Time":
                 return r"Naive:\\Computing"
             case "Naive: Total":
