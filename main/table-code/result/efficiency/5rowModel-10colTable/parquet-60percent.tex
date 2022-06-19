@@ -1,8 +1,10 @@
+\message{LaTeX Warning: This table needs to be manually checked}
 \begin{table}[htb]
     \centering
-    \begin{tabular}{@{}cccccccccc@{}}
+    \caption{The result of the efficiency test with a generated table with \SI{40}{\percent} unique columns in a parquet file format. The test was conducted on a model with an input size of 5 rows on tables with 10 columns.}
+    \begin{tabular}{@{}SSSSSSSSSS@{}}
         \toprule
-        Rows & Columns & ML: Loading & ML: Compute Time & ML: Loading & ML: Validation Time & ML: Total & Naive: Loading & Naive: Compute Time & Naive: Total \\
+        {Rows} & {Columns} & {ML: Loading} & {ML: Compute Time} & {ML: Loading} & {ML: Validation Time} & {ML: Total} & {Naive: Loading} & {Naive: Compute Time} & {Naive: Total} \\
         \midrule
         100 & 10 & 0.0295057892799377 & 0.8930145278573036 & 0.0295057892799377 & 0.0001655407249927 & 0.923016183078289 & 0.0066963359713554 & 0.0006499774754047 & 0.0073494352400302 \\
         1000 & 10 & 0.0041689611971378 & 0.8930765092372894 & 0.0041689611971378 & 0.0007404014468193 & 0.8983441069722176 & 0.0042342171072959 & 0.0018981657922267 & 0.0061333291232585 \\
@@ -14,5 +16,5 @@
         5000000 & 10 & 0.1949130743741989 & 0.906261496245861 & 0.1949130743741989 & 11.87022789940238 & 13.000012069940569 & 0.1888897195458412 & 29.05283895134926 & 29.241731964051723 \\
         50000000 & 10 & 2.190954457968473 & 0.9081766791641712 & 2.190954457968473 & 151.72741992026567 & 155.09234410524368 & 2.1839862391352654 & 379.3704476840794 & 381.5544367544353 \\
         \bottomrule
-    \end{tabular}
+    \end{tabular}\label{table:efficiency_parquet-60percent}
 \end{table}
