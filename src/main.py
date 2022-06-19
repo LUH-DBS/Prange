@@ -431,11 +431,12 @@ def get_example_features(max_count: int = 2, table_count: int = 1000, out_path: 
 
 def speed_test_to_tex(input_path: str = 'src/result/speed_random-int',):
     tmp_path = '/tmp/thesis-tmp'
-    keep_columns = ['Rows', 'Columns', 'ML: Loading', 'ML: Compute Time', 'ML: Loading',
+    keep_columns = ['Rows', 'ML: Loading', 'ML: Compute Time', 'ML: Loading',
                     'ML: Validation Time', 'ML: Total', 'Naive: Loading', 'Naive: Compute Time', 'Naive: Total']
     for table_path in local.traverse_directory_path(input_path):
         table = local.get_table(table_path)
         keep_table = table[keep_columns]
+        keep_table = keep_table.sort_values(["Rows"])
         tmp_file = table_path.replace(input_path, tmp_path)
         Path(tmp_file.rsplit('/', 1)[0]).mkdir(parents=True, exist_ok=True)
         keep_table.to_csv(tmp_file, index=False)

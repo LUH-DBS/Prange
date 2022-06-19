@@ -13,10 +13,9 @@ PREAMBLE = r"""\documentclass[11pt, a4paper]{article}
 \usepackage{booktabs}
 \begin{document}"""
 
-WARNING = "\\message{{LaTeX Warning: This table needs to be manually checked}}\n"
+WARNING = "\\GenericWarning{{}}{{LaTeX Warning: This table needs to be manually checked}}\n"
 
-HEADER = WARNING + r"""\begin{{table}}[ht]
-{indent}\centering{caption}
+HEADER = WARNING + r"""\begin{{table}}[ht]{caption}
 {indent}\begin{{tabular}}{{@{{}}{align}@{{}}}}
 {indent}{indent}\toprule"""
 
@@ -182,11 +181,31 @@ class Tably:
                 try:
                     float(line[index])
                 except ValueError:
-                    line[index] = '{' + line[index] + '}'
+                    line[index] = '{\shortstack{' + \
+                        self._replace_tex_headers(line[index]) + '}}'
         row = r'{indent}{indent}{content} \\'.format(
             indent=indent,
             content=' & '.join(self.tex_str(line)))
         return row
+
+    def _replace_tex_headers(self, value: str) -> str:
+        match value:
+            case "ML: Loading":
+                return r"Model:\\Loading"
+            case "ML: Compute Time":
+                return r"Model:\\Computing"
+            case "ML: Validation Time":
+                return r"Model:\\Validation"
+            case "ML: Total":
+                return r"Model:\\Total"
+            case "Naive: Loading":
+                return r"Naive:\\Loading"
+            case "Naive: Compute Time":
+                return r"Naive:\\Computing"
+            case "Naive: Total":
+                return r"Naive:\\Total"
+            case _:
+                return value
 
     def combine_tables(self):
         """Combine all tables together and add a preamble if required.
