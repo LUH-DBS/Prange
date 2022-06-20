@@ -11,13 +11,18 @@ For these experiments, only the tables with at least 100 rows and 3 columns wher
 
 
 \subsection{Comparing models with different input sizes}\label{subsec:correctness_comparing-input-size} % TODO: Writing
-As described in Section~\ref{sec:extracted_features}, the proposed method works by extracting features from the first rows of a table and using a machine learning model to guess if a column has duplicate values based on those features. This experiment compares different models which use \num{5}, \num{10}, \num{20} and \num{50} rows to extract features. Each of the models was trained for \num{5} hours.
+As described in Section~\ref{sec:extracted_features}, the proposed method works by extracting features from the first rows of a table and using a machine learning model to guess if a column has duplicate values based on those features. This experiment compares different models which use \num{5}, \num{10}, \num{20} and \num{50} rows to extract features. A model with an input size larger than \num{50} was not feasible as the tables used for training and testing had a minimum size of \num{100} rows. With a bigger input, the preparation would end up working like the naive algorithm with an extra step. % TODO: is ref to extracted features correct?
 
-During the experiment, \num{5000} tables with a total of XX rows were used to test each model.
+Each of the models was trained for \num{5} hours. During the experiment, \num{5000} tables which were not used during training with a total of \num{57211} columns were used to test each model. % TODO: write better?
 
-Result
+The results of the experiment in Table~\ref{table:correctness-comparing_input_sizes} show that the input size has a large influence on the quality of the prediction. While none of the models has any false negative guesses, the ratio of false positive guesses decreases with an increasing input size.
 
-Conclusion
+This experiment shows that an increase in the input size of the model does have a great impact on the number of false positive guesses. However, since each positive guess by the model is verified using the naive algorithm, the number of false guesses has no effect on the quality of the final prediction of the proposed method. What is effected by it is the efficiency of the method; this is explored further in Section~\ref{subsec:efficiency-changing_uniques}.
+
+Another important finding of this experiment is that even with a small input size, the model has not made any false negative guesses. As the negative guesses of the model are not checked, it is important for them to be correct to ensure the overall correctness of the proposed method.
+
+\input{table-code/result/correctness/compare_input_sizes.tex}
+
 
 \subsection{Altering the training time}\label{subsec:correctness_comparing-training-time} % TODO: Writing
 In this experiment, different models with an input size of \num{10} rows are being trained for different amounts of time. Each model is trained on \num{10000} tables with at least \num{100} rows and \num{3} columns. Subsequently, each of the models is tested on \num{5000} different tables.
@@ -36,10 +41,11 @@ Conclusion
 \subsection{Summarized Results}\label{subsec:correctness_conclusions} % TODO: Writing
 
 
-\subsection{Examine columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: Writing
+\subsection{Examine columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: Writing %? maybe a table with examples?
 False guesses are the largest weakness of the proposed method as false negatives lead to a column being completely ignored and false positives to reduced efficiency, which will be explored further in Section~\ref{subsec:efficiency-changing_uniques}. It is therefore very important to examine the columns which lead to false guesses to improve the model if possible.
 
-False positive guesses occur very often as the model is trained to avoid any false negative guesses. Of the guesses the model makes roughly \SI{10}{\percent} are true positives and \SI{20}{\percent} are false positives. % TODO: table to back this up
+False positive guesses occur very often as the model is trained to avoid any false negative guesses. The experiment in Section\ref{subsec:correctness_comparing-input-size} has shown that depending on the input size between \SI{18}{\percent} and \SI{77}{\percent} of the positive guesses are false positives. % TODO: how many guesses in total are correct/false
+
 The false guesses are unfortunately mostly unavoidable as they are caused by empty cells which are located after the input rows of the model. As the column would be a primary key candidate without these missing values, there is nothing that can be changed to improve the correctness of the model in this case.
 
 Another example for a column leading to a false positive guess is one containing the name of authors. For the model, this column contains short strings which do not have any duplicates in the first rows. % TODO: write further
