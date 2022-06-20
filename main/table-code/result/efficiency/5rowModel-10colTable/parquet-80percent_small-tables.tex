@@ -1,6 +1,6 @@
 \GenericWarning{}{LaTeX Warning: This table needs to be manually checked}
 \begin{table}[ht]
-    \caption{The result of the efficiency test with a generated table with \SI{20}{\percent} unique columns in a parquet file format. The test was conducted on a model with an input size of 5 rows on tables with 10 columns.}
+    \caption{The result of the efficiency test with a generated table with \SI{20}{\percent} unique columns in a parquet file format. The test was conducted on a model with an input size of 5 rows on tables with 10 columns. During the experiment, only the necessary rows and columns were loaded.}
     \begin{tabular}{@{}SSSSSSSSS@{}}
         \toprule
         {\shortstack{Rows}} & {\shortstack{Model:\\Loading I}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Loading II}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
