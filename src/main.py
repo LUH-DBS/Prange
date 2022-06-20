@@ -364,44 +364,45 @@ def setup_logging(log_to_file: bool = True, level=logging.DEBUG):
 
 def dataset_info():
     logger.info("Starting to gather dataset info")
-    MIN_COLS = 10
-    over_100 = 0
-    over_1000 = 0
-    for dataset in ["gittables-parquet", "gittables-csv"]:
+    for dataset in ["gittables-parquet"]:
+        min_size_counter = 0
+        column_counter = 0
+        unique_col_counter = 0
+        unique_col_avg = 0
         counter = 0
-        with open(f'dataset_info-{dataset}.csv', 'w') as file:
-            # file.write("Folder,File,Rows,Columns\n")
-            for path in local.traverse_directory_path(f'src/data/{dataset}/'):
-                counter += 1
-                # print(f"Table {counter}             ", end="\r")
-                try:
-                    table = local.get_table(path)
-                except pd.errors.ParserError as e:
-                    counter -= 1
-                    logger.common_error(
-                        "ParserError with file %s", path)
-                    continue
-                except ArrowInvalid as error:
-                    counter -= 1
-                    logger.common_error(
-                        "ArrowInvalid error with file %s", path)
-                    continue
-                except UnicodeDecodeError:
-                    counter -= 1
-                    logger.common_error(
-                        "UnicodeDecodeError with file %s", path)
-                    continue
-                if len(table.columns) >= MIN_COLS and len(table) > 100:
-                    if len(table) > 1000:
-                        over_1000 += 1
-                    elif len(table) > 100:
-                        over_100 += 1
-                    row = [path.rsplit('/', 2)[1], path.rsplit('/', 1)
-                           [1], len(table), len(table.columns)]
-                    row = [str(x) for x in row]
-                    # file.write(",".join(row) + "\n")
+        for path in local.traverse_directory_path(f'src/data/{dataset}/'):
+            counter += 1
+            try:
+                table = local.get_table(path)
+            except pd.errors.ParserError as e:
+                counter -= 1
+                logger.common_error(
+                    "ParserError with file %s", path)
+                continue
+            except ArrowInvalid as error:
+                counter -= 1
+                logger.common_error(
+                    "ArrowInvalid error with file %s", path)
+                continue
+            except UnicodeDecodeError:
+                counter -= 1
+                logger.common_error(
+                    "UnicodeDecodeError with file %s", path)
+                continue
+            if len(table.columns) >= MIN_COLS and len(table) > MIN_ROWS:
+                min_size_counter += 1
+                column_counter += len(table.columns)
+                unique_cols = naive_algorithm.find_unique_columns_in_table(
+                    table)
+                unique_col_counter += len(unique_cols)
+                unique_col_avg += len(unique_cols) / len(table.columns)
+                # if len(unique_cols) / len(table.columns) < 0.01:
+                #     logger.info(
+                #         f"Table with {len(unique_cols)} uniques and {len(table.columns)} columns ({path})")
         logger.info(
-            f"{dataset} has {over_100} tables with > 100 rows and {over_1000} tables with > 1000 rows")
+            f"{dataset} has {min_size_counter:,.0f} tables with > {MIN_ROWS} rows and > {MIN_COLS} columns")
+        logger.info(
+            f"There are {unique_col_counter / column_counter * 100:.2f}% unique columns (avg. {unique_col_avg / counter * 100:.2f}% per table)")
 
 
 def get_example_features(max_count: int = 2, table_count: int = 1000, out_path: str = 'features.csv'):
@@ -429,7 +430,7 @@ def get_example_features(max_count: int = 2, table_count: int = 1000, out_path: 
         result.to_csv(out_path, index=False, mode='a', header=False)
 
 
-def speed_test_to_tex(input_path: str = 'src/result/speed_random-int',):
+def speed_test_to_tex(input_path: str = 'src/result/speed_random-int'):
     tmp_path = '/tmp/thesis-tmp'
     for table_path in local.traverse_directory_path(input_path):
         if 'small-tables' in table_path:
@@ -454,6 +455,21 @@ def speed_test_to_tex(input_path: str = 'src/result/speed_random-int',):
                align='S',
                )
     rmtree(tmp_path)
+    _speed_plot('src/result/speed_random-int')
+
+
+def _speed_plot(input_path: str):
+    with open('main/table-code/result/efficiency/plot.txt', 'w') as file:
+        for table_path in local.traverse_directory_path(input_path):
+            table = local.get_table(table_path)
+            table = table.sort_values(["Rows"])
+            file.write(f"{table_path}\nModel:\ncoordinates {{\n")
+            for nrows, model_time in table[["Rows", "ML: Total"]].values:
+                file.write(f"({nrows},{model_time}) ")
+            file.write("\n};\nNaive:\ncoordinates{\n")
+            for nrows, naive_time in table[["Rows", "Naive: Total"]].values:
+                file.write(f"({nrows},{naive_time}) ")
+            file.write("\n};\n\n")
 
 
 def csv_to_tex(input_path: str = 'src/result/speed_random-int', output_path: str = 'main/table-code/result/efficiency', align: str = 'c'):
@@ -474,7 +490,7 @@ def csv_to_tex(input_path: str = 'src/result/speed_random-int', output_path: str
     for root, dirs, files in os.walk(input_path):
         for file in files:
             filepath = root + '/' + file
-            file_format = 'csv'
+            file_format = 'CSV'
             small_tables = False
             match file:
                 case x if 'parquet' in x:
