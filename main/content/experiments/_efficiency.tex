@@ -1,24 +1,26 @@
 \section{Efficiency}\label{sec:efficiency}
-Another important metric to determine the feasibility of the machine learning model is the efficiency. The main question is if or from what table size the model is faster than a naive method. This becomes even more interesting as each positive guess of the model has to be verified using the naive algorithm because the model is trained for the highest recall and precision, not accuracy. % TODO: ref to model
+Another important metric to determine the feasibility of the machine learning model is the efficiency. The main question is if or from what table size the proposed method is faster than the naive method. This becomes even more interesting as each positive guess of the model has to be verified using the naive algorithm to increase the accuracy. % TODO: ref to model
 
-% TODO: Describe which model where used -> 3 hours, 10.000 tables, recall_precision
+In the following experiments the models that were used were trained for \num{3} hours on \num{10000} tables with at least \num{100} rows and \num{3} columns. % They were trained with the recall_precision metric
+% Apart from the experiment in Section~\ref{subsec:efficiency-comparing_models} a model with an input size of \num{10} rows was used. % TODO: uncomment if subsection exists
 
 \subsection{Experiment Data}\label{subsec:efficiency-experiment_data}
-The experiment was conducted on a set of generated tables to control for the size of the table as well as the number of unique and non-unique columns, as can be seen in Table~\ref{table:efficiency-generated_table}.
+The experiments in this section were conducted on a set of generated tables to control for the size of the table as well as the number of unique and non-unique columns. A small example of such a table can be seen in Table~\ref{table:efficiency-generated_table}.
 
-For the experiments, tables with different sizes were generated. They each had \num{10} columns and between \num{100} and \num{100000000} columns. To ensure the correct prediction by the model, the columns where generated in a specific way. The unique columns are evenly incrementing for the first \num{50} rows, while the first two rows of the non-unique columns contain the same value. The rest of each column contains distinct incrementing values which are mixed up to increase the time of the naive algorithm which works by sorting each column. % TODO: ref to naive algorithm
+The generated tables each have \num{10} columns and between \num{100} and \num{100000000} columns. To ensure the correct prediction by the model, the columns where generated in a specific way.
+The unique columns are evenly incrementing for the first \num{50} rows, while the first two rows of the non-unique columns contain the same value. The rest of each column contains distinct incrementing values which are mixed up to increase the time the sorting based naive algorithm takes to find unique columns. % TODO: ref to naive algorithm
 
 \input{table-code/experiments/efficiency-generated_table.tex}
 
 
 \subsection{Base experiment}\label{subsec:efficiency-base_experiment}
-For the first experiment, a model which uses 10 rows as its input was used. The experiment data consisted of \num{9} tables with \num{10} columns each and between \num{100} and \num{100000000} rows. Three of the columns where unique, seven contained duplicates.
+The first experiment explores the efficiency of the proposed method compared to the naive algorithm. The generated tables that were used contained \num{3} unique and \num{7} non-unique tables.
 
-Figure~\ref{fig:efficiency-base_experiment-plot} and Table~\ref{table:efficiency_csv-70percent} show that for tables with up to \num{100000} rows, the naive algorithm takes only a fraction of a second and is therefore faster than the proposed machine learning model. However, since the model takes a roughly constant time of half a second, it becomes faster as the table size surpasses one million rows.
+Figure~\ref{fig:efficiency-base_experiment-plot} and Table~\ref{table:efficiency_csv-70percent} show that for tables with up to \num{100000} rows, the naive algorithm takes only a fraction of a second and is therefore faster than the proposed machine learning model. However, since the model takes a roughly constant time of half a second tom compute its prediction, it becomes faster as the table size surpasses one million rows.
 
-Particularly noteworthy is the fact that the validation time for the model takes very close to \SI{30}{\percent} of the time of the naive algorithm. That is because only columns which are unique according to the model are validated, so in this case three.
+The column \enquote{Model: Validation} in Table~\ref{table:efficiency_csv-70percent} additionally illustrates that the validation time of the proposed method is proportional to the amount of positive guesses by the model. This highlights the importance of a high accuracy as explained in Section~\ref{subsec:correctness_comparing-input-size}, because each false positive guess unnecessarily increases the time it takes to validate the guesses and therefore decreases the efficiency.
 
-In conclusion, it is clear that for large tables the most time is used loading the dataset and checking the columns for duplicates with the naive algorithm. While a possible improvement of the naive algorithm is not part of this thesis, in Section~\ref{subsec:efficiency-shorter_loading_times} two different ways to shorten the loading times will be explored. % TODO: write better
+In conclusion, it is clear that for large tables loading the dataset and checking the columns for duplicates with the naive algorithm takes the longest. Ways to shorten the loading time will be explored in Section~\ref{subsec:efficiency-shorter_loading_times}. While a more efficient naive algorithm is not part of this thesis, Section~\ref{subsec:correctness_comparing-input-size} and~\ref{subsec:correctness_examine-false-guesses} deal with the question of how to decrease the number of false positive guesses.
 
 \input{table-code/experiments/efficiency-base_experiment_plot.tex}
 
@@ -32,19 +34,19 @@ Another advantageous property of this format is the concept of row groups, which
 
 The Table~\ref{table:efficiency_parquet-70percent} shows the result of the base experiment from Section~\ref{subsec:efficiency-base_experiment} repeated with tables generated as parquet files. While the computing time for the model and the naive algorithm remain roughly equal compared to Table~\ref{table:efficiency_csv-70percent}, the loading time is decreased significantly for large tables. %? loading times make up a larger part of total time for model
 
-Table~\ref{table:efficiency_parquet-70percent_small-tables} presents the result for the experiment using the advantages of the file format by loading only the necessary rows and columns. That is why in this case, there are two loading times for the model. The first time only the first row group is being loaded while the second time only the columns which are unique according to the model are loaded for validation. However, this does not make any difference except for the largest table and even then the total time is hardly changing.
+Table~\ref{table:efficiency_parquet-70percent_small-tables} presents the result for the experiment using the advantages of the file format by loading only the necessary rows and columns. This leads to two loading times for the model. The first time only the first row group is being loaded while the second time only the columns which are unique according to the model are loaded. However, this does not make any difference except for the largest table and even then the total time is hardly changing.
 
-In summary, although the reduced \io{} does make a notable difference, it is not very large compared to the efficiency gain through the use of the model, as can be seen in Figure~\ref{fig:efficiency-shorter_loading_time-plot}. This could change, however, if the file reading speed would be slower, for example because they have to be read over the internet. In this case, reading only the necessary rows and columns could make a larger difference too.
+In summary, although the reduced loading time does make a notable difference, it is not very large compared to the efficiency gain through the use of the model, as can be seen in Figure~\ref{fig:efficiency-shorter_loading_time-plot}. This could change, however, if the file reading speed would be slower, for example because they have to be read over the internet. In this case, reading only the necessary rows and columns and thus decreasing \io{} further could make a larger difference too.
 
 \input{table-code/experiments/efficiency-shorter_loading_time_plot.tex}
 
 
-\subsection{Comparing models with different input sizes}\label{subsec:efficiency-comparing_models} % TODO: Writing
-Short description of what \enquote{different input sizes} means (long explanation in earlier section).
+% \subsection{Comparing models with different input sizes}\label{subsec:efficiency-comparing_models} % TODO: Writing
+% Short description of what \enquote{different input sizes} means (long explanation in earlier section).
 
-Compare times for \SI{70}{\percent}.
+% Compare times for \SI{70}{\percent}.
 
-Conclusion: No large difference, the difference may correlate with the larger file size of the model itself.
+% Conclusion: No large difference, the difference may correlate with the larger file size of the model itself.
 
 
 \subsection{Changing the ratio of unique columns}\label{subsec:efficiency-changing_uniques}
@@ -59,3 +61,5 @@ In the gittables dataset which is used in the correctness test, the ratio of uni
 
 \subsection{Summarized results}\label{subsec:efficiency-summarized_results}
 The experiments in this section show that the proposed method of finding primary key candidates is suitable for some cases. If the tables which will be examined contain mostly less than \num{1000000} rows or the ratio of unique columns is high, the model is probably slower than the naive algorithm. On very large tables with \num{100000000} or more rows however the model can improve the time it takes to find all unique columns significantly. % maybe something about i/o?
+
+It additionally demonstrates that it is important for the efficiency to decrease the number of false positive guesses of the model as much as possible.
