@@ -1,0 +1,19 @@
+\begin{table}[ht]
+  \centering
+  \caption[Result for Correctness: Comparing different training times]{The result of the correctness experiment comparing models which were trained for different amounts of time. Each of the models was trained for \num{5} hours on \num{10000} tables. The test was conducted on \num{5000} tables with an average of \num{184} rows and a total of \num{57211} columns.} % TODO: maybe a text more different from table compare-input-sizes
+  \begin{tabular}{SSSSS}
+    \toprule
+    {Training Time}   & {Accuracy}         & {Precision}         & {Recall}           & {F1}               \\ \midrule
+    \SI{1}{\minute}   & 0.8468651133523274 & 0.369447843927723   & 0.9994104402025711 & 0.5395006570302234 \\
+    \SI{2}{\minute}   & 0.8462183845763926 & 0.36747685185185186 & 0.9894818854694195 & 0.5359215107078806 \\
+    \SI{5}{\minute}   & 0.8231284193599133 & 0.3365895233724513  & 1.0                & 0.5036542894982097 \\
+    \SI{10}{\minute}  & 0.8231284193599133 & 0.3365895233724513  & 1.0                & 0.5036542894982097 \\
+    \SI{20}{\minute}  & 0.8231284193599133 & 0.3365895233724513  & 1.0                & 0.5036542894982097 \\
+    \SI{40}{\minute}  & 0.8231284193599133 & 0.3365895233724513  & 1.0                & 0.5036542894982097 \\
+    \SI{60}{\minute}  & 0.8231284193599133 & 0.3365895233724513  & 1.0                & 0.5036542894982097 \\
+    \SI{120}{\minute} & 0.8468651133523274 & 0.3694854264123785  & 1.0                & 0.5395974565137421 \\
+    \SI{180}{\minute} & 0.8730139308874167 & 0.4139962870288159  & 0.9990261005064277 & 0.5854020430291617 \\
+    \SI{300}{\minute} & 0.8231284193599133 & 0.3365895233724513  & 1.0                & 0.5036542894982097 \\
+    \bottomrule
+  \end{tabular}\label{table:correctness-compare_training_time}
+\end{table}

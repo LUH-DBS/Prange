@@ -25,11 +25,17 @@ Another important finding of this experiment is that even with a small input siz
 
 
 \subsection{Altering the training time}\label{subsec:correctness_comparing-training-time} % TODO: Writing
+The Auto-Sklearn library, which was used to train the machine learning models, automatically searches for the best learning algorithm and optimizes it, as was described in Section~\ref{sec:used_packages_and_libraries}. Since this process takes time to run, the theory is that the performance of the model increases with higher training time. % TODO: maybe write better? 
+
 In this experiment, different models with an input size of \num{10} rows are being trained for different amounts of time. Each model is trained on \num{10000} tables with at least \num{100} rows and \num{3} columns. Subsequently, each of the models is tested on \num{5000} different tables.
 
-Result
+The Table~\ref{table:correctness-compare_training_time} presents the results of this experiment. With a training time of \num{1} or \SI{2}{\minute} the performance of the machine learning model is indeed slightly worse as there are some false positive guesses. %! How many?
 
-Conclusion
+However, apart from producing false negative guesses, the models with the two shortest training times seem to performed slightly better than most of the other models as their accuracy and precision is higher. Additionally, the model with the best performance is not the one with the highest training time but the one a training time of \SI{120}{\minute}.
+
+This experiment very clearly demonstrates that the machine learning model for this task does not need a long training time. Furthermore, it shows that there might be advantageous to train a model multiple times and compare them to find the best performing, since the performance is not strongly correlated to the training time.
+
+\input{table-code/result/correctness/compare-training-time.tex}
 
 % \subsection{Testing only non-trivial columns}\label{subsec:correctness_non-trivial-columns} % TODO: Writing
 % Experiment Setup
