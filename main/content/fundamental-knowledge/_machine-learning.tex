@@ -1,19 +1,34 @@
 \section{Machine Learning}\label{sec:machine_learning}
 Machine learning is a part of the field of \ac{ai}. The focus is on extracting information from large amounts of data, with algorithms gradually improving themselves to mimic human learning~\cite{what-is-ml}.
 
-Machine learning algorithms generally require labeled data to extract information. This labelled data consists mostly of a table where each column corresponds to a feature, which is a specific aspect the algorithm can use to infer some information. % Is a citation necessary?
+The field of machine learning is itself divided into two main parts, \enquote{Classical learning} and \enquote{Deep learning}\cite{ml-visual-explanation}.
 
-TODO\@: Deep Learning, unlabeled data (images etc)
-\subsection{Categories of Machine Learning}
-% https://scikit-learn.org/stable/tutorial/basic/tutorial.html#machine-learning-the-problem-setting
-\begin{itemize}
-  \item Supervised
-        \begin{itemize}
-          \item Classification
-          \item Regression
-        \end{itemize}
-  \item Unsupervised
-  \item explain the idea behind the feature extraction (it has to be understandable by a student)
-\end{itemize}
+% https://ischoolonline.berkeley.edu/blog/what-is-machine-learning/
+% https://www.ibm.com/cloud/learn/machine-learning
 
-\subsection{Scikit-Learn and Auto-Sklearn}\label{sec:ml-libraries}
+\subsection{Deep Learning and neural networks} % TODO: need to proof read
+
+Deep Learning includes various techniques that use neural networks. In the simplest form, neural networks consist of different so-called nodes, which are arranged as layers\cite{neuralNet}.
+
+The first layer, also known as the \enquote{input layer}, is the layer the input vector is applied to. If the input exceeds a certain value, the neuron is activated, i.e.\ it passes on an output.
+
+In the next layers, which are called \enquote{hidden layers}, the outputs from all the nodes of the previous layer and a \enquote{bias layer} are computed in each node and the output is passed on. The bias layer consists of a single value that influences all nodes on a layer.
+
+Finally, the last layer outputs the result of the computation. How strong each previous node influences the value of the current node is what the neural network is trained on.
+
+Neural networks are particularly good at recognizing patterns in large unordered data, such as images, videos, and audio tracks. Examples of this include facial recognition or verifying hand signatures\cite{neuralNet-applications}.
+
+\input{table-code/machine-learning/neural_network.tex}
+
+\subsection{Classical Learning} % TODO: writing
+% https://towardsdatascience.com/deep-learning-vs-classical-machine-learning-9a42c6d48aa
+Algorithms in the field of classical machine learning are largely based on statistical or probabilistic methods, which originated as pattern recognition in the 1960s. It has the advantage of being a fast method that does not require much computing power compared to deep learning algorithms\cite{neuralNet}.
+
+% https://en.wikipedia.org/wiki/Machine_learning#Approaches
+% https://www.ibm.com/cloud/blog/supervised-vs-unsupervised-learning
+\subsection{Supervised Learning}
+
+\subsection{Unsupervised Learning}
+
+\subsection{Reinforcement learning}
+
