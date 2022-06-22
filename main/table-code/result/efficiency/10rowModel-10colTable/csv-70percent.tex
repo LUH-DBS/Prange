@@ -1,7 +1,8 @@
 \begin{table}[ht]
     \caption[Efficiency test on tables with \SI{30}{\percent} unique columns in CSV format]{The result of the efficiency test with a generated table with \SI{30}{\percent} unique columns in a CSV file format. The test was conducted on a model with an input size of 10 rows on tables with 10 columns.}
-    % \small
+    \small
     \setlength{\tabcolsep}{5.5pt}
+    \makebox[\linewidth]{%
     \begin{tabular}{@{}S[table-format=9]SSSSSSSS@{}}
         \toprule
         {\shortstack{Rows}} & {\shortstack{Model:\\Loading}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
@@ -17,4 +18,5 @@
         100000000 & 52.42867323383689 & 0.4439504966139793 & 257.90396685898304 & 311.1732710637152 & 52.22971136868 & 854.4166974648833 & 906.6464131213723 \\
         \bottomrule
     \end{tabular}\label{table:efficiency_csv-70percent}
+    }
 \end{table}

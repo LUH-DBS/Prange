@@ -1,11 +1,11 @@
 \begin{figure}[ht]
-  \caption[Compare the efficiency the proposed method and the naive algorithm]{This plot shows the total time for the naive algorithm and the proposed method to compute the unique columns as can be seen in Table~\ref{table:efficiency_csv-70percent}. The tables were saved in a CSV format.} % TODO: better caption
+  \caption[Compare the efficiency the proposed method and the naive algorithm]{This plot shows the total runtime of the naive algorithm and the proposed method to compute the unique columns as can be seen in Table~\ref{table:efficiency_csv-70percent}. The tables were saved in a CSV format.} % TODO: better caption
   \label{fig:efficiency-base_experiment-plot} % chktex 24
   \begin{tikzpicture}
     \begin{axis}[
         % title={},
         xlabel={Rows of the table},
-        ylabel={Total elapsed Time [\si{\second}]},
+        ylabel={Total runtime [\si{\second}]},
         xmin=10000, xmax=100000000, xmode=log,
         ymin=0, ymax=1000,
         % xtick={0,1000,100000,10000000,100000000},

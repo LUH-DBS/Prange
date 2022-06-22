@@ -1,5 +1,7 @@
 \begin{table}[ht]
     \caption[Efficiency test on tables with varying numbers of unique columns]{The result of the efficiency test where each table has a size of \num{100000000} rows and \num{10} columns and is read from a parquet file. The only thing that is changing is the number of unique columns.}
+    % \small
+    \makebox[\linewidth]{%
     \begin{tabular}{@{}SSSSSSSS@{}}
         \toprule
         {\shortstack{Unique\\Columns}} & {\shortstack{Model:\\Loading}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
@@ -10,6 +12,7 @@
         1 & 4.5677355751395226 & 0.4685130454599857 & 87.07020292803645 & 92.24436162412168 & 4.497119572013617 & 856.5085486248136 & 861.0056716166437 \\
         \bottomrule
     \end{tabular}\label{table:efficiency-changing_uniques-table}
+    }
 \end{table}
 
 % \begin{table}[ht]
