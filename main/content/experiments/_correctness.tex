@@ -5,7 +5,7 @@ In this section, different experiments will be conducted to determine which para
 
 
 \subsection{Experiment Data}\label{subsec:correctness_experiment-data} % TODO: Writing
-The experiments where performed on the gittables dataset, which is a large corpus of relational tables extracted from CSV files in GitHub\cite{gittables-article}.
+The experiments where performed on the GitTables dataset, which is a large corpus of relational tables extracted from CSV files in GitHub\cite{gittables-article}.
 
 For these experiments, only the tables with at least 100 rows and 3 columns where used. % TODO: how many exist in the dataset?
 
@@ -16,7 +16,7 @@ How was the training and the test dataset generated? % TODO
 % TODO: is the first paragraph too much before the experiment?
 As described in Section~\ref{sec:extracted_features}, the proposed method extracts features from the first rows of a table and uses a machine learning model to predict if a column has duplicate values based on those features. % TODO: is ref to extracted features correct?
 
-In this experiment, we compare different models which use \num{5}, \num{10}, \num{20} and \num{50} rows to extract features. A model with an input size larger than \num{50} rows was not feasible as the tables used for training and testing had a minimum size of \num{100} rows. With a bigger input, the preparation would end up working like the naive algorithm with an extra step.
+In this experiment, I compare different models which use \num{5}, \num{10}, \num{20} and \num{50} rows to extract features. A model with an input size larger than \num{50} rows was not feasible as the tables used for training and testing had a minimum size of \num{100} rows. With a bigger input, the preparation would end up working like the naive algorithm with an extra step.
 
 
 Each model was trained for \num{5} hours. During the experiment, the test dataset with \num{5000} tables that was described in Section~\ref{subsec:correctness_experiment-data} was used to test each model. % TODO: is the test dataset described good enough?

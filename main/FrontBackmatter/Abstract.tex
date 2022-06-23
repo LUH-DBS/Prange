@@ -10,13 +10,10 @@
 \let\cleardoublepage\relax
 %! TODO
 \chapter*{Abstract}
-Short summary of the contents in English\dots a great guide by
-Kent Beck how to write good abstracts can be found here:
-\begin{center}
-  \url{https://plg.uwaterloo.ca/~migod/research/beckOOPSLA.html}
-\end{center}
+The discovery of primary key candidates and unique columns in general is an important problem. % TODO: write better
+The current algorithms to find unique columns are not fast enough for large tables as their runtime depends on the size of the table.
 
-\vfill
+In this thesis, I propose a new method to detect unique columns. It uses a machine learning model to predict which columns are probably unique columns. Only positive guesses will be checked for duplicates. With this method, the time it takes to detect all unique columns is reduced by more than \SI{60}{\percent} for large tables with more than \num{10000000} rows. % TODO: is this number correct?
 
 \endgroup
 

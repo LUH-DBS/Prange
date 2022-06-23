@@ -2,4 +2,4 @@ Janek
 Prange
 non-uniques
 uniques
-gittables
+GitTables

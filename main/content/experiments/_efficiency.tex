@@ -62,7 +62,7 @@ In this experiment, a model with an input size of \num{10} rows is used on \num{
 
 Table~\ref{table:efficiency-changing_uniques-table} shows that nearly every step of the process takes the same amount of time, just the validation step is proportional to the number of unique columns.
 
-In the gittables dataset, which is used in the correctness test, the ratio of unique columns is \SI{10}{\percent}. The positive guesses of the model are quite a bit higher since its priority is to avoid false negatives, not false positives. Still, the share of positive guesses during tests on the gittables dataset is around \SI{30}{\percent}, which is low enough to be a clear improvement over the naive algorithm given large enough tables. %! TODO: percentage of positive guesses
+In the GitTables dataset, which is used in the correctness test, the ratio of unique columns is \SI{10}{\percent}. The positive guesses of the model are quite a bit higher since its priority is to avoid false negatives, not false positives. Still, the share of positive guesses during tests on the GitTables dataset is around \SI{30}{\percent}, which is low enough to be a clear improvement over the naive algorithm given large enough tables. %! TODO: percentage of positive guesses
 
 \input{table-code/experiments/efficiency-changing_uniques-table.tex}
 

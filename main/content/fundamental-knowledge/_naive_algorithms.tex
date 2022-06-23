@@ -3,7 +3,7 @@ There are fundamentally two ways of finding primary key candidates. The first on
 
 The other method operates by sorting the column in a first step and then comparing each row with its neighbors. If two rows are the same, the column is not unique.
 
-The naive algorithm that is used for the experiments in Chapter~\ref{chap:experiments} is a sorting based method. However, it has the specialty of aborting if one of the values is None/Null since it is not unique for the purposes of this thesis as explained in Section~\ref{sec:definition_terms}.
+The naive algorithm that is used for the experiments in Chapter~\ref{chap:experiments} is a sorting based method. However, it has the specialty of aborting if one of the values is None/Null since it is not unique for the purposes of this thesis as explained in Section~\ref{chap:problem_statement}.
 
 % TODO: this paragraph here or in section efficiency experiment?
 The reason the hashing based method was not used for the experiments was to be able to reliably carry out the efficiency experiments. Although the sorting based method is less efficient, it enables the experiments to be set up in a way that enables the machine learning model to make the correct prediction without increasing the speed of the naive algorithm.
