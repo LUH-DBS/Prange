@@ -6,16 +6,16 @@ The following experiments explore the efficiency of the proposed method in compa
 
 
 \subsection{Experiment Data}\label{subsec:efficiency-experiment_data}
-The experiments in this section were conducted on a set of generated tables to control the size of the table as well as the number of unique and non-unique columns. A small example of such a table can be seen in Table~\ref{table:efficiency-generated_table}.
+The experiments in this section were conducted on a set of generated tables to control the size of the table as well as the number of unique and non"=unique columns. A small example of such a table can be seen in Table~\ref{table:efficiency-generated_table}. % chktex 18
 
 The generated tables each have \num{10} columns and between \num{100} and \num{100000000} columns. To ensure the correct prediction by the model, the columns where generated in a specific way.
-The unique columns are evenly incrementing for the first \num{50} rows, while the first two rows of the non-unique columns contain the same value. The rest of each column contains distinct incrementing values which are mixed up to increase the time the sorting based naive algorithm takes to find unique columns. % TODO: ref to naive algorithm
+The unique columns are evenly incrementing for the first \num{50} rows, while the first two rows of the non"=unique columns contain the same value. The rest of each column contains distinct incrementing values which are mixed up to increase the time the sorting based naive algorithm takes to find unique columns. % TODO: ref to naive algorithm  % chktex 18
 
 \input{table-code/experiments/efficiency-generated_table.tex}
 
 
 \subsection{Base experiment}\label{subsec:efficiency-base_experiment}
-The first experiment explores the efficiency of the proposed method compared to the naive algorithm. The generated tables that were used contained \num{3} unique and \num{7} non-unique columns.
+The first experiment explores the efficiency of the proposed method compared to the naive algorithm. The generated tables that were used contained \num{3} unique and \num{7} non"=unique columns.  % chktex 18
 
 Figure~\ref{fig:efficiency-base_experiment-plot} and Table~\ref{table:efficiency_csv-70percent} show that for tables with up to \num{100000} rows, the naive algorithm takes only a fraction of a second and is therefore faster than the proposed machine learning model. However, since the model takes a roughly constant time of half a second to compute its prediction, it becomes faster as the table size surpasses one million rows.
 
