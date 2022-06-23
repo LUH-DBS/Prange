@@ -1,5 +1,5 @@
-\begin{sidewaystable}
-  \small
+% \begin{sidewaystable}
+\begin{table}[ht]
   \caption[An example feature table]{An example for a feature table which is used by the model proposed in Chapter~\ref{chap:proposed_method}. The following values are possible in the column \enquote{Data Type}:
     \begin{enumerate*}[start=0, label={\num{\arabic*}:}]
       \item The inspected rows contain a duplicate value.
@@ -8,21 +8,25 @@
       \item The column contains only boolean values (which does rarely occur without containing duplicates).
       \item The column contains a mix of different types.
     \end{enumerate*}}
-  \begin{tabular*}{\linewidth}{SSSSSSSSSS}
-    \toprule
-    {Duplicates} & {Data Type} & {Sorted} & {Min.\ value} & {Max.\ value} & {Mean}           & {Std.\ Deviation} & {Avg.\ string length} & {Min.\ string length} & {Max.\ string length} \\ \midrule
-    1            & 0           & 0        & 0.0           & 0.0           & 0.0              & 0.0               & 0.0                   & 0.0                   & 0.0                   \\
-    0            & 1           & 1        & 7.0           & 562.0         & 290,705882352941 & 187,488587887997  & 0.0                   & 0.0                   & 0.0                   \\
-    0            & 1           & 1        & 1.0           & 62.0          & 28,9411764705882 & 21,4955535757843  & 0.0                   & 0.0                   & 0.0                   \\
-    0            & 1           & 1        & 611.0         & 946.0         & 789,117647058824 & 107,903824279391  & 0.0                   & 0.0                   & 0.0                   \\
-    0            & 1           & 1        & 1.0           & 17.0          & 9,0              & 5,04975246918104  & 0.0                   & 0.0                   & 0.0                   \\
-    0            & 2           & 0        & 0.0           & 0.0           & 0.0              & 0.0               & 86.25                 & 78.0                  & 92.0                  \\
-    0            & 2           & 0        & 0.0           & 0.0           & 0.0              & 0.0               & 78.75                 & 60.0                  & 96.0                  \\
-    0            & 2           & 0        & 0.0           & 0.0           & 0.0              & 0.0               & 123.03225806451613    & 51.0                  & 296.0                 \\
-    0            & 2           & 0        & 0.0           & 0.0           & 0.0              & 0.0               & 94.1304347826087      & 46.0                  & 204.0                 \\
-    0            & 3           & 0        & 0.0           & 0.0           & 0.0              & 0.0               & 0.0                   & 0.0                   & 0.0                   \\
-    0            & 4           & 0        & 0.0           & 0.0           & 0.0              & 0.0               & 0.0                   & 0.0                   & 0.0                   \\
-    \bottomrule
-  \end{tabular*}\label{table:feature_table_example}
-
-\end{sidewaystable}
+  \setlength{\tabcolsep}{4pt}
+  \small
+  \makebox[\linewidth]{%
+    \begin{tabular}{SSSSSSSSSS}
+      \toprule
+      {\shortstack{Duplicates}} & {\shortstack{Data                                                                                               \\Type}} & {\shortstack{Sorted}} & {\shortstack{Min.\\value}} & {\shortstack{Max.\\value}} & {\shortstack{Mean}} & {\shortstack{Std.\\Deviation}} & {\shortstack{Avg.\\string\\length}} & {\shortstack{Min.\\string\\length}} & {\shortstack{Max.\\string\\length}} \\ \midrule
+      1                         & 0                 & 0 & 0.0   & 0.0   & 0.0              & 0.0              & 0.0                & 0.0  & 0.0   \\
+      0                         & 1                 & 1 & 7.0   & 562.0 & 290,705882352941 & 187,488587887997 & 0.0                & 0.0  & 0.0   \\
+      0                         & 1                 & 1 & 1.0   & 62.0  & 28,9411764705882 & 21,4955535757843 & 0.0                & 0.0  & 0.0   \\
+      0                         & 1                 & 1 & 611.0 & 946.0 & 789,117647058824 & 107,903824279391 & 0.0                & 0.0  & 0.0   \\
+      0                         & 1                 & 1 & 1.0   & 17.0  & 9,0              & 5,04975246918104 & 0.0                & 0.0  & 0.0   \\
+      0                         & 2                 & 0 & 0.0   & 0.0   & 0.0              & 0.0              & 86.25              & 78.0 & 92.0  \\
+      0                         & 2                 & 0 & 0.0   & 0.0   & 0.0              & 0.0              & 78.75              & 60.0 & 96.0  \\
+      0                         & 2                 & 0 & 0.0   & 0.0   & 0.0              & 0.0              & 123.03225806451613 & 51.0 & 296.0 \\
+      0                         & 2                 & 0 & 0.0   & 0.0   & 0.0              & 0.0              & 94.1304347826087   & 46.0 & 204.0 \\
+      0                         & 3                 & 0 & 0.0   & 0.0   & 0.0              & 0.0              & 0.0                & 0.0  & 0.0   \\
+      0                         & 4                 & 0 & 0.0   & 0.0   & 0.0              & 0.0              & 0.0                & 0.0  & 0.0   \\
+      \bottomrule
+    \end{tabular}\label{table:feature_table_example}
+  }
+\end{table}
+% \end{sidewaystable}

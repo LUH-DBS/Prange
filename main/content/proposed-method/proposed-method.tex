@@ -30,6 +30,10 @@ Numeric values
 String values, mixed types
 
 The algorithm to extract features from a column can be found in Listing~\ref{lst:proposed_method-prepare_column} and an example of a table with the extracted features is the Table~\ref{table:feature_table_example}. Explanation\ldots
+
+\input{table-code/proposed-method/feature_table.tex}
+
+
 % TODO: explain listing line by line
 
 \lstinputlisting[float, language=Python, caption={[Preparing a column]This code shows how a column is prepared for the model. This process is repeated for each row; the result forms the feature table. The variable \texttt{column} contains the first \textit{n} rows of the column where \textit{n} is the input size of the model.}, label={lst:proposed_method-prepare_column}]{table-code/proposed-method/prepare-columns.py}
