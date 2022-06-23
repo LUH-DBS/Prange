@@ -6,7 +6,7 @@ The field of machine learning is itself divided into two main parts, \enquote{Cl
 % https://ischoolonline.berkeley.edu/blog/what-is-machine-learning/
 % https://www.ibm.com/cloud/learn/machine-learning
 
-\subsection{Deep Learning and neural networks} % TODO: need to proof read
+\subsection{Deep Learning and Neural Networks} % TODO: need to proof read
 
 Deep Learning includes various techniques that use neural networks. In the simplest form, neural networks consist of different so-called nodes, which are arranged as layers\cite{neuralNet}.
 
@@ -22,13 +22,19 @@ Neural networks are particularly good at recognizing patterns in large unordered
 
 \subsection{Classical Learning} % TODO: writing
 % https://towardsdatascience.com/deep-learning-vs-classical-machine-learning-9a42c6d48aa
-Algorithms in the field of classical machine learning are largely based on statistical or probabilistic methods, which originated as pattern recognition in the 1960s. It has the advantage of being a fast method that does not require much computing power compared to deep learning algorithms\cite{neuralNet}.
+Algorithms in the field of classical machine learning are largely based on statistical or probabilistic methods, which originated as pattern recognition in the 1960s. It has the advantage of being a fast method that does not require much computing power compared to deep learning algorithms\cite{classical-ml}.
 
-% https://en.wikipedia.org/wiki/Machine_learning#Approaches
-% https://www.ibm.com/cloud/blog/supervised-vs-unsupervised-learning
-\subsection{Supervised Learning}
+\subsection{Categories of Machine Learning}
+Both deep learning as well as classical learning are dived into different categories based on the kind of task and trainingsdata.
 
-\subsection{Unsupervised Learning}
+Unsupervised learning is used on unlabeled data. Its main use is to organize the data or to make it more manageable. Tasks in this domain include clustering, which categorizes data based on similar data points, or assoziation, which tries to find relationships between variables in a dataset\cite{supervised-unsupervised-learning}.
 
-\subsection{Reinforcement learning}
+Supervised learning on the other hand makes use of labeled data. This comes with the disadvantage that the structure of the data as well as the desired results have to be known\cite{classical-ml}. Even though it increases the effort of the preparation of the trainingsdata, it also raises the accuracy of the model since it is trained to produce only the desired result.
 
+% Reinforcement Learning  \cite{types-of-ml} % TODO
+
+\begin{figure}[ht]
+  \caption[Different kinds of machine learning]{This picture shows the different types of machine learning and the way they are trained\cite{types-of-ml}.} % TODO: is a more detailed description necessary?
+  \centering
+  \includegraphics[width=\linewidth]{img/types_of_machine_learning.png}\label{fig:kinds_of_ml}
+\end{figure}
