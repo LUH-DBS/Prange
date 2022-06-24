@@ -1,11 +1,11 @@
 \begin{table}[ht]
-    \caption[Efficiency experiment on tables with \SI{30}{\percent} unique columns saved as parquet files, where only the necessary rows and columns are loaded]{The result of the efficiency test with a generated table with \SI{30}{\percent} unique columns in a parquet file format. The test was conducted on a model with an input size of 10 rows on tables with 10 columns. During the experiment, only the necessary rows and columns were loaded.}
+    \caption[Efficiency experiment on tables with \SI{30}{\percent} unique columns saved as parquet files, where only the necessary rows and columns are loaded]{The result of the efficiency experiment on a generated table with \SI{30}{\percent} unique columns in a parquet file format. The experiment was conducted on a model with an input size of 10 rows on tables generated with 10 columns. During the experiment, only the necessary rows and columns were loaded.}
     \small
     \setlength{\tabcolsep}{4pt}
     \makebox[\linewidth]{%
         \begin{tabular}{@{}S[table-format=9]SSSSSSSS@{}}
             \toprule
-            {\shortstack{Rows}} & {\shortstack{Model:                                                                                                                                                    \\Loading I}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Loading II}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
+            {\shortstack{Rows}} & {\shortstack{Model:\\Loading I}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Loading II}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
             \midrule
             100                 & 0.0019583702087402  & 0.4582597687840462 & 0.0025078989565372 & 0.0001805499196052 & 0.4629099182784557 & 0.0035582929849624 & 0.0004192851483821 & 0.0039786621928215 \\
             1000                & 0.0015548579394817  & 0.4559830017387867 & 0.0025322996079921 & 0.0007521696388721 & 0.4608258455991745 & 0.0026408433914184 & 0.0018298886716365 & 0.0044715628027915 \\
