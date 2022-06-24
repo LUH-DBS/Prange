@@ -1,13 +1,13 @@
 \begin{table}[ht]
   \centering
-  \caption[Result for Correctness: Comparing different input sizes]{The result of the correctness experiment comparing models with different input sizes. Each of the models was trained for \num{5} hours on \num{10000} tables. The test was conducted on \num{5000} tables with an average of \num{184} rows and a total of \num{57211} columns.}
+  \caption[Result for Correctness: Comparing different input sizes]{The result of the correctness experiment comparing models with different input sizes. Each of the models was trained for \num{5} hours on \num{10000} tables. The test was conducted on \num{30000} tables with an average of \num{277} rows and a total of \num{307030} columns.} % TODO: ref to dataset description
   \begin{tabular}{S[table-format=2]SSSS}
     \toprule
-    {Model Input Size} & {Accuracy}         & {Precision}        & {Recall} & {F1}               \\ \midrule
-    5                  & 0.7093915505759382 & 0.2359375          & 1.0      & 0.381795195954488  \\
-    10                 & 0.8231284193599133 & 0.3365895233724513 & 1.0      & 0.5036542894982097 \\
-    20                 & 0.9204873188722449 & 0.530207580295363  & 1.0      & 0.6929877843018154 \\
-    50                 & 0.9800038454143434 & 0.8177763618986938 & 1.0      & 0.8997546442341394 \\
+    {Model Input Size} & {Accuracy}         & {Precision}         & {Recall} & {F1}               \\ \midrule
+    5                  & 0.7038921278051005 & 0.2687803622558955  & 1.0      & 0.4236830427892235 \\
+    10                 & 0.8329283783343647 & 0.39448025119814906 & 1.0      & 0.5657738800663664 \\
+    20                 & 0.9096993779109533 & 0.546554797769164   & 1.0      & 0.7068030160425545 \\
+    50                 & 0.9697521414845455 & 0.7825313195176209  & 1.0      & 0.8780000788198048 \\
     \bottomrule
   \end{tabular}\label{table:correctness-comparing_input_sizes}
 \end{table}
