@@ -37,38 +37,19 @@ SCORING_STRATEGIES = [
 MIN_ROWS = 100
 MIN_COLS = 3
 TRAIN_TABLE_COUNT = 10000
-TEST_TABLE_COUNT = 1000
+TEST_TABLE_COUNT = 5000
 
 
 def main():
-    TRAIN_MODEL = True  # ! training has to be seperate, otherwise logging will not work
-    if TRAIN_MODEL:
-        setup_logging(log_to_file=False, level=logging.DEBUG)
-        testing.prepare_and_train(row_count_iter=MODEL_ROWS_LIST,
-                                  train_table_count=TRAIN_TABLE_COUNT,
-                                  data_path=BASE_PATH_DATA + TRAIN_DATASOURCE,
-                                  train_envenly=False,
-                                  scoring_strategies=SCORING_STRATEGIES,
-                                  train_time=TRAIN_TIME,
-                                  min_rows=MIN_ROWS,
-                                  min_cols=MIN_COLS
-                                  )
-    else:
-        setup_logging(log_to_file=True, level=logging.INFO)
-        # download_dataset()
-        # dataset_info()
-        # logger.setLevel(logging.DEBUG)
-        # speed_test()
-        # logger.setLevel(logging.INFO)
-        # speed_test_to_tex()
-        correctness_test(log_false_guesses=True)
-        # correctness_test_to_tex()
+    count_guesses('src/result/correctness/long/').to_csv(
+        "src/result/correctness/summary/guess_count.csv", index=False)
+    # compare_training_time()
 
 
 def compare_input_sizes(train_model: bool = False):
     model_rows_list = [5, 10, 20, 50]
     train_table_count = TRAIN_TABLE_COUNT
-    test_table_count = TEST_TABLE_COUNT  # -1 is as much as possible
+    test_table_count = 30000  # -1 is as much as possible
     train_time = [5 * 60 * 60]  # 5 hours
     if train_model:
         setup_logging(log_to_file=False, level=logging.DEBUG)
@@ -100,7 +81,7 @@ def compare_training_time(train_model: bool = False):
     model_rows_list = [10]
     train_table_count = TRAIN_TABLE_COUNT
     test_table_count = TEST_TABLE_COUNT  # -1 is as much as possible
-    train_time = [5*60, 10*60, 20*60, 40*60,
+    train_time = [1*60, 2*60, 5*60, 10*60, 20*60, 40*60,
                   1*60*60, 2*60*60, 3*60*60, 5*60*60]
     if train_model:
         setup_logging(log_to_file=False, level=logging.DEBUG)
@@ -195,9 +176,9 @@ def correctness_test(experiment_name: str, model_rows_list: List[int], train_tab
         train_model (bool, optional): Only train the models if True. Defaults to False.
     """
     logger.info("Started the correctness test")
-    if log_false_guesses:
-        rmtree(f'{RESULT_PATH_CORRECTNESS}/false_pos', ignore_errors=True)
-        rmtree(f'{RESULT_PATH_CORRECTNESS}/false_neg', ignore_errors=True)
+    # if log_false_guesses:
+    # rmtree(f'{RESULT_PATH_CORRECTNESS}/false_pos', ignore_errors=True)
+    # rmtree(f'{RESULT_PATH_CORRECTNESS}/false_neg', ignore_errors=True)
     for strategy in SCORING_STRATEGIES:
         strategy = '_'.join(strategy[0])
         for nrows in model_rows_list:
@@ -342,6 +323,13 @@ def setup_logging(log_to_file: bool = True, level=logging.DEBUG):
         setattr(logging.getLoggerClass(), methodName, logForLevel)
         setattr(logging, methodName, logToRoot)
 
+    global logging_is_setup
+    try:
+        if logging_is_setup:
+            logger.info("Logging was already setup, aborting setup_logging()")
+            return
+    except NameError:
+        logging_is_setup = True
     addLoggingLevel("COMMON_ERROR", logging.DEBUG + 5)
     if log_to_file:
         Path("src/log/").mkdir(parents=True, exist_ok=True)
@@ -360,6 +348,19 @@ def setup_logging(log_to_file: bool = True, level=logging.DEBUG):
             level=level,
             format='%(levelname)s (%(name)s:%(lineno)d): %(message)s'
         )
+
+
+def count_guesses(filedir_path: str) -> pd.DataFrame:
+    result = []
+    for filepath in local.traverse_directory_path(filedir_path):
+        table = local.get_table(filepath)
+        table = table[["True Pos", "True Neg", "False Pos", "False Neg"]]
+        table = table.sum().values
+        true_pos = table[0]
+        false_pos = table[2]
+        true_positiv_ratio = true_pos / (true_pos + false_pos)
+        result.append([filepath, *[i for i in table], true_positiv_ratio])
+    return pd.DataFrame(result, columns=["filepath", "True Pos", "True Neg", "False Pos", "False Neg", "True Pos Ratio"])
 
 
 def dataset_info():
