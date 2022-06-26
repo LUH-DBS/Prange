@@ -1,0 +1,18 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Improving Primary Key Detection with Machine
+  Learning
+message: >-
+  If you use this dataset, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Janek
+    family-names: Prange
+    email: janek.prange@stud.uni-hannover.de
+    affiliation: Leibniz Universität Hannover
+repository-code: 'https://github.com/LUH-DBS/Prange'
+date-released: '2022-07-03'
