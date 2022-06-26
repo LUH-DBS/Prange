@@ -1,0 +1,15 @@
+filepath,True Pos,True Neg,False Pos,False Neg,True Pos Ratio
+src/result/correctness/long/compare-input-sizes/5rows.csv,33418,182698,90914,0,0.2687803622558955
+src/result/correctness/long/compare-input-sizes/10rows.csv,33418,222316,51296,0,0.39448025119814906
+src/result/correctness/long/compare-input-sizes/20rows.csv,33418,245887,27725,0,0.546554797769164
+src/result/correctness/long/compare-input-sizes/50rows.csv,33418,264325,9287,0,0.7825313195176209
+src/result/correctness/long/compare-training-time/1minutes.csv,5112,43318,8759,22,0.3685386778170283
+src/result/correctness/long/compare-training-time/2minutes.csv,5134,43316,8761,0,0.3694854264123785
+src/result/correctness/long/compare-training-time/5minutes.csv,5134,41958,10119,0,0.3365895233724513
+src/result/correctness/long/compare-training-time/10minutes.csv,5134,41958,10119,0,0.3365895233724513
+src/result/correctness/long/compare-training-time/20minutes.csv,5134,41958,10119,0,0.3365895233724513
+src/result/correctness/long/compare-training-time/40minutes.csv,5134,41958,10119,0,0.3365895233724513
+src/result/correctness/long/compare-training-time/60minutes.csv,5134,41958,10119,0,0.3365895233724513
+src/result/correctness/long/compare-training-time/120minutes.csv,5134,41958,10119,0,0.3365895233724513
+src/result/correctness/long/compare-training-time/180minutes.csv,5134,41958,10119,0,0.3365895233724513
+src/result/correctness/long/compare-training-time/300minutes.csv,5134,41958,10119,0,0.3365895233724513
