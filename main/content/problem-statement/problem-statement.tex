@@ -5,3 +5,8 @@ Primary key candidates are columns in a table which do not have any duplicate va
 Runtime of naive algorithm (sorting and hashing based)
 
 No problem with small tables, but problem with tables with more than a few million rows
+
+% TODO: integrate into this section
+The naive algorithm that is used for the experiments in Chapter~\ref{chap:experiments} is a sorting based method. However, it has the specialty of aborting if one of the values is None/Null since the column can not be used as a primary key.
+
+The reason the hashing based method was not used for the experiments was to be able to reliably carry out the efficiency experiments. Although the sorting based method is less efficient, it enables the experiments to be set up in a way that enables the machine learning model to make the correct prediction without decreasing the runtime of the naive algorithm.

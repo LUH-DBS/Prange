@@ -1,13 +1,14 @@
 \chapter{Motivation}
-Tables are an increasingly important way to store and organize data. Be it SQL databases, No-SQL databases or simple Excel tables, the ability to organize data and present it concisely is at the core of many projects.
+Tables are a way to store and organize data that continues to grow in importance. Be it SQL databases, No-SQL databases or simple Excel tables, the ability to organize data and present it concisely is at the core of many projects.
 
-In the best case, the structure of the data set has already been considered before creating them in order to clarify which data type can occur in a column, whether values can be left empty and which columns act as primary keys.
+In the best case, the structure of the dataset has already been considered before creating it in order to define which data type can occur in a column, whether values can be left empty and which columns act as primary keys.
 
-However, there are cases where this did not happen for various reasons; either because the data had to be saved quickly and there was no capacity for reasonable planning, or because the data is no longer available in the original format. % TODO: maybe a citation?
+However, there are cases where this information is not available for various reasons; either because the data had to be saved quickly and there was no capacity for reasonable planning, or because the data is no longer available in the original format. % TODO: maybe a citation?
 
 In this case, it is an important task to recover the missing metadata as accurately as possible. While information such as the data type and the existence of empty values is comparatively easy to find within a linear runtime, identifying primary keys is more difficult.
 
-One challenge is to distinguish between primary key candidates, which are characterized by the fact that they do not contain duplicates, and practically usable primary keys. % TODO: write better
-For example, even if a column containing comments from users does not contain duplicates, text that is on average 100 characters long is not really suitable as a key.
+One challenge is to distinguish between primary key candidates, which are characterized by the fact that they do not contain duplicates, and practically usable primary keys. An example for the is a column containing comments from users. Even though this column may not contain duplicates, text that is on average 100 characters long is not practically suitable as a key.
 
-Another problem is the runtime needed to determine if a column contains duplicates. For very large tables with several million rows, this step can take some time. % TODO: how much time? cite related work
+Another problem is the time it takes conventional algorithms to determine if a column contains duplicates. The at best linear runtime of these algorithms becomes a problem as the tables become very large and contain several million rows.
+
+This thesis will try to improve the solution to the second problem. % TODO: write better?
