@@ -1,7 +1,7 @@
 \begin{table}[ht]
     \caption[Efficiency experiment on tables with varying numbers of unique columns]{The result of the efficiency experiment where each table has a size of \num{100000000} rows and \num{10} columns and is read from a parquet file. The only thing that is changing is the number of unique columns.}
     % \small
-    \makebox[\linewidth]{%
+    \makebox[\linewidth][l]{%
     \begin{tabular}{@{}SSSSSSSS@{}}
         \toprule
         {\shortstack{Unique\\Columns}} & {\shortstack{Model:\\Loading}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\

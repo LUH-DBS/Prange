@@ -1,8 +1,6 @@
 \chapter{Proposed Method}\label{chap:proposed_method}
 \section{Overview}\label{sec:overview}
-In this thesis I present a method to increase the efficiency of finding unique columns in a table. The method is based on a machine learning model which uses the first few rows of a row to guess if it will have any duplicate values anywhere in the column. Each positive guess will subsequently be validated using a conventional naive method. % TODO: the "I present" here or in problem statement?
-
-% For the purpose of this method a column that contains only distinct values and a single empty row is not unique as it can not be used as a primary key. %? is here the best place for that? or better in fundamental knowledge? or both?
+In this thesis I present a method to increase the efficiency of finding unique columns in a table. The method is based on a machine learning model which uses the first few rows of each column to guess if it will have any duplicate values. Each positive guess will subsequently be validated using a conventional naive method.
 
 The proposed method works in three steps. First, the features are extracted from the first rows of the table. After that, the model tries to predict the existence of duplicate values from the features. Finally, the columns which are unique according to the model are checked with a naive method.
 
@@ -23,7 +21,7 @@ The feature extraction is necessary as explained in Section~\ref{sec:machine_lea
 
 % TODO: which data type numbers exist?
 
-The code in Listing~\ref{lst:proposed_method-prepare_column} prepares each column to produce such a feature table. The feature extraction of the proposed method works in different steps which are executed on after the other.
+The code in Listing~\ref{lst:proposed_method-prepare_column} prepares each column to produce such a feature table. The feature extraction of the proposed method works in different steps which are executed one after the other.
 
 The variable column contains the first \textit{n} rows of the column in the table where \textit{n} is the input size of the method.
 
@@ -47,7 +45,7 @@ If there is any value in the column which is not a string, a ValueError is raise
   float,
   numbers=left,
   language=Python,
-  caption={[Preparing a column]This code shows how a column is prepared for the model. This process is repeated for each row; the result forms the feature table. The variable \texttt{column} contains the first \textit{n} rows of the column where \textit{n} is the input size of the model.},
+  caption={[The algorithm to extract the features from a column]This code shows how the features are extracted from a column. This process is repeated for each column; the result forms the feature table which is the input for the machine learning model. The variable \texttt{column} contains the first \textit{n} rows of the column where \textit{n} is the input size of the model.},
   label={lst:proposed_method-prepare_column}
 ]{table-code/proposed-method/prepare-columns.py}
 

@@ -1,11 +1,11 @@
 \begin{table}[ht]
-    \caption[Efficiency experiment on tables with \SI{30}{\percent} unique columns saved as parquet files]{The result of the efficiency experiment on a generated table with \SI{30}{\percent} unique columns in a parquet file format. The experiments was conducted on a model with an input size of 10 rows on tables generated with 10 columns.}
+    \caption[Efficiency experiment on tables with \SI{30}{\percent} unique columns saved as parquet files]{The result of the efficiency experiment conducted on a table generated with \num{3} unique and \num{7} non-unique columns saved as a parquet file. The experiment was conducted on a model with an input size of 10 rows which was trained on the training dataset.}
     \small
     \setlength{\tabcolsep}{5.5pt}
-    \makebox[\linewidth]{%
+    \makebox[\linewidth][r]{%
         \begin{tabular}{@{}S[table-format=9]SSSSSSSS@{}}
             \toprule
-            {\shortstack{Rows}} & {\shortstack{Model:                                                                                                                               \\Loading}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
+            {\shortstack{Rows}} & {\shortstack{Model:\\Loading}} & {\shortstack{Model:\\Computing}} & {\shortstack{Model:\\Validation}} & {\shortstack{Model:\\Total}} & {\shortstack{Naive:\\Loading}} & {\shortstack{Naive:\\Computing}} & {\shortstack{Naive:\\Total}} \\
             \midrule
             100                 & 0.0037329792976379  & 0.4535947442054748 & 0.0001380555331707 & 0.4577647559344768 & 0.0056636519730091 & 0.0005674697458744 & 0.0062335357069969 \\
             1000                & 0.002842117100954   & 0.4445352330803871 & 0.0006063096225261 & 0.4482727721333504 & 0.0034207440912723 & 0.0018974170088768 & 0.0053194314241409 \\

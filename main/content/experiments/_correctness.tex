@@ -1,29 +1,32 @@
 \section{Correctness}\label{sec:correctness}
-The correctness of the model is probably the most important metric to determine its usability. While a false positive is not a major problem because each positive guess is verified (see Chapter~\ref{chap:proposed_method}), a false negative will mean that a primary key candidate gets ignored.
+The correctness of the model is probably the most important metric to determine its usability. While a false positive is not a major problem for the correctness because each positive guess is verified (see Chapter~\ref{chap:proposed_method}), a false negative leads to a primary key candidate being ignored.
 
-In this section, different experiments will be conducted to determine which parameters are the best to train the model. Additionally, in Section~\ref{subsec:correctness_examine-false-guesses} the column which led to false guesses by the model will be examined.
+In this section, different experiments will be conducted to determine which parameters have an influence on the correctness of the prediction. Additionally, in Section~\ref{subsec:correctness_examine-false-guesses} the columns which led to false guesses by the model will be examined.
 
 
 \subsection{Experiment Data}\label{subsec:correctness_experiment-data}
-The experiments where performed on the GitTables dataset, which is a large corpus of relational tables extracted from CSV files in GitHub\cite{gittables-article}.
+The experiments where performed on the GitTables dataset, which is a large corpus of relational tables extracted from CSV files in GitHub\cite{gittables-article}. However, not the whole dataset was used but only a subset of tables split into a training and a test dataset.
 
-The training dataset is used to train every model which was tested in the following experiments. It is a subset of the GitTables dataset with \num{10000} tables. Every table has to have at least \num{100} rows and \num{3} columns to ensure the table preparation described in Section~\ref{lst:proposed_method-prepare_column} does not become the naive algorithm with extra steps. The tables where selected by traversing the GitTables dataset and skipping tables which are to small.
+The training dataset is used to train every model which was tested in the following experiments including the efficiency experiments. It is a subset of the GitTables dataset with \num{10000} tables which where selected by traversing the GitTables dataset and skipping tables which are to small.
 
-The test dataset was generated the same way as the training dataset. By traversing the GitTables and skipping every table which is too small or part of the training dataset a collection of \num{5000} tables with \num{57211} columns and an average of \num{184} rows was generated. It was used for every experiment except the one in Section~\ref{subsec:correctness_comparing-input-size} where a dataset with \num{30000} tables with \num{307030} columns and an average of \num{277} rows was used.
+Every table in it has to have at least \num{100} rows and \num{3} columns to ensure the feature extraction described in Section~\ref{lst:proposed_method-prepare_column} does not become the naive algorithm with extra steps. This could be a problem as searching for duplicates with the naive algorithm in the first \textit{n} rows of each column is part of the feature extraction.
+
+The test dataset was generated the same way as the training dataset. By traversing the GitTables and skipping every table which is too small or part of the training dataset a collection of \num{5000} tables with \num{57211} columns and an average of \num{184} rows was generated. It was used for every experiment apart from the one in Section~\ref{subsec:correctness_comparing-input-size} where a dataset of \num{30000} tables with \num{307030} columns and an average of \num{277} rows was used.
 
 
 \subsection{Comparing models with different input sizes}\label{subsec:correctness_comparing-input-size}
-% TODO: is the first paragraph too much before the experiment?
-As described in Section~\ref{sec:extracted_features}, the proposed method extracts features from the first rows of a table and uses a machine learning model to predict if a column has duplicate values based on those features. % TODO: is ref to extracted features correct?
+As described in Section~\ref{sec:extracted_features}, the proposed method extracts features from the first rows of a table and uses a machine learning model to predict if a column has any duplicate values based on those features. % TODO: is ref to extracted features correct?
 
-In this experiment, I compare different models which use \num{5}, \num{10}, \num{20} and \num{50} rows to extract features. A model with an input size larger than \num{50} rows was not feasible as the tables used for training and testing had a minimum size of \num{100} rows. With a bigger input, the preparation would end up working like the naive algorithm with an extra step.
+In this experiment, I compare different models which use the first \num{5}, \num{10}, \num{20} and \num{50} rows of each column to extract features. A model with an input size larger than \num{50} rows was not feasible as the tables used for training and testing had a minimum size of \num{100} rows. With a bigger input, the feature extraction would end up performing like the naive algorithm as checking the first \textit{n} rows for duplicates with the naive algorithm is part of the feature extraction. % chktex 13 % TODO: is the last sentence too much? practically the same is said in the previous subsection
 
 
-Each model was trained for \num{5} hours. During the experiment, the test dataset with \num{5000} tables that was described in Section~\ref{subsec:correctness_experiment-data} was used to test each model. % TODO: is the test dataset described good enough?
+Each model was trained for \num{5} hours on the training dataset. During the experiment, the test dataset with \num{5000} tables that was described in Section~\ref{subsec:correctness_experiment-data} was used to test each model.
 
-Table~\ref{table:correctness-comparing_input_sizes} shows the results of this experiment, which demonstrate that the input size has a large influence on the quality of the prediction. While none of the models has any false negative guesses, the ratio of false positive guesses decreases with an increasing input size.
+Table~\ref{table:correctness-comparing_input_sizes} shows the results of this experiment, which demonstrates that the input size has a large influence on the quality of the prediction. While none of the models has any false negative guesses, the number of false positive guesses decreases with an increasing input size.
 
-This experiment shows that an increase in the input size of the model does have a great impact on the number of false positive guesses. However, since each positive guess by the model is verified using the naive algorithm, the number of false guesses has no effect on the quality of the final prediction of the proposed method. What is effected by it is the efficiency of the method; this is explored further in Section~\ref{subsec:efficiency-changing_uniques}.
+%! TODO: how many positive guesses? -> guess_count.csv
+
+This experiment shows that an increase in the input size of the model does have a great impact on the number of false positive guesses. However, since each positive guess by the model is verified using the naive algorithm, the number of false guesses has no effect on the quality of the final prediction of the proposed method. What is however effected by it is the efficiency of the method; this is explored further in Section~\ref{subsec:efficiency-changing_uniques}.
 
 Another important finding of this experiment is that even with a small input size of only \num{5} rows, the model has not made any false negative guesses. As the negative guesses of the model are not checked, it is important for them to be correct to ensure the overall correctness of the proposed method.
 
@@ -31,15 +34,15 @@ Another important finding of this experiment is that even with a small input siz
 
 
 \subsection{Altering the training time}\label{subsec:correctness_comparing-training-time} % TODO: Writing
-The Auto-Sklearn library, which was used to train the machine learning models, automatically searches for the best learning algorithm and optimizes it, as was described in Section~\ref{sec:used_packages_and_libraries}. Since this process takes time to run, the theory is that the performance of the model increases with higher training time. % TODO: maybe write better? 
+The Auto-Sklearn library, which was used to train the machine learning models, automatically searches for the best learning algorithm and optimizes it as described in Section~\ref{sec:used_packages_and_libraries}. Since this process takes time to run, in theory the performance of the model increases with higher training time. % TODO: maybe write better? 
 
-In this experiment, different models with an input size of \num{10} rows are being trained for different amounts of time. Each model is trained on \num{10000} tables with at least \num{100} rows and \num{3} columns. Subsequently, each of the models is tested on \num{5000} different tables.
+In this experiment, different models with an input size of \num{10} rows are being trained for different amounts of time on the training dataset. Subsequently, the experiment is conducted for each model on the test dataset with \num{5000} tables.
 
 The Table~\ref{table:correctness-compare_training_time} presents the results of this experiment. With a training time of \num{1} or \SI{2}{\minute} the performance of the machine learning model is indeed slightly worse as there are some false positive guesses. %! TODO: How many? updated table
 
-However, apart from producing false negative guesses, the models with the two shortest training times seem to performed slightly better than most of the other models as their accuracy and precision is higher. Additionally, the model with the best performance is not the one with the highest training time but the one a training time of \SI{120}{\minute}. %! TODO: updated table
+However, apart from producing false negative guesses, the models with the two shortest training times seem to perform slightly better than most of the other models as their accuracy and precision is higher. Additionally, the model with the best performance is not the one with the highest training time but the one a training time of \SI{120}{\minute}. %! TODO: updated table
 
-This experiment very clearly demonstrates that the machine learning model for this task does not need a long training time. Furthermore, it shows that there might be advantageous to train a model multiple times and compare them to find the best performing, since the performance is not strongly correlated to the training time.
+This experiment very clearly demonstrates that the machine learning model does not need a long training time to find unique columns. Furthermore, it shows that there might be advantageous to train a model multiple times and compare them to find the best performing, since the performance is not strongly correlated to the training time.
 
 \input{table-code/result/correctness/compare-training-time.tex}
 
@@ -50,16 +53,15 @@ This experiment very clearly demonstrates that the machine learning model for th
 
 % Conclusion
 
-\subsection{Summary}\label{subsec:correctness_conclusions} % TODO: Writing
+\subsection{Summary}\label{subsec:correctness_conclusions} %! TODO: Writing
 
 
 \subsection{Examine columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: Writing %? maybe a table with examples?
-The greatest possible weakness of the of the proposed method are false guesses, as false positive guesses lead to a reduced efficiency and false negative guesses result in primary key candidates being ignored. It is therefore important to examine the columns which lead to false guesses to improve the model if possible.
+The greatest weakness of the proposed method are false guesses. False positive guesses lead to a reduced efficiency because more columns need to be checked with the naive algorithm. False negative guesses on the other hand result in primary key candidates being ignored which reduces the correctness. It is therefore important to examine the columns which lead to false guesses to improve the model if possible.
 
-False positive guesses occur very often as the model is trained to avoid any false negative guesses. The experiment in Section~\ref{subsec:correctness_comparing-input-size} has shown that depending on the input size between \SI{18}{\percent} and \SI{77}{\percent} of the positive guesses are false positives. % TODO: how many guesses in total are correct/false
-% The Section~\ref{subsec:efficiency-changing_uniques} will explore further how strong false positives influence the efficiency.
+False positive guesses occur very often as the model is primarily trained to avoid any false negative guesses. The experiment in Section~\ref{subsec:correctness_comparing-input-size} has shown that depending on the input size between \SI{27}{\percent} and \SI{78}{\percent} of the positive guesses are false positives.
 
-The false guesses are unfortunately mostly unavoidable as they are caused by empty cells which are located after the input rows of the model. As the column would be a primary key candidate without these missing values, there is nothing that can be changed to improve the correctness of the model in this case.
+The false guesses are unfortunately mostly unavoidable as they are caused mainly by empty cells which are located after the input rows of the model in otherwise unique columns. As the column would be a primary key candidate without these missing values, there is no possible change which would improve the correctness of the model in this case.
 
 Another example for a column leading to a false positive guess is one containing the name of authors. For the model, this column contains short strings which do not have any duplicates in the first rows. % TODO: write further
 

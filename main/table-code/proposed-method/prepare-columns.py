@@ -17,7 +17,7 @@ if only_bool(column):
 if only_numeric(column):
   result[1] = 1
   result += [min_value(column), max_value(column),
-              mean_value(column), std_deviation(column)]
+             mean_value(column), std_deviation(column)]
   # values for strings
   result += [0, 0, 0]
   return result
