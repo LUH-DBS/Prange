@@ -2,13 +2,13 @@
 \section{Overview}\label{sec:overview}
 In this thesis I present a method to increase the efficiency of finding unique columns in a table. The method is based on a machine learning model which uses the first few rows of a row to guess if it will have any duplicate values anywhere in the column. Each positive guess will subsequently be validated using a conventional naive method. % TODO: the "I present" here or in problem statement?
 
-For the purpose of this method a column that contains only distinct values and a single empty row is not unique as it can not be used as a primary key. %? is here the best place for that? or better in fundamental knowledge? or both?
+% For the purpose of this method a column that contains only distinct values and a single empty row is not unique as it can not be used as a primary key. %? is here the best place for that? or better in fundamental knowledge? or both?
 
 The proposed method works in three steps. First, the features are extracted from the first rows of the table. After that, the model tries to predict the existence of duplicate values from the features. Finally, the columns which are unique according to the model are checked with a naive method.
 
 %! column headers are not part of the input
 
-%! link to github repo
+%! link to github repo \cite{Prange_Improving_Primary_Key_2022}
 
 % ["Duplicates", "Data Type", "Sorted",
 %           # number
@@ -17,26 +17,39 @@ The proposed method works in three steps. First, the features are extracted from
 %           "Avg. string length", "Min. string length", "Max. string length"
 %           ]  # 10
 \section{Extracting Features}\label{sec:extracted_features} % TODO: Writing
-The feature extraction is necessary as explained in Section~\ref{sec:machine_learning}\ldots % TODO
-
-The feature extraction of the proposed method works in different steps which are executed on after the other. First all columns which contain duplicate values in the first rows are sorted out by setting the feature \enquote{Duplicates} to \num{1} and all other features to \num{0}.
-
-The remaining rows are checked in order to determine whether they are sorted or not. During this step, it is possible that an error occurs because two values in the column can not be compared. This is mostly the case if there is an empty/None value in the column.
-
-Next, a distinction is made between the different types of values. If the column contains only boolean values, the feature \enquote{Data Type} is set to \num{3}, all other features stay on \num{0}. Although it is very unlikely that a column contains exclusively boolean values without any duplicate values, there are tables in the gittables dataset to which this applies. % TODO: keep boolean values?
-
-Numeric values
-
-String values, mixed types
-
-The algorithm to extract features from a column can be found in Listing~\ref{lst:proposed_method-prepare_column} and an example of a table with the extracted features is the Table~\ref{table:feature_table_example}. Explanation\ldots
+The feature extraction is necessary as explained in Section~\ref{sec:machine_learning} to get a table like Table~\ref{table:feature_table_example}\ldots %! TODO
 
 \input{table-code/proposed-method/feature_table.tex}
 
+% TODO: which data type numbers exist?
 
-% TODO: explain listing line by line
+The code in Listing~\ref{lst:proposed_method-prepare_column} prepares each column to produce such a feature table. The feature extraction of the proposed method works in different steps which are executed on after the other.
 
-\lstinputlisting[float, language=Python, caption={[Preparing a column]This code shows how a column is prepared for the model. This process is repeated for each row; the result forms the feature table. The variable \texttt{column} contains the first \textit{n} rows of the column where \textit{n} is the input size of the model.}, label={lst:proposed_method-prepare_column}]{table-code/proposed-method/prepare-columns.py}
+The variable column contains the first \textit{n} rows of the column in the table where \textit{n} is the input size of the method.
+
+First all columns which contain duplicate values in the first rows are sorted out in line 1 and 2 by setting the feature \enquote{Duplicates} to \num{1} and all other features to \num{0}.
+
+In line 5 to 12 the remaining columns are checked in order to determine whether they are sorted or not. During this step, it is possible that an error occurs because two values in the column can not be compared. This is mostly the case if there is an empty/None value in the column.
+
+In the following lines, a distinction is made between the different types of values.
+
+If the column contains only boolean values, the feature \enquote{Data Type} is set to \num{3} while all other features stay on \num{0} in line 13 to 16. Although it is very unlikely that a column contains exclusively boolean values without any duplicate values, there are tables in the gittables dataset to which this applies. % TODO: keep boolean values?
+
+Line 17 to 23 handle columns that contain exclusively numeric values. The \enquote{Data Type} feature is set to \num{1} in line 18 and the four features specific to numeric values are extracted in line 19 and 20. The three remaining features are set to \num{0} in line 22. % TODO: write better
+
+Finally, the columns that contain exclusively string or a mix of different types are handled in the remaining lines.
+
+First, the features for numeric values are set to 0 in line 25. After that, the average of the length of every item in the column is formed together with the minimum and maximum length. At the end the \enquote{Data Type} feature is set to \num{2} in line 39.
+
+If there is any value in the column which is not a string, a ValueError is raised in line 32, which leads to the \enquote{Data Type} feature being set to \num{4} in line 42 and the string specific features set to \num{0}.
+
+\lstinputlisting[
+  float,
+  numbers=left,
+  language=Python,
+  caption={[Preparing a column]This code shows how a column is prepared for the model. This process is repeated for each row; the result forms the feature table. The variable \texttt{column} contains the first \textit{n} rows of the column where \textit{n} is the input size of the model.},
+  label={lst:proposed_method-prepare_column}
+]{table-code/proposed-method/prepare-columns.py}
 
 
 \section{Training the Model}\label{sec:traing_the_model} % TODO: Writing

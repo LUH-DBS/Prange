@@ -21,7 +21,6 @@ if only_numeric(column):
   # values for strings
   result += [0, 0, 0]
   return result
-result[1] = 2
 # values for numbers
 result += [0, 0, 0, 0]
 try:
@@ -37,6 +36,7 @@ try:
         average = sum(length_list)/len(length_list)
     minimum = min(length_list)
     maximum = max(length_list)
+    result[1] = 2
     result += [average, minimum, maximum]
 except ValueError:
     result[1] = 4  # mixed column, mostly None/NaN value
