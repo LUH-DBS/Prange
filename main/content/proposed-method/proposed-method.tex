@@ -14,14 +14,14 @@ The proposed method works in three steps. First, the features are extracted from
 %           # string
 %           "Avg. string length", "Min. string length", "Max. string length"
 %           ]  # 10
-\section{Extracting Features}\label{sec:extracted_features} % TODO: Writing
-The feature extraction is necessary as explained in Section~\ref{sec:machine_learning} to get a table like Table~\ref{table:feature_table_example}\ldots %! TODO
+\section{Feature Extraction}\label{sec:extracted_features}
+The machine learning model which is used by the proposed method can not work on the tables directly as it is trained with supervised learning. The model therefore uses a feature table as input, an example of which can be seen in Table~\ref{table:feature_table_example}.
 
 \input{table-code/proposed-method/feature_table.tex}
 
 % TODO: which data type numbers exist?
 
-The code in Listing~\ref{lst:proposed_method-prepare_column} prepares each column to produce such a feature table. The feature extraction of the proposed method works in different steps which are executed one after the other.
+The code in Listing~\ref{lst:proposed_method-prepare_column} extracts the features from each column to produce such a feature table. The feature extraction of the proposed method works in different steps which are executed one after the other.
 
 The variable column contains the first \textit{n} rows of the column in the table where \textit{n} is the input size of the method.
 
@@ -31,7 +31,7 @@ In line 5 to 12 the remaining columns are checked in order to determine whether 
 
 In the following lines, a distinction is made between the different types of values.
 
-If the column contains only boolean values, the feature \enquote{Data Type} is set to \num{3} while all other features stay on \num{0} in line 13 to 16. Although it is very unlikely that a column contains exclusively boolean values without any duplicate values, there are tables in the gittables dataset to which this applies. % TODO: keep boolean values?
+If the column contains only boolean values, the feature \enquote{Data Type} is set to \num{3} while all other features stay on \num{0} in line 13 to 16. Although it is very unlikely that a column contains exclusively boolean values without any duplicate values, there are tables in the GitTables dataset to which this applies. % TODO: keep boolean values?
 
 Line 17 to 23 handle columns that contain exclusively numeric values. The \enquote{Data Type} feature is set to \num{1} in line 18 and the four features specific to numeric values are extracted in line 19 and 20. The three remaining features are set to \num{0} in line 22. % TODO: write better
 
