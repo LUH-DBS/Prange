@@ -1,14 +1,14 @@
-\chapter{Conclusion} % TODO: writing
+\chapter{Conclusion}
 
 \section{Possible Applications}
-Usage as part of a larger algorithm or programm to speed up the process of finding unique columns. This way it is possible to ensure to only use the table if it is large enough for the proposed method to be advantageous.
+The proposed method is not suitable as a standalone application the way it is implemented as there are too many cases where the efficiency is far behind the naive algorithm. A more promising possibility would be to use this method as a part of a larger algorithm or program where it would be used only if it has an advantage of the naive algorithm.
 
-Maybe an advantage that the method produces possible uniques very fast and verifies them afterwards.
+Another useful advantage of the proposed method is the fact that it produces a set of possible unique columns in a very short amount of time even for large tables. This would make it possible to very fast display columns which may be primary key candidates and validate the guesses in the background.
 
-Perhaps the principle of narrowing the columns of the table to inspect closely with a machine learning model can be transferred to other aspects than finding unique columns.
+It may be possible to transfer the idea behind the proposed method to use a machine learning algorithm which predicts if a column has certain properties (such as uniqueness). This way it could be possible to improve the speed in several areas of data analysis, not just the detection of primary key candidates.
 
 
-\section{Limitations of the method}
-The method only searches for single column uniques. Maybe it is possible to combine it with an existing algorithm for finding multi column uniques and speeding it up.
+\section{Limitations of the proposed method}
+A big limitation of the proposed method is the fact that it only predicts uniqueness for single columns. % TODO: write further
 
-There is a possibilty that a unique column is classified as a non-unique by the proposed method. To rule out this possibilty, all the columns would have to be inspected with the naive algorithm.
+Additionally, there is the possibility that a unique column is classified as a non-unique by the proposed method. However, to rule out this possibility, all the columns would have to be inspected with the naive algorithm. % TODO: maybe write better?

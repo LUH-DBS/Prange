@@ -1,0 +1,22 @@
+\section{Metrics}\label{sec:metrics} %! TODO: writing
+% https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9
+During the experiments in Chapter~\ref{chap:experiments}, the performance is measured with different metrics.
+
+\begin{table}[ht]
+  \centering
+  \caption{Definition of true and false negatives and positives} % TODO: write better and short caption
+  \begin{tabular}{ll|l|l} % chktex 44
+                            & \multicolumn{1}{c}{} & \multicolumn{2}{c}{Prediction}                  \\
+                            &                      & Negative                       & Positive       \\ \cline{2-4}
+    \multirow{2}{*}{Actual} & Negative             & True Negative                  & False Positive \\ \cline{2-4}
+                            & Positive             & False Negative                 & True Positive  \\
+  \end{tabular}\label{table:true-false-neg-pos}
+\end{table}
+
+Accuracy is calculated by dividing the number of correct guesses by the total number of guesses. % TODO
+
+Precision is defined as the number of true positive guesses divided by the total number of positive guesses. It is a good measurement when false positives are associated with a high cost. % TODO
+
+Recall is defined as the number of positive guesses divided by the number of actual positives. It is a good measurement when false negatives are associated with a high cost % TODO
+
+F1 is calculated by dividing the product of precision and recall by their sum. It is an important measurement when both precision and recall are important and the number of positives and negatives is very unbalanced, for example if there are \SI{99}{\percent} negatives.

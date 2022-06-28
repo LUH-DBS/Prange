@@ -7,7 +7,7 @@ In this section, different experiments will be conducted to determine which para
 \subsection{Experiment Data}\label{subsec:correctness_experiment-data}
 The experiments where performed on the GitTables dataset, which is a large corpus of relational tables extracted from CSV files in GitHub\cite{gittables-article}. However, not the whole dataset was used but only a subset of tables split into a training and a test dataset.
 
-The training dataset is used to train every model which was tested in the following experiments including the efficiency experiments. It is a subset of the GitTables dataset with \num{10000} tables which where selected by traversing the GitTables dataset and skipping tables which are to small.
+The training dataset is used to train every model which was tested in the following experiments including the efficiency experiments. It is a subset of the GitTables dataset with \num{10000} tables which where selected by traversing the GitTables dataset and skipping tables which are too small.
 
 Every table in it has to have at least \num{100} rows and \num{3} columns to ensure the feature extraction described in Section~\ref{lst:proposed_method-prepare_column} does not become the naive algorithm with extra steps. This could be a problem as searching for duplicates with the naive algorithm in the first \textit{n} rows of each column is part of the feature extraction.
 
@@ -33,7 +33,7 @@ Another important finding of this experiment is that even with a small input siz
 \input{table-code/result/correctness/compare_input_sizes.tex}
 
 
-\subsection{Altering the training time}\label{subsec:correctness_comparing-training-time} % TODO: Writing
+\subsection{Altering the training time}\label{subsec:correctness_comparing-training-time}
 The Auto-Sklearn library, which was used to train the machine learning models, automatically searches for the best learning algorithm and optimizes it as described in Section~\ref{sec:used_packages_and_libraries}. Since this process takes time to run, in theory the performance of the model increases with higher training time. % TODO: maybe write better? 
 
 In this experiment, different models with an input size of \num{10} rows are being trained for different amounts of time on the training dataset. Subsequently, the experiment is conducted for each model on the test dataset with \num{5000} tables.
@@ -50,10 +50,10 @@ This experiment very clearly demonstrates that the machine learning model does n
 \subsection{Summary}\label{subsec:correctness_conclusions} %! TODO
 The experiments in this section demonstrate that the predictions made by the model have a sufficiently high accuracy. Models which have been trained for more than one minute had a recall of 1 and therefore no false negative guesses. This is a very good result as false negative guesses would lead to unique columns which are ignored.
 
-Furthermore, the models in the experiments produce less than twice as much false positive guesses as true positive guesses and even less for models with a larger input size. This is important as false positive guessses reduce the efficiency, which is explored further in Section~\ref{sec:efficiency}.
+Furthermore, the models in the experiments produce less than twice as much false positive guesses as true positive guesses and even less for models with a larger input size. This is important as false positive guesses reduce the efficiency, which is explored further in Section~\ref{sec:efficiency}.
 
 
-\subsection{Examine columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: Writing %? maybe a table with examples?
+\subsection{Examine columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: maybe a table with examples?
 The greatest weakness of the proposed method are false guesses. False positive guesses lead to a reduced efficiency because more columns need to be checked with the naive algorithm. False negative guesses on the other hand result in primary key candidates being ignored which reduces the correctness. It is therefore important to examine the columns which lead to false guesses to improve the model if possible.
 
 False positive guesses occur very often as the model is primarily trained to avoid any false negative guesses. The experiment in Section~\ref{subsec:correctness_comparing-input-size} has shown that depending on the input size between \SI{27}{\percent} and \SI{78}{\percent} of the positive guesses are false positives.
@@ -62,6 +62,6 @@ The false guesses are unfortunately mostly unavoidable as they are caused mainly
 
 Another example for a column leading to a false positive guess is one containing the name of authors. Since the model only sees short strings without duplicates in these columns, there is no good way for the current implementation to recognize the column as non-unique. However, it would be possible to additionally include the column heading as a feature to enable the model to learn that the column with the names of authors is more likely to contain duplicate values.
 
-False negative guesses occured only in one of all the correctness experiments, namely with the model which was trained for only one minute in Section~\ref{subsec:correctness_comparing-training-time}. And even then the false negatives were rare and the corresponding columns contained only negative numbers or numbers smaller than 1. While these columns are negative, they are not suited very well as primary keys. % TODO: is this ok?
+False negative guesses occurred only in one of all the correctness experiments, namely with the model which was trained for only one minute in Section~\ref{subsec:correctness_comparing-training-time}. And even then the false negatives were rare, and the corresponding columns contained only negative numbers or numbers smaller than 1. While these columns are negative, they are not suited very well as primary keys. % TODO: is this ok?
 
 % TODO: Maybe a summarizing paragraph?
