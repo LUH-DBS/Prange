@@ -29,7 +29,7 @@ In conclusion, this experiment illustrates that for large tables loading the dat
 
 
 \subsection{Reduce loading times}\label{subsec:efficiency-shorter_loading_times}
-While CSV files are very easy to use, they are not meant to efficiently store large quantities of data. A file format which is substantially more suitable to handle large datasets is the parquet format\cite{parquet-book}.
+While CSV files are very easy to use, they are not meant to efficiently store large quantities of data. A file format which is substantially more suitable to handle large datasets is the parquet format~\cite{parquet-book}.
 
 It achieves this through the use of various features such as column wise compression, which tends to be more efficient since the values in the same column are usually very similar. This has the additional benefit of enabling the algorithm to only read the required columns which may decrease \io{} as only positive guesses need to be loaded for the validation.
 

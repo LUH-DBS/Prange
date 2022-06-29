@@ -1,6 +1,6 @@
 \section{Metrics}\label{sec:metrics} %! TODO: writing
 % https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9
-During the experiments in Chapter~\ref{chap:experiments}, the performance is measured with different metrics.
+During the training and testing of a machine learning model, its performance is measured with different metrics. The basis for these experiments is how well the prediction of the machine learning model matches the reality. Table~\ref{table:true-false-neg-pos} shows the different possibilities of matches and how they are called. % TODO: write better, different word for the second 'matches'
 
 \begin{table}[ht]
   \centering
@@ -13,10 +13,12 @@ During the experiments in Chapter~\ref{chap:experiments}, the performance is mea
   \end{tabular}\label{table:true-false-neg-pos}
 \end{table}
 
-Accuracy is calculated by dividing the number of correct guesses by the total number of guesses. % TODO
+Four metrics exist based on those measurements to calculate the correctness of the machine learning model.
 
-Precision is defined as the number of true positive guesses divided by the total number of positive guesses. It is a good measurement when false positives are associated with a high cost. % TODO
+The first of these metrics is accuracy, which is calculated by dividing the number of correct guesses by the total number of guesses. It indicates how close the prediction is to the actual result and is therefore a good general reference point for the correctness of the model.
 
-Recall is defined as the number of positive guesses divided by the number of actual positives. It is a good measurement when false negatives are associated with a high cost % TODO
+The second metric, precision, is defined as the number of true positive guesses divided by the total number of positive guesses. It is very well suited for determining the correctness when false positives are associated with a high cost.
 
-F1 is calculated by dividing the product of precision and recall by their sum. It is an important measurement when both precision and recall are important and the number of positives and negatives is very unbalanced, for example if there are \SI{99}{\percent} negatives.
+Recall is the third metric and defined as the number of positive guesses divided by the number of actual positives. It is a good metric to measure the performance when false negatives are associated with a high cost.
+
+Finally, F1 is calculated by dividing the product of precision and recall by their sum. Just like accuracy, F1 is well suited when both precision and recall are equally important. The difference is that F1 is especially good in cases where the number of positives and negatives is very unbalanced. An example for this is a dataset where \SI{99}{\percent} of the actual results are negatives.
