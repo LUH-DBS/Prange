@@ -4,9 +4,7 @@ In this thesis I present a method to increase the efficiency of finding unique c
 
 The proposed method works in three steps. First, the features are extracted from the first rows of the table. After that, the model tries to predict the existence of duplicate values from the features. Finally, the columns which are unique according to the model are checked with a naive method.
 
-%! column headers are not part of the input
-
-%! link to github repo ~\cite{Prange_Improving_Primary_Key_2022}
+The source of the proposed method as well as the experiments in Chapter~\ref{chap:experiments} can be found in the GitHub repository \url{https://github.com/LUH-DBS/Prange}. % TODO: write better?
 
 % ["Duplicates", "Data Type", "Sorted",
 %           # number
@@ -19,7 +17,7 @@ The machine learning model which is used by the proposed method can not work on 
 
 \input{table-code/proposed-method/feature_table.tex}
 
-% TODO: which data type numbers exist?
+% TODO: which data type numbers exist? -> is inside the text sufficient?
 
 The code in Listing~\ref{lst:proposed_method-prepare_column} extracts the features from each column to produce such a feature table. The feature extraction of the proposed method works in different steps which are executed one after the other.
 
@@ -41,6 +39,8 @@ First, the features for numeric values are set to 0 in line 25. After that, the 
 
 If there is any value in the column which is not a string, a ValueError is raised in line 32, which leads to the \enquote{Data Type} feature being set to \num{4} in line 42 and the string specific features set to \num{0}.
 
+It should be emphasized that the column header is not being extracted as a feature. While this could lead to a better performance in some cases, it is challenging to encode the various headings in a way that is understandable for the machine learning model. % TODO: is this good?
+
 \lstinputlisting[
   float,
   numbers=left,
@@ -50,7 +50,25 @@ If there is any value in the column which is not a string, a ValueError is raise
 ]{table-code/proposed-method/prepare-columns.py}
 
 
-\section{Training the Model}\label{sec:traing_the_model} % TODO: Writing
-How was the model trained? What settings where used for the training and why?
+\section{Used packages and libraries}\label{sec:used_packages_and_libraries} % TODO: maybe another paragraph?
+For this thesis, the algorithms and experiments where implemented using \texttt{Python 3.10.2}. To interact with the data, the python library \texttt{pandas} was used as its dataframe structure has useful additional functions and has a good compatibility to the library \texttt{Auto-Sklearn}, which was used to train the machine learning model.
 
-\input{content/fundamental-knowledge/_packages-and-libraries.tex}
+
+\section{Training the Model}\label{sec:traing_the_model}
+The machine learning model was trained on the training dataset, which is a subset with \num{10000} tables of the GitTables dataset that is used for the correctness test in Section~\ref{sec:correctness}. Each of the tables has a minimum size of \num{100} rows and \num{3} columns. % TODO: write better, explain GitTables further?
+
+From each table in the training dataset the features where extracted and saved as the \enquote{training\_data} table. Additionally, the data was correctly classified using the naive algorithm to form the \enquote{training\_result} table.
+
+The Listing~\ref{lst:proposed_method-train_model} presents the training process. First, in line 5 and 6 the feature table produced from the training data and the result table where loaded as pandas dataframes.
+
+In line 8 to 11, the training parameters where selected. The train time was changed for the different experiments in Chapter~\ref{chap:experiments}. However, the metric the model was trained on was always recall, as false negatives have the highest cost for the performance of the model. While there is a cost associated with false positives too, they do not decrease the correctness of the proposed method as each positive guess by the model is verified using a naive algorithm.
+
+Finally, in line 12 the model is trained on the training data. Auto-Sklearn automatically chooses the best of a range of classical learning algorithms. % TODO: write better? 
+
+\lstinputlisting[
+  float=ht,
+  numbers=left,
+  language=Python,
+  caption={[Training the model with Auto-Sklearn]This code shows how the machine learning model is trained using the python library Auto-Sklearn.}, % TODO: The data is loaded as pandas dataframes?
+  label={lst:proposed_method-train_model}
+]{table-code/proposed-method/train_model.py}
