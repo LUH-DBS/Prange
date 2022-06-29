@@ -5,26 +5,27 @@ In this section, different experiments will be conducted to determine which para
 
 
 \subsection{Experiment Data}\label{subsec:correctness_experiment-data}
-The experiments where performed on the GitTables dataset, which is a large corpus of relational tables extracted from CSV files in GitHub~\cite{gittables-article}. However, not the whole dataset was used but only a subset of tables split into a training and a test dataset.
+The experiments where performed on the GitTables dataset, which is a large corpus of relational tables extracted from CSV files in GitHub~\cite{gittables-article}. However, not the whole dataset was used, only a subset of tables which were split into a training and a test dataset.
 
-The training dataset is used to train every model which was tested in the following experiments including the efficiency experiments. It is a subset of the GitTables dataset with \num{10000} tables which where selected by traversing the GitTables dataset and skipping tables which are too small.
+To train each of the models tested in the following experiments, including the efficiency experiments, the training dataset was used. It is a subset of the GitTables dataset with \num{10000} tables that where selected by traversing the GitTables dataset and skipping tables which are too small.
 
-Every table in it has to have at least \num{100} rows and \num{3} columns to ensure the feature extraction described in Section~\ref{lst:proposed_method-prepare_column} does not become the naive algorithm with extra steps. This could be a problem as searching for duplicates with the naive algorithm in the first \textit{n} rows of each column is part of the feature extraction.
+Every table in the training dataset has to have at least \num{100} rows and \num{3} columns to ensure the feature extraction described in Section~\ref{lst:proposed_method-prepare_column} does not become the naive algorithm with extra steps. This could be a problem as searching for duplicates with the naive algorithm in the first \textit{n} rows of each column is part of the feature extraction.
 
-The test dataset was generated the same way as the training dataset. By traversing the GitTables and skipping every table which is too small or part of the training dataset a collection of \num{5000} tables with \num{57211} columns and an average of \num{184} rows was generated. It was used for every experiment apart from the one in Section~\ref{subsec:correctness_comparing-input-size} where a dataset of \num{30000} tables with \num{307030} columns and an average of \num{277} rows was used.
+The test dataset was generated the same way as the training dataset. By traversing the GitTables and skipping every table which is too small or part of the training dataset, a collection of \num{5000} tables with \num{57211} columns and an average of \num{184} rows was generated. It was used for every experiment apart from the one in Section~\ref{subsec:correctness_comparing-input-size} where a dataset of \num{30000} tables with \num{307030} columns and an average of \num{277} rows was used.
 
 
 \subsection{Comparing models with different input sizes}\label{subsec:correctness_comparing-input-size}
-As described in Section~\ref{sec:extracted_features}, the proposed method extracts features from the first rows of a table and uses a machine learning model to predict if a column has any duplicate values based on those features. % TODO: is ref to extracted features correct?
+As described in Section~\ref{sec:extracted_features}, the proposed method extracts features from the first rows of a table and uses a machine learning model to predict if a column has any duplicate values based on those features.
 
-In this experiment, I compare different models which use the first \num{5}, \num{10}, \num{20} and \num{50} rows of each column to extract features. A model with an input size larger than \num{50} rows was not feasible as the tables used for training and testing had a minimum size of \num{100} rows. With a bigger input, the feature extraction would end up performing like the naive algorithm as checking the first \textit{n} rows for duplicates with the naive algorithm is part of the feature extraction. % chktex 13 % TODO: is the last sentence too much? practically the same is said in the previous subsection
+In this experiment, I compare different models which use the first \num{5}, \num{10}, \num{20} and \num{50} rows of each column to extract features. A model with an input size larger than \num{50} rows was not feasible as the tables used for training and testing had a minimum size of \num{100} rows.
+% With a bigger input, the feature extraction would end up performing like the naive algorithm as checking the first \textit{n} rows for duplicates with the naive algorithm is part of the feature extraction. % TODO: is the last sentence too much? practically the same is said in the previous subsection
 
 
 Each model was trained for \num{5} hours on the training dataset. During the experiment, the test dataset with \num{5000} tables that was described in Section~\ref{subsec:correctness_experiment-data} was used to test each model.
 
-Table~\ref{table:correctness-comparing_input_sizes} shows the results of this experiment, which demonstrates that the input size has a large influence on the quality of the prediction. While none of the models has any false negative guesses, the number of false positive guesses decreases with an increasing input size.
+Table~\ref{table:correctness-comparing_input_sizes} shows the results of this experiment, which demonstrates that the input size has a large influence on the quality of the prediction. While none of the models have any false negative guesses, the number of false positive guesses decreases with an increasing input size.
 
-%! TODO: how many positive guesses? -> guess_count.csv
+%! TODO: how many positive guesses? -> guess_count.csv -> even for the 5 row model 40% of the columns predicted as positive
 
 This experiment shows that an increase in the input size of the model does have a great impact on the number of false positive guesses. However, since each positive guess by the model is verified using the naive algorithm, the number of false guesses has no effect on the quality of the final prediction of the proposed method. What is however effected by it is the efficiency of the method; this is explored further in Section~\ref{subsec:efficiency-changing_uniques}.
 
@@ -47,10 +48,12 @@ This experiment very clearly demonstrates that the machine learning model does n
 \input{table-code/result/correctness/compare-training-time.tex}
 
 
-\subsection{Summary}\label{subsec:correctness_conclusions} %! TODO
+\subsection{Summary}\label{subsec:correctness_conclusions}
 The experiments in this section demonstrate that the predictions made by the model have a sufficiently high accuracy. Models which have been trained for more than one minute had a recall of 1 and therefore no false negative guesses. This is a very good result as false negative guesses would lead to unique columns which are ignored.
 
 Furthermore, the models in the experiments produce less than twice as much false positive guesses as true positive guesses and even less for models with a larger input size. This is important as false positive guesses reduce the efficiency, which is explored further in Section~\ref{sec:efficiency}.
+
+% TODO: the number of predicted positive correlates roughly with the number of actual positives
 
 
 \subsection{Examine columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: maybe a table with examples?
@@ -62,6 +65,6 @@ The false guesses are unfortunately mostly unavoidable as they are caused mainly
 
 Another example for a column leading to a false positive guess is one containing the name of authors. Since the model only sees short strings without duplicates in these columns, there is no good way for the current implementation to recognize the column as non-unique. However, it would be possible to additionally include the column heading as a feature to enable the model to learn that the column with the names of authors is more likely to contain duplicate values.
 
-False negative guesses occurred only in one of all the correctness experiments, namely with the model which was trained for only one minute in Section~\ref{subsec:correctness_comparing-training-time}. And even then the false negatives were rare, and the corresponding columns contained only negative numbers or numbers smaller than 1. While these columns are negative, they are not suited very well as primary keys. % TODO: is this ok?
+False negative guesses occurred only in one of all the correctness experiments, namely with the model which was trained for just one minute in Section~\ref{subsec:correctness_comparing-training-time}. And even then the false negatives were rare, and the corresponding columns contained only negative numbers or numbers smaller than 1. While these columns are negative, they are not suited very well as primary keys. % TODO: is this ok?
 
 % TODO: Maybe a summarizing paragraph?

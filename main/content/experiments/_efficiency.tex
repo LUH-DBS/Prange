@@ -1,15 +1,15 @@
 \section{Efficiency}\label{sec:efficiency}
 Next to the correctness, the efficiency of the proposed method is the most important metric to determine its feasibility. % TODO: maybe a better wording?
-The main question is if or from what table size the proposed method is faster than the naive method. This becomes even more interesting as each positive guess of the model has to be verified using the naive algorithm to increase the accuracy. % TODO: ref to model
+The main question is if or from what table size the proposed method is faster than the naive method. This becomes even more interesting as each positive guess of the model has to be verified using the naive algorithm to increase the accuracy.
 
-The following experiments explore the efficiency of the proposed method in comparison to the naive algorithm and which parameters have the greatest influence on it. %! TODO: write better?
+The following experiments explore the efficiency of the proposed method in comparison to the naive algorithm and which parameters have the greatest influence on it.
 
 
 \subsection{Experiment Data}\label{subsec:efficiency-experiment_data}
-The experiments in this section were conducted on a set of generated tables to control the size of the table as well as the number of unique and non-unique columns. A small example of such a table can be seen in Table~\ref{table:efficiency-generated_table}. % chktex 18
+The experiments in this section were conducted on a set of generated tables to control the size of the table as well as the number of unique and non-unique columns. A small example of such a table can be seen in Table~\ref{table:efficiency-generated_table}.
 
 The generated tables each have \num{10} columns and between \num{100} and \num{100000000} columns. To ensure the correct prediction by the model, the columns where generated in a specific way.
-The unique columns are evenly incrementing for the first \num{50} rows, while the first two rows of the non-unique columns contain the same value. The rest of each column contains distinct incrementing values which are mixed up to increase the time the sorting based naive algorithm takes to find unique columns. % TODO: ref to naive algorithm  % chktex 18
+The unique columns are evenly incrementing for the first \num{50} rows, while the first two rows of the non-unique columns contain the same value. The rest of each column contains distinct incrementing values which are mixed up to increase the time the sorting based naive algorithm takes to find unique columns.
 
 \input{table-code/experiments/efficiency-generated_table.tex}
 
@@ -49,7 +49,7 @@ In summary, while the reduced loading time does make a notable difference, it is
 
 
 
-% \subsection{Comparing models with different input sizes}\label{subsec:efficiency-comparing_models} % TODO: Writing
+% \subsection{Comparing models with different input sizes}\label{subsec:efficiency-comparing_models} % TODO: Writing?
 % Short description of what \enquote{different input sizes} means (long explanation in earlier section).
 
 % Compare times for \SI{70}{\percent}.
@@ -58,7 +58,8 @@ In summary, while the reduced loading time does make a notable difference, it is
 
 
 \subsection{Changing the ratio of unique to non-unique columns}\label{subsec:efficiency-changing_uniques}
-The last variable that has an impact on the runtime of the model is the percentage of unique columns in the table. Since every positive prediction by the model has to be verified using the naive algorithm, the total runtime increases the more unique columns the model predicts. The number of unique columns predicted by the model correlates roughly with the number of actual unique columns in the table. % TODO: ref to section under correctness test?
+The last variable that has an impact on the runtime of the model is the percentage of unique columns in the table. Since every positive prediction by the model has to be verified using the naive algorithm, the total runtime increases the more unique columns the model predicts.
+% Section~\ref{subsec:correctness_conclusions} has shown that the number of unique columns predicted by the model correlates roughly with the number of actual unique columns in the table. % TODO: is the last sentence necessary?
 
 In this experiment, a model with an input size of \num{10} rows is used on \num{4} tables, which are saved as parquet files and each have \num{100000000} rows and \num{10} columns. The difference between these tables is the percentage of unique columns, which range from \SI{60}{\percent} to \SI{90}{\percent}.
 

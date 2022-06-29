@@ -29,9 +29,9 @@ In line 5 to 12 the remaining columns are checked in order to determine whether 
 
 In the following lines, a distinction is made between the different types of values.
 
-If the column contains only boolean values, the feature \enquote{Data Type} is set to \num{3} while all other features stay on \num{0} in line 13 to 16. Although it is very unlikely that a column contains exclusively boolean values without any duplicate values, there are tables in the GitTables dataset to which this applies. % TODO: keep boolean values?
+If the column contains only boolean values, the feature \enquote{Data Type} is set to \num{3} while all other features stay on \num{0} in line 13 to 16. Although it is very unlikely that a column contains exclusively boolean values without any duplicate values, there are tables in the GitTables dataset to which this applies.
 
-Line 17 to 23 handle columns that contain exclusively numeric values. The \enquote{Data Type} feature is set to \num{1} in line 18 and the four features specific to numeric values are extracted in line 19 and 20. The three remaining features are set to \num{0} in line 22. % TODO: write better
+Line 17 to 23 handle columns that contain exclusively numeric values. The \enquote{Data Type} feature is set to \num{1} in line 18 and the four features specific to numeric values are extracted in line 19 and 20. The three remaining features are set to \num{0} in line 22.
 
 Finally, the columns that contain exclusively string or a mix of different types are handled in the remaining lines.
 
@@ -39,7 +39,7 @@ First, the features for numeric values are set to 0 in line 25. After that, the 
 
 If there is any value in the column which is not a string, a ValueError is raised in line 32, which leads to the \enquote{Data Type} feature being set to \num{4} in line 42 and the string specific features set to \num{0}.
 
-It should be emphasized that the column header is not being extracted as a feature. While this could lead to a better performance in some cases, it is challenging to encode the various headings in a way that is understandable for the machine learning model. % TODO: is this good?
+It should be emphasized that the column header is not being extracted as a feature. While this could lead to a better performance in some cases, it is challenging to encode the various headings in a way that is understandable for the machine learning model.
 
 \lstinputlisting[
   float,

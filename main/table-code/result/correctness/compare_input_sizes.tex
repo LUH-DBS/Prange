@@ -1,14 +1,15 @@
 \begin{table}[ht]
   \centering
   \caption[Result for Correctness: Comparing different input sizes]{The result of the correctness experiment comparing models with different input sizes. Each of the models was trained for \num{5} hours on the training dataset described in Section~\ref{subsec:correctness_experiment-data}. The experiment was conducted on the test dataset with \num{30000} tables.}
-  % TODO: how many positive guesses?
-  \begin{tabular}{S[table-format=2]SSSS}
-    \toprule
-    {Model Input Size} & {Accuracy}         & {Precision}         & {Recall} & {F1}               \\ \midrule
-    5                  & 0.7038921278051005 & 0.2687803622558955  & 1.0      & 0.4236830427892235 \\
-    10                 & 0.8329283783343647 & 0.39448025119814906 & 1.0      & 0.5657738800663664 \\
-    20                 & 0.9096993779109533 & 0.546554797769164   & 1.0      & 0.7068030160425545 \\
-    50                 & 0.9697521414845455 & 0.7825313195176209  & 1.0      & 0.8780000788198048 \\
-    \bottomrule
-  \end{tabular}\label{table:correctness-comparing_input_sizes}
+  % \makebox[\linewidth][l]{%
+    \begin{tabular}{S[table-format=2]SSSSS[table-format=6]}
+      \toprule
+      {\shortstack{Model\\Input Size}} & {Accuracy}         & {Precision}         & {Recall} & {F1}               & {\shortstack{Predicted\\Positives}} \\ \midrule
+      5                  & 0.7038921278051005 & 0.2687803622558955  & 1.0      & 0.4236830427892235 & 124332                \\
+      10                 & 0.8329283783343647 & 0.39448025119814906 & 1.0      & 0.5657738800663664 & 84714                 \\
+      20                 & 0.9096993779109533 & 0.546554797769164   & 1.0      & 0.7068030160425545 & 61143                 \\
+      50                 & 0.9697521414845455 & 0.7825313195176209  & 1.0      & 0.8780000788198048 & 42705                 \\
+      \bottomrule
+    \end{tabular}\label{table:correctness-comparing_input_sizes}
+  % }
 \end{table}

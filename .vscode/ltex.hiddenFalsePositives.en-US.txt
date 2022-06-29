@@ -8,3 +8,4 @@
 {"rule":"COLLECTIVE_NOUN_VERB_AGREEMENT_VBP","sentence":"^\\QHowever, not the whole dataset was used but only a subset of tables split into a training and a test dataset.\\E$"}
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QAdditionally, the data was correctly classified using the naive algorithm to form the trainingresult table.\\E$"}
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QFrom each table in the training dataset the features where extracted and saved as the trainingdata table.\\E$"}
+{"rule":"BEEN_PART_AGREEMENT","sentence":"^\\QHowever, the metric the model was trained on was always recall, as false negatives have the highest cost for the performance of the model.\\E$"}
