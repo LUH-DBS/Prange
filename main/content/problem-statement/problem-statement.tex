@@ -1,9 +1,9 @@
-\chapter{Problem Statement}\label{chap:problem_statement} % TODO: writing
-Primary key candidates are columns which do not have any duplicate values and can therefore be used to identify a row in the table. For the purposes of this thesis, a column that contains a None/Null value is considered non-unique as it can not be used as a primary key.
+\chapter{Problem Statement}\label{chap:problem_statement} %! TODO: writing
+Primary key candidates are columns which do not have any duplicate values and can therefore be used to identify a row in the table.
+
+Even though the discovery of unique column combinations is a topic which receives a lot of attention because of its applications in the fields of data discovery and data analysis, the underlying algorithm to determine whether a column is unique is unchanged.
+
+For the purposes of this thesis, a column that contains a None/Null value is considered non-unique as it can not be used as a primary key.
 
 The runtime of a conventional naive algorithm is in \(O(n)\) or \(O(\log(n))\) as explained in Section~\ref{sec:naive_algorithm}. This becomes a problem when the tables have several million rows.
 
-% TODO: integrate into this section
-The naive algorithm that is used for the experiments in Chapter~\ref{chap:experiments} is a sorting based method with the specialty of aborting if one of the values is None/Null since the column can not be used as a primary key.
-
-The reason the hashing based method was not used for the experiments was to be able to reliably carry out the efficiency experiments. Although the sorting based method is less efficient, it enables the experiments to be set up in a way that enables the machine learning model to make the correct prediction without decreasing the runtime of the naive algorithm.
