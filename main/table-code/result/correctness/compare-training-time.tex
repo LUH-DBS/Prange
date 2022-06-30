@@ -2,19 +2,23 @@
   \centering
   \caption[Result for Correctness: Comparing different training times]{The result of the correctness experiment comparing models which were trained for different amounts of time on the training dataset. The experiment was conducted on the test dataset with \num{5000} tables.} % TODO: maybe a text more different from table compare-input-sizes
   %! TODO: number of false negatives
-  \begin{tabular}{SSSSS}
-    \toprule
-    {Training Time [\si{\minute}]} & {Accuracy}         & {Precision}        & {Recall}          & {F1}               \\ \midrule
-    1                              & 0.8465155302302005 & 0.3685386778170283 & 0.995714842228282 & 0.5379636937647987 \\
-    2                              & 0.8468651133523274 & 0.3694854264123785 & 1.0               & 0.5395974565137421 \\
-    5                              & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 \\
-    10                             & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 \\
-    20                             & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 \\
-    40                             & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 \\
-    60                             & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 \\
-    120                            & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 \\
-    180                            & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 \\
-    300                            & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 \\
-    \bottomrule
-  \end{tabular}\label{table:correctness-compare_training_time}
+  \makebox[\linewidth][r]{%
+    \begin{tabular}{S[table-format=3]SSSSS[table-format=2]}
+      \toprule
+      {\shortstack{Training Time\\{[\si{\minute}]}}} & {Accuracy}         & {Precision}        & {Recall}          & {F1}               & {\shortstack{False Negative\\Predictions}} \\ \midrule
+      % {\shortstack{Training Time\\TODO}} & {Accuracy}         & {Precision}        & {Recall}          & {F1}               & {\shortstack{False Negative\\Predictions}} \\ \midrule
+      % {\shortstack{Training Time\\[\si{\minute}]}} & {Accuracy}         & {Precision}        & {Recall}          & {F1}               & {\shortstack{False Negative\\Predictions}} \\ \midrule
+      1   & 0.8465155302302005 & 0.3685386778170283 & 0.995714842228282 & 0.5379636937647987 & 22  \\
+      2   & 0.8468651133523274 & 0.3694854264123785 & 1.0               & 0.5395974565137421 & 0   \\
+      5   & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 & 0   \\
+      10  & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 & 0   \\
+      20  & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 & 0   \\
+      40  & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 & 0   \\
+      60  & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 & 0   \\
+      120 & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 & 0   \\
+      180 & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 & 0   \\
+      300 & 0.8231284193599133 & 0.3365895233724513 & 1.0               & 0.5036542894982097 & 0   \\
+      \bottomrule
+    \end{tabular}\label{table:correctness-compare_training_time}
+  }
 \end{table}
