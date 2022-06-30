@@ -8,8 +8,8 @@ The following experiments explore the efficiency of the proposed method in compa
 \subsection{Experiment Data}\label{subsec:efficiency-experiment_data}
 The experiments in this section were conducted on a set of generated tables to control the size of the table as well as the number of unique and non-unique columns. A small example of such a table can be seen in Table~\ref{table:efficiency-generated_table}.
 
-The generated tables each have \num{10} columns and between \num{100} and \num{100000000} columns. To ensure the correct prediction by the model, the columns where generated in a specific way.
-The unique columns are evenly incrementing for the first \num{50} rows, while the first two rows of the non-unique columns contain the same value. The rest of each column contains distinct incrementing values which are mixed up to increase the time the sorting based naive algorithm takes to find unique columns.
+Each generated table has \num{10} rows and between \num{100} and \num{100000000} columns. To ensure the correct prediction by the model, the columns where generated in a specific way.
+The unique columns are evenly incrementing for the first \num{50} rows, while the first two rows of the non-unique columns contain the same value. The rest of each column contains distinct incrementing values which are mixed up to increase the time which the sorting based naive algorithm takes to find unique columns.
 
 \input{table-code/experiments/efficiency-generated_table.tex}
 
@@ -37,13 +37,13 @@ Another advantageous property of this format is the concept of row groups, which
 
 The Table~\ref{table:efficiency_parquet-70percent} shows the result of the base experiment from Section~\ref{subsec:efficiency-base_experiment} repeated with tables generated as parquet files. While the computing time for the model and the naive algorithm remain roughly equal compared to Table~\ref{table:efficiency_csv-70percent}, the loading time is decreased significantly for large tables. %? loading times make up a larger part of total time for model
 
-\input{table-code/result/efficiency/10rowModel-10colTable/parquet-70percent.tex}
-
 Table~\ref{table:efficiency_parquet-70percent_small-tables} presents the result for the experiment using the advantages of the file format by loading only the necessary rows and columns. This leads to two loading times for the model. The first time only the first row group is being loaded while the second time only the columns which are unique according to the model are loaded. However, this does not make any difference except for the largest table and even then the total time is hardly changing.
+
+\input{table-code/result/efficiency/10rowModel-10colTable/parquet-70percent.tex}
 
 \input{table-code/result/efficiency/10rowModel-10colTable/parquet-70percent_small-tables.tex}
 
-In summary, while the reduced loading time does make a notable difference, it is not very large compared to the efficiency gain achieved through the use of the proposed method, as can be seen in Figure~\ref{fig:efficiency-shorter_loading_time-plot}. This could change, however, if the file reading speed would be slower, for example because the data had to be read over the internet. In this case, reading only the necessary rows and columns and thus decreasing \io{} further could make a larger difference too.
+In summary, while the reduced loading time does make a notable difference, it is not very large compared to the efficiency gain achieved through the use of the proposed method, which is additionally demonstrated in Figure~\ref{fig:efficiency-shorter_loading_time-plot}. This could change, however, if the file reading speed would be slower, for example because the data had to be read over the internet. In this case, reading only the necessary rows and columns and thus decreasing \io{} further could make a larger difference too.
 
 \input{table-code/experiments/efficiency-shorter_loading_time_plot.tex}
 

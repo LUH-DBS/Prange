@@ -51,7 +51,7 @@ It should be emphasized that the column header is not being extracted as a featu
 
 
 \section{Used packages and libraries}\label{sec:used_packages_and_libraries} % TODO: maybe another paragraph?
-For this thesis, the algorithms and experiments where implemented using \texttt{Python 3.10.2}. To interact with the data, the python library \texttt{pandas} was used as its dataframe structure has useful additional functions and has a good compatibility to the library \texttt{Auto-Sklearn}, which was used to train the machine learning model.
+For this thesis, the algorithms and experiments where implemented using Python 3.10.2. To interact with the data, the python library pandas was used as its dataframe structure has useful additional functions and has a good compatibility to the library Auto-Sklearn, which was used to train the machine learning model.
 
 
 \section{Training the Model}\label{sec:traing_the_model}
@@ -61,7 +61,7 @@ From each table in the training dataset the features where extracted and saved a
 
 The Listing~\ref{lst:proposed_method-train_model} presents the training process. First, in line 5 and 6 the feature table produced from the training data and the result table where loaded as pandas dataframes.
 
-In line 8 to 11, the training parameters where selected. The train time was changed for the different experiments in Chapter~\ref{chap:experiments}. However, the metric the model was trained on was always recall, as false negatives have the highest cost for the performance of the model. While there is a cost associated with false positives too, they do not decrease the correctness of the proposed method as each positive guess by the model is verified using a naive algorithm.
+In line 8 to 11, the training parameters where selected. The train time was changed for the different experiments in Chapter~\ref{chap:experiments}. The model was always trained with the metric recall used to measure its performance, as false negatives have the highest cost for the performance of the model. While there is a cost associated with false positives too, they do not decrease the correctness of the proposed method as each positive guess by the model is verified using a naive algorithm.
 
 Finally, in line 12 the model is trained on the training data. Auto-Sklearn automatically chooses the best of a range of classical learning algorithms. % TODO: write better? 
 

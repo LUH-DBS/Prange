@@ -27,7 +27,7 @@ Table~\ref{table:correctness-comparing_input_sizes} shows the results of this ex
 
 %! TODO: how many positive guesses? -> guess_count.csv -> even for the 5 row model 40% of the columns predicted as positive
 
-This experiment shows that an increase in the input size of the model does have a great impact on the number of false positive guesses. However, since each positive guess by the model is verified using the naive algorithm, the number of false guesses has no effect on the quality of the final prediction of the proposed method. What is however effected by it is the efficiency of the method; this is explored further in Section~\ref{subsec:efficiency-changing_uniques}.
+This experiment shows that an increase in the input size of the model does have a great impact on the number of false positive guesses. Since each positive guess from the model is verified using the naive algorithm, the number of false positive guesses has no effect on the quality of the final prediction from the proposed method. However, this verification has an influence on the efficiency of the method; this is explored further in Section~\ref{subsec:efficiency-changing_uniques}.
 
 Another important finding of this experiment is that even with a small input size of only \num{5} rows, the model has not made any false negative guesses. As the negative guesses of the model are not checked, it is important for them to be correct to ensure the overall correctness of the proposed method.
 
@@ -43,7 +43,7 @@ The Table~\ref{table:correctness-compare_training_time} presents the results of 
 
 However, apart from the false negative guesses, the models with a training time of one and two minutes have a slightly better performance than the other models. % TODO: maybe write better?
 
-This experiment very clearly demonstrates that the machine learning model does not need a long training time to find unique columns. Furthermore, it shows that there might be advantageous to train a model multiple times and compare them to find the best performing, since a longer training time does not translate to higher performance.
+This experiment very clearly demonstrates that the machine learning model does not need a long training time to find unique columns. Furthermore, it shows that there might be advantageous to train a model multiple times and compare them to find the best performing, since a longer training time does not necessarily lead to higher performance.
 
 \input{table-code/result/correctness/compare-training-time.tex}
 
