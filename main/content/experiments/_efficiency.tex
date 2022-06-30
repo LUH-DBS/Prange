@@ -1,5 +1,5 @@
 \section{Efficiency}\label{sec:efficiency}
-Next to the correctness, the efficiency of the proposed method is the most important metric to determine its feasibility. % TODO: maybe a better wording?
+Next to the correctness, the efficiency of the proposed method is the most important property to determine its feasibility. % TODO: maybe a better wording?
 The main question is if or from what table size the proposed method is faster than the naive method. This becomes even more interesting as each positive guess of the model has to be verified using the naive algorithm to increase the accuracy.
 
 The following experiments explore the efficiency of the proposed method in comparison to the naive algorithm and which parameters have the greatest influence on it.
@@ -59,13 +59,12 @@ In summary, while the reduced loading time does make a notable difference, it is
 
 \subsection{Changing the ratio of unique to non-unique columns}\label{subsec:efficiency-changing_uniques}
 The last variable that has an impact on the runtime of the model is the percentage of unique columns in the table. Since every positive prediction by the model has to be verified using the naive algorithm, the total runtime increases the more unique columns the model predicts.
-% Section~\ref{subsec:correctness_conclusions} has shown that the number of unique columns predicted by the model correlates roughly with the number of actual unique columns in the table. % TODO: is the last sentence necessary?
 
 In this experiment, a model with an input size of \num{10} rows is used on \num{4} tables, which are saved as parquet files and each have \num{100000000} rows and \num{10} columns. The difference between these tables is the percentage of unique columns, which range from \SI{60}{\percent} to \SI{90}{\percent}.
 
 Table~\ref{table:efficiency-changing_uniques-table} shows that nearly every step of the process takes the same amount of time, only the validation step is proportional to the number of unique columns.
 
-In the GitTables dataset, which is used in the correctness experiment, the ratio of unique columns is \SI{10}{\percent}. The positive guesses of the model are quite a bit higher since its priority is to avoid false negatives, not false positives. Still, the share of positive guesses during tests on the GitTables dataset is around \SI{30}{\percent}, which is low enough to be a clear improvement over the naive algorithm given large enough tables. %! TODO: percentage of positive guesses
+In the GitTables dataset, which is used in the correctness experiment, the ratio of unique columns is approximately \SI{11}{\percent}. The positive guesses of the model are quite a bit higher since its priority is to avoid false negatives, not false positives. Still, the experiment in Section~\ref{table:correctness-comparing_input_sizes} has shown that the share of positive guesses during tests on the GitTables dataset is smaller than \SI{30}{\percent} for a model with an input size of at least \num{10} rows. This is low enough to be a clear improvement over the naive algorithm given large enough tables.
 
 \input{table-code/experiments/efficiency-changing_uniques-table.tex}
 

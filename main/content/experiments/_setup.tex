@@ -2,16 +2,16 @@
 The following experiments where conducted on a server of the university. The machine uses \SI{514}{\gibi\byte} working memory and an \texttt{AMD EPYC 7702P 64-Core} processor. A graphic card was not necessary for the experiments.
 % Ethernet: BCM57416 NetXtreme-E Dual-Media 10G RDMA Ethernet Controller (2x, only one active)
 
-The naive algorithm that is used for the experiments is a sorting based method with the specialty of aborting if one of the values is None/Null since the column can not be used as a primary key.
+The naive algorithm that is used during the experiments is a sorting based method with the specialty of aborting if one of the values is None/Null since the column can not be used as a primary key.
 
-The reason the hashing based method was not used for the experiments was to be able to reliably carry out the efficiency experiments. Although the sorting based method is less efficient, it enables the experiments to be set up in a way that enables the machine learning model to make the correct prediction without decreasing the runtime of the naive algorithm.
+The reason the hashing based method was not used for the experiments was to be able to reliably carry out the efficiency experiments. Even though the sorting based method is less efficient, it enables the experiments to be set up in a way that enables the machine learning model to make the correct prediction without decreasing the runtime of the naive algorithm.
 
 % TODO: explain code
 
-\lstinputlisting[ % TODO: clean up the code
-  float,
-  numbers=left,
-  language=Python,
-  caption={[The implementation of the naive algorithm used in this thesis]This code shows the implementation of the naive algorithm which was used in this thesis. The unique columns are identified with a sorting based method. A specialty is the fact that a column with a single None value is considered non-unique.},
-  label={lst:naive_algorithm}
-]{table-code/proposed-method/naive_algorithm.py}
+% \lstinputlisting[ % TODO: clean up the code
+%   float,
+%   numbers=left,
+%   language=Python,
+%   caption={[The implementation of the naive algorithm used in this thesis]This code shows the implementation of the naive algorithm which was used in this thesis. The unique columns are identified with a sorting based method. A specialty is the fact that a column with a single None value is considered non-unique.},
+%   label={lst:naive_algorithm}
+% ]{table-code/proposed-method/naive_algorithm.py}

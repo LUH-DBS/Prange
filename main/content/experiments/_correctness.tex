@@ -23,9 +23,10 @@ In this experiment, I compare different models which use the first \num{5}, \num
 
 Each model was trained for \num{5} hours on the training dataset. During the experiment, the test dataset with \num{5000} tables that was described in Section~\ref{subsec:correctness_experiment-data} was used to test each model.
 
-Table~\ref{table:correctness-comparing_input_sizes} shows the results of this experiment, which demonstrates that the input size has a large influence on the quality of the prediction. While none of the models have any false negative guesses, the number of false positive guesses decreases with an increasing input size.
+Table~\ref{table:correctness-comparing_input_sizes} shows the results of this experiment, which demonstrate that the input size has a large influence on the quality of the prediction. While none of the models have any false negative guesses, the number of false positive guesses decreases with an increasing input size.
 
-%! TODO: how many positive guesses? -> guess_count.csv -> even for the 5 row model 40% of the columns predicted as positive
+Importantly, even the worst performing model with an input size of \num{5} rows predicts that \SI{40}{\percent} of all columns are unique. This rate drops % TODO: write better?
+to \SI{14}{\percent} for the model with an input size of \num{50} rows, which is very close to the actual ratio of unique columns of about \SI{11}{\percent}.
 
 This experiment shows that an increase in the input size of the model does have a great impact on the number of false positive guesses. Since each positive guess from the model is verified using the naive algorithm, the number of false positive guesses has no effect on the quality of the final prediction from the proposed method. However, this verification has an influence on the efficiency of the method; this is explored further in Section~\ref{subsec:efficiency-changing_uniques}.
 
@@ -35,13 +36,13 @@ Another important finding of this experiment is that even with a small input siz
 
 
 \subsection{Altering the training time}\label{subsec:correctness_comparing-training-time}
-The Auto-Sklearn library, which was used to train the machine learning models, automatically searches for the best learning algorithm and optimizes it as described in Section~\ref{sec:used_packages_and_libraries}. Since this process takes time to run, in theory the performance of the model increases with higher training time. % TODO: maybe write better? 
+The library Auto-Sklearn, which was used to train the machine learning models, automatically searches for the best learning algorithm and optimizes it as described in Section~\ref{sec:used_packages_and_libraries}. Since this process takes time to run, theoretically the performance of the model increases with higher training time.
 
 In this experiment, different models with an input size of \num{10} rows are being trained for different amounts of time on the training dataset. Subsequently, the experiment is conducted for each model on the test dataset with \num{5000} tables.
 
 The Table~\ref{table:correctness-compare_training_time} presents the results of this experiment. With a training time of one minute the performance of the machine learning model is indeed slightly worse as there are \num{22} false negative guesses.
 
-However, apart from the false negative guesses, the models with a training time of one and two minutes have a slightly better performance than the other models. % TODO: maybe write better?
+However, apart from the false negative guesses, the models with a training time of one and two minutes have a slightly better performance than the other models.
 
 This experiment very clearly demonstrates that the machine learning model does not need a long training time to find unique columns. Furthermore, it shows that there might be advantageous to train a model multiple times and compare them to find the best performing, since a longer training time does not necessarily lead to higher performance.
 
@@ -49,9 +50,9 @@ This experiment very clearly demonstrates that the machine learning model does n
 
 
 \subsection{Summary}\label{subsec:correctness_conclusions}
-The experiments in this section demonstrate that the predictions made by the model have a sufficiently high accuracy. Models which have been trained for more than one minute had a recall of 1 and therefore no false negative guesses. This is a very good result as false negative guesses would lead to unique columns which are ignored.
+The experiments in this section demonstrate that the predictions made by the model have a sufficiently high accuracy. Models which have been trained for more than one minute predicted no false negative guesses. This is a very good result as false negative guesses would lead to unique columns which are ignored.
 
-Furthermore, the models in the experiments produce less than twice as much false positive guesses as true positive guesses and even less for models with a larger input size. This is important as false positive guesses reduce the efficiency, which is explored further in Section~\ref{sec:efficiency}.
+Furthermore, the models in the experiments produce less than twice as much false positive guesses as true positive guesses and even less for models with a larger input size. This is important as false positive guesses reduce the efficiency, which is explored further in Section~\ref{sec:efficiency}. %! TODO: write correctly
 
 % TODO: the number of predicted positive correlates roughly with the number of actual positives
 
