@@ -1,7 +1,7 @@
 \section{Correctness}\label{sec:correctness}
 The correctness of the model is probably the most important metric to determine its usability. While a false positive is not a major problem for the correctness because each positive guess is verified (see Chapter~\ref{chap:proposed_method}), a false negative leads to a primary key candidate being ignored.
 
-In this section, different experiments will be conducted to determine which parameters have an influence on the correctness of the prediction. Additionally, in Section~\ref{subsec:correctness_examine-false-guesses} the columns which led to false guesses by the model will be examined.
+In this section, different experiments will be conducted to determine which parameters have an influence on the correctness of the prediction. Additionally, in Section~\ref{subsec:correctness_examine-false-guesses} the columns which led to false predictions by the model will be examined.
 
 
 \subsection{Experiment Data}\label{subsec:correctness_experiment-data}
@@ -17,26 +17,23 @@ The test dataset was generated the same way as the training dataset. By traversi
 \subsection{Comparing models with different input sizes}\label{subsec:correctness_comparing-input-size}
 As described in Section~\ref{sec:extracted_features}, the proposed method extracts features from the first rows of a table and uses a machine learning model to predict if a column has any duplicate values based on those features.
 
-In this experiment, I compare different models which use the first \num{5}, \num{10}, \num{20} and \num{50} rows of each column to extract features. A model with an input size larger than \num{50} rows was not feasible as the tables used for training and testing had a minimum size of \num{100} rows.
-% With a bigger input, the feature extraction would end up performing like the naive algorithm as checking the first \textit{n} rows for duplicates with the naive algorithm is part of the feature extraction. % TODO: is the last sentence too much? practically the same is said in the previous subsection
+In this experiment, I compare different models which use the first \num{5}, \num{10}, \num{20} and \num{50} rows of each column to extract features. A model with an input size larger than \num{50} rows was not feasible as the tables used for training and testing had a minimum size of only \num{100} rows.
 
+Each model was trained for \num{5} hours on the training dataset. During the experiment, the test dataset with \num{5000} tables was used to test each model.
 
-Each model was trained for \num{5} hours on the training dataset. During the experiment, the test dataset with \num{5000} tables that was described in Section~\ref{subsec:correctness_experiment-data} was used to test each model.
+Table~\ref{table:correctness-comparing_input_sizes} shows the results of this experiment which demonstrate that the input size has a large influence on the quality of the prediction. While none of the models have any false negative guesses, the number of false positive guesses decreases with an increasing input size.
 
-Table~\ref{table:correctness-comparing_input_sizes} shows the results of this experiment, which demonstrate that the input size has a large influence on the quality of the prediction. While none of the models have any false negative guesses, the number of false positive guesses decreases with an increasing input size.
+An important finding is that even the worst performing model with an input size of \num{5} rows predicts that only \SI{40}{\percent} of all columns are unique. This rate drops to \SI{14}{\percent} for the model with an input size of \num{50} rows, which is very close to the actual ratio of unique columns of about \SI{11}{\percent}.
 
-Importantly, even the worst performing model with an input size of \num{5} rows predicts that \SI{40}{\percent} of all columns are unique. This rate drops % TODO: write better?
-to \SI{14}{\percent} for the model with an input size of \num{50} rows, which is very close to the actual ratio of unique columns of about \SI{11}{\percent}.
+This experiment shows that an increase in the input size of the model does have a great impact on the number of false positive guesses. Since each positive prediction from the model is verified using the naive algorithm, the number of false positive guesses has no effect on the quality of the final prediction from the proposed method. However, this verification has an influence on the efficiency of the method; this is explored further in Section~\ref{subsec:efficiency-changing_uniques}.
 
-This experiment shows that an increase in the input size of the model does have a great impact on the number of false positive guesses. Since each positive guess from the model is verified using the naive algorithm, the number of false positive guesses has no effect on the quality of the final prediction from the proposed method. However, this verification has an influence on the efficiency of the method; this is explored further in Section~\ref{subsec:efficiency-changing_uniques}.
-
-Another important finding of this experiment is that even with a small input size of only \num{5} rows, the model has not made any false negative guesses. As the negative guesses of the model are not checked, it is important for them to be correct to ensure the overall correctness of the proposed method.
+Another important finding of this experiment is that even with a small input size of only \num{5} rows, the model has not made any false negative prediction. As the negative guesses of the model are not checked, it is important for them to be correct to ensure the overall correctness of the proposed method.
 
 \input{table-code/result/correctness/compare_input_sizes.tex}
 
 
 \subsection{Altering the training time}\label{subsec:correctness_comparing-training-time}
-The library Auto-Sklearn, which was used to train the machine learning models, automatically searches for the best learning algorithm and optimizes it as described in Section~\ref{sec:used_packages_and_libraries}. Since this process takes time to run, theoretically the performance of the model increases with higher training time.
+The library Auto-Sklearn, which was used to train the machine learning models, automatically searches for the best learning algorithm and optimizes it as described in Section~\ref{sec:used_packages_and_libraries}. Since this process takes time to run, theoretically the performance of the model should increase with higher training time.
 
 In this experiment, different models with an input size of \num{10} rows are being trained for different amounts of time on the training dataset. Subsequently, the experiment is conducted for each model on the test dataset with \num{5000} tables.
 
@@ -44,28 +41,23 @@ The Table~\ref{table:correctness-compare_training_time} presents the results of 
 
 However, apart from the false negative guesses, the models with a training time of one and two minutes have a slightly better performance than the other models.
 
-This experiment very clearly demonstrates that the machine learning model does not need a long training time to find unique columns. Furthermore, it shows that there might be advantageous to train a model multiple times and compare them to find the best performing, since a longer training time does not necessarily lead to higher performance.
+This experiment very clearly demonstrates that the machine learning model does not need a long training time to find unique columns. Furthermore, it shows that it might be advantageous to train a model multiple times and compare them to find the best performing, since a longer training time does not necessarily lead to higher performance.
 
 \input{table-code/result/correctness/compare-training-time.tex}
 
 
 \subsection{Summary}\label{subsec:correctness_conclusions}
-The experiments in this section demonstrate that the predictions made by the model have a sufficiently high accuracy. Models which have been trained for more than one minute predicted no false negative guesses. This is a very good result as false negative guesses would lead to unique columns which are ignored.
+The experiments in this section demonstrate that the predictions made by the model have a sufficiently high accuracy. Models which have been trained for more than one minute produced no false negative predictions. This is a very good result as false negative guesses would lead to unique columns being ignored.
 
-Furthermore, the models in the experiments produce less than twice as much false positive guesses as true positive guesses and even less for models with a larger input size. This is important as false positive guesses reduce the efficiency, which is explored further in Section~\ref{sec:efficiency}. %! TODO: write correctly
+Furthermore, the positive guesses of the models in the experiments are correct at least one third of the time and even more for models with a larger input size. This is important as false positive guesses reduce the efficiency, which is explored further in Section~\ref{sec:efficiency}.
 
-% TODO: the number of predicted positive correlates roughly with the number of actual positives
-
-
-\subsection{Examine columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: maybe a table with examples?
+\subsection{Examining columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: maybe a table with examples?
 The greatest weakness of the proposed method are false guesses. False positive guesses lead to a reduced efficiency because more columns need to be checked with the naive algorithm. False negative guesses on the other hand result in primary key candidates being ignored which reduces the correctness. It is therefore important to examine the columns which lead to false guesses to improve the model if possible.
 
-False positive guesses occur very often as the model is primarily trained to avoid any false negative guesses. The experiment in Section~\ref{subsec:correctness_comparing-input-size} has shown that depending on the input size between \SI{27}{\percent} and \SI{78}{\percent} of the positive guesses are false positives.
+False positive guesses occur very often as the model is primarily trained to avoid any false negative guesses. The experiment in Section~\ref{subsec:correctness_comparing-input-size} has shown that depending on the input size between \SI{27}{\percent} and \SI{78}{\percent} of the positive predictions are true positives.
 
-The false guesses are unfortunately mostly unavoidable as they are caused mainly by empty cells which are located after the input rows of the model in otherwise unique columns. As the column would be a primary key candidate without these missing values, there is no possible change which would improve the correctness of the model in this case.
+The false positive guesses are unfortunately mostly unavoidable as they are caused mainly by empty cells which are located after the input rows of the model in otherwise unique columns. As the column would be a primary key candidate without these missing values, there is no possible change which would improve the correctness of the model in this case.
 
-Another example for a column leading to a false positive guess is one containing the name of authors. Since the model only sees short strings without duplicates in these columns, there is no good way for the current implementation to recognize the column as non-unique. However, it would be possible to additionally include the column heading as a feature to enable the model to learn that the column with the names of authors is more likely to contain duplicate values.
+Another example for a column leading to a false positive guess is one containing the name of authors. Since the model only sees short strings without duplicates in these columns, there is no good way for the current implementation to recognize the column as non-unique. However, it could be possible to additionally include the column heading as a feature to enable the model to learn that the column with the names of authors is more likely to contain duplicate values.
 
-False negative guesses occurred only in one of all the correctness experiments, namely with the model which was trained for just one minute in Section~\ref{subsec:correctness_comparing-training-time}. And even then the false negatives were rare, and the corresponding columns contained only negative numbers or numbers smaller than 1. While these columns are negative, they are not suited very well as primary keys. % TODO: is this ok?
-
-% TODO: Maybe a summarizing paragraph?
+False negative guesses occurred only in one of all the correctness experiments, namely with the model which was trained for just one minute in Section~\ref{subsec:correctness_comparing-training-time}. And even then the false negatives were rare, and the corresponding columns contained only negative numbers or numbers smaller than 1. While these columns are unique, they are not suited very well as primary keys.

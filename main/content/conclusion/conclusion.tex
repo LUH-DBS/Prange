@@ -1,14 +1,14 @@
 \chapter{Conclusion}
 
 \section{Possible Applications}
-The proposed method is not suitable as a standalone application the way it is implemented as there are too many cases where the efficiency is far behind the naive algorithm. A more promising possibility would be to use this method as a part of a larger algorithm or program where it would be used only if it has an advantage of the naive algorithm.
+The proposed method is not suitable as a standalone application the way it is implemented as there are too many cases where its efficiency is far behind the naive algorithm. A more promising possibility would be to use this method as a part of a larger algorithm or program where it would be used only if it has an advantage over the naive algorithm.
 
-Another useful advantage of the proposed method is the fact that it produces a set of possible unique columns in a very short amount of time even for large tables. This would make it possible to very fast display columns which may be primary key candidates and validate the guesses in the background.
+Another useful characteristic of the proposed method is the fact that it produces a set of probable unique columns in a very short amount of time even for large tables. This would make it possible to display columns which may be primary key candidates very fast and validate the predictions in the background.
 
-It may be possible to transfer the idea behind the proposed method to use a machine learning algorithm which predicts if a column has certain properties (such as uniqueness). This way it could be possible to improve the speed in several areas of data analysis, not just the detection of primary key candidates.
+It may be possible to transfer the idea behind the proposed method, to use a machine learning algorithm which predicts if a column has certain properties (such as uniqueness), to other properties of tables. This way it could be possible to improve the speed in several areas of data analysis, not just the detection of primary key candidates.
 
 
 \section{Limitations of the proposed method}
-A big limitation of the proposed method is the fact that it only predicts uniqueness for single columns. % TODO: write further
+A big limitation of the proposed method is the fact that it only predicts uniqueness for single columns. This is a problem for two reasons. On the one hand, not every table has a primary key that includes only one column. On the other hand, information can be drawn from whether a column combination is unique. Here, the method needs to be further developed.
 
-Additionally, there is the possibility that a unique column is classified as a non-unique by the proposed method. However, to rule out this possibility, all the columns would have to be inspected with the naive algorithm. % TODO: maybe write better?
+Additionally, there is the possibility that a unique column is classified as a non-unique by the proposed method. However, to rule out this possibility, all the columns would have to be inspected with the naive algorithm which would defeat the purpose of the method.

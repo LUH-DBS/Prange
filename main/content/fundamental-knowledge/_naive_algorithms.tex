@@ -1,5 +1,5 @@
 \section{Naive Algorithms for finding primary key candidates}\label{sec:naive_algorithm}
-There are two basic ways of finding primary key candidates. Both of them are traversing each column and comparing its values to detect duplicates.
+There are two basic ways of finding primary key candidates. Both of them function by traversing each column and comparing its values to detect duplicates.
 
 The first method works by traversing a column, forming the hash value of each row and saving this hash value in a suitable data structure. If the hash value of a row is already present, the algorithm aborts because it is clear that the column is not unique. This algorithm runs in a time of \(O(n)\) as every value in the column has to be checked once to conclude that it is a unique column.
 

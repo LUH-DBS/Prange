@@ -1,6 +1,5 @@
 \section{Efficiency}\label{sec:efficiency}
-Next to the correctness, the efficiency of the proposed method is the most important property to determine its feasibility. % TODO: maybe a better wording?
-The main question is if or from what table size the proposed method is faster than the naive method. This becomes even more interesting as each positive guess of the model has to be verified using the naive algorithm to increase the accuracy.
+Next to the correctness, the efficiency of the proposed method is the most important property to determine its feasibility. The main question is if or from what table size the proposed method is faster than the naive method. This becomes even more interesting as each positive guess of the model has to be verified using the naive algorithm to increase the accuracy.
 
 The following experiments explore the efficiency of the proposed method in comparison to the naive algorithm and which parameters have the greatest influence on it.
 
@@ -19,7 +18,7 @@ The first experiment explores the efficiency of the proposed method compared to 
 
 Figure~\ref{fig:efficiency-base_experiment-plot} and Table~\ref{table:efficiency_csv-70percent} show that for tables with up to \num{100000} rows, the naive algorithm takes only a fraction of a second and is therefore faster than the proposed machine learning model. However, since the model takes a roughly constant time of half a second to compute its prediction, it becomes faster as the table size surpasses one million rows.
 
-The column \enquote{Model: Validation} in Table~\ref{table:efficiency_csv-70percent} additionally illustrates that the validation time of the proposed method is proportional to the number of positive guesses by the model. This highlights the importance of as few false positive guesses as possible, because each false positive guess unnecessarily increases the runtime through the required validation and therefore decreases the efficiency.
+The column \enquote{Model: Validation} in Table~\ref{table:efficiency_csv-70percent} additionally illustrates that the validation time of the proposed method is proportional to the number of positive guesses by the model. This highlights the importance of finding as few false positive guesses as possible because each false positive guess unnecessarily increases the runtime through the required validation and therefore decreases the efficiency.
 
 In conclusion, this experiment illustrates that for large tables loading the dataset and checking the columns for duplicates with the naive algorithm takes the most time. Possibilities to reduce the loading time will be explored in Section~\ref{subsec:efficiency-shorter_loading_times}. While a more efficient naive algorithm is not part of this thesis, Section~\ref{subsec:correctness_comparing-input-size} and~\ref{subsec:correctness_examine-false-guesses} deal with the question of how to decrease the number of false positive guesses.
 
@@ -28,14 +27,14 @@ In conclusion, this experiment illustrates that for large tables loading the dat
 \input{table-code/result/efficiency/10rowModel-10colTable/csv-70percent.tex}
 
 
-\subsection{Reduce loading times}\label{subsec:efficiency-shorter_loading_times}
+\subsection{Reducing loading times}\label{subsec:efficiency-shorter_loading_times}
 While CSV files are very easy to use, they are not meant to efficiently store large quantities of data. A file format which is substantially more suitable to handle large datasets is the parquet format~\cite{parquet-book}.
 
 It achieves this through the use of various features such as column wise compression, which tends to be more efficient since the values in the same column are usually very similar. This has the additional benefit of enabling the algorithm to only read the required columns which may decrease \io{} as only positive guesses need to be loaded for the validation.
 
 Another advantageous property of this format is the concept of row groups, which ensure that a batch of rows is being saved together and can therefore be read together too. This makes it possible to read just the first row group and use these rows as an input for the model.
 
-The Table~\ref{table:efficiency_parquet-70percent} shows the result of the base experiment from Section~\ref{subsec:efficiency-base_experiment} repeated with tables generated as parquet files. While the computing time for the model and the naive algorithm remain roughly equal compared to Table~\ref{table:efficiency_csv-70percent}, the loading time is decreased significantly for large tables. %? loading times make up a larger part of total time for model
+Table~\ref{table:efficiency_parquet-70percent} shows the result of the base experiment from Section~\ref{subsec:efficiency-base_experiment} repeated with tables generated as parquet files. While the computing time for the model and the naive algorithm remain roughly equal compared to Table~\ref{table:efficiency_csv-70percent}, the loading time is decreased significantly for large tables. %? loading times make up a larger part of total time for model
 
 Table~\ref{table:efficiency_parquet-70percent_small-tables} presents the result for the experiment using the advantages of the file format by loading only the necessary rows and columns. This leads to two loading times for the model. The first time only the first row group is being loaded while the second time only the columns which are unique according to the model are loaded. However, this does not make any difference except for the largest table and even then the total time is hardly changing.
 
@@ -71,4 +70,4 @@ In the GitTables dataset, which is used in the correctness experiment, the ratio
 \subsection{Summary}\label{subsec:efficiency-summary}
 The experiments in this section show that the proposed method to find primary key candidates is suitable for some cases. If the tables that will be examined contain mostly viewer than \num{1000000} rows or the ratio of unique to non-unique columns is too high, the model is probably slower than the naive algorithm. However, on very large tables with \num{100000000} or more rows the model can significantly improve the overall runtime. % maybe something about i/o?
 
-Section~\ref{subsec:efficiency-changing_uniques} additionally demonstrates that for a high efficiency it is important to decrease the number of false positive guesses made by the model as much as possible.
+Section~\ref{subsec:efficiency-changing_uniques} additionally demonstrates that for a high efficiency it is important to decrease the number of false positive predictions made by the model as much as possible.

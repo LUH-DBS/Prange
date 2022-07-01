@@ -2,9 +2,9 @@
 The following experiments where conducted on a server of the university. The machine uses \SI{514}{\gibi\byte} working memory and an \texttt{AMD EPYC 7702P 64-Core} processor. A graphic card was not necessary for the experiments.
 % Ethernet: BCM57416 NetXtreme-E Dual-Media 10G RDMA Ethernet Controller (2x, only one active)
 
-The naive algorithm that is used during the experiments is a sorting based method with the specialty of aborting if one of the values is None/Null since the column can not be used as a primary key.
+The naive algorithm that is used during the experiments is a sorting based method with the specialty of aborting if one of the values is empty since then the column cannot be used as a primary key.
 
-The reason the hashing based method was not used for the experiments was to be able to reliably carry out the efficiency experiments. Even though the sorting based method is less efficient, it enables the experiments to be set up in a way that enables the machine learning model to make the correct prediction without decreasing the runtime of the naive algorithm.
+The reason the hashing based method was not used for the experiments is to be able to reliably carry out the efficiency experiments. Even though the sorting based method is less efficient, it enables the experiments to be set up in a way that enables the machine learning model is guaranteed to make the correct prediction without decreasing the runtime of the naive algorithm.
 
 % TODO: explain code
 
