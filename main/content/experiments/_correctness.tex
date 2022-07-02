@@ -51,7 +51,7 @@ The experiments in this section demonstrate that the predictions made by the mod
 
 Furthermore, the positive guesses of the models in the experiments are correct at least one third of the time and even more for models with a larger input size. This is important as false positive guesses reduce the efficiency, which is explored further in Section~\ref{sec:efficiency}.
 
-\subsection{Examining columns which led to false guesses}\label{subsec:correctness_examine-false-guesses} % TODO: maybe a table with examples?
+\subsection{Examining columns which led to false guesses}\label{subsec:correctness_examine-false-guesses}
 The greatest weakness of the proposed method are false guesses. False positive guesses lead to a reduced efficiency because more columns need to be checked with the naive algorithm. False negative guesses on the other hand result in primary key candidates being ignored which reduces the correctness. It is therefore important to examine the columns which lead to false guesses to improve the model if possible.
 
 False positive guesses occur very often as the model is primarily trained to avoid any false negative guesses. The experiment in Section~\ref{subsec:correctness_comparing-input-size} has shown that depending on the input size between \SI{27}{\percent} and \SI{78}{\percent} of the positive predictions are true positives.

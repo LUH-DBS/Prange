@@ -1,8 +1,8 @@
 \chapter{Problem Statement}\label{chap:problem_statement}
 Primary Keys are columns which are used to identify rows in a table. They are characterized by the fact that they are unique, meaning they do not have any duplicate values. Columns that do contain duplicate values are non-unique.
 
-For the purposes of this thesis, a column which includes an empty value is considered non-unique even if technically all values are distinct. This constraint ensures every unique column that is detected to be suitable as a primary key, as it is not possible to identify a row based on an empty value. % TODO: write better
+For the purposes of this thesis, a column which includes an empty value is considered non-unique even if technically all values are distinct. This constraint ensures every unique column that is detected to be suitable as a primary key, as it is not possible to identify a row based on an empty value.
 
-The conventional naive algorithm to find unique columns has a runtime in \(O(n)\) if a hashing based algorithm or \(O(\log(n))\) if a sorting based algorithm is used. The problem with these algorithms is that the runtime depends on the number of rows. This leads to a long runtime for very large tables with several million rows. % TODO: runtime if not enough RAM?
+The conventional naive algorithm to find unique columns has a runtime in \(O(n)\) if a hashing based algorithm or \(O(\log(n))\) if a sorting based algorithm is used. The problem with these algorithms is that the runtime depends on the number of rows. This leads to a long runtime for very large tables with several million rows.
 
-Additionally, for such large tables memory management becomes a problem as the whole table has to be read at least once and held in memory at least partially. % TODO: write better
+Additionally, for such large tables memory management becomes a problem as the whole table has to be read at least once and held in memory at least partially.

@@ -47,15 +47,6 @@ In summary, while the reduced loading time does make a notable difference, it is
 \input{table-code/experiments/efficiency-shorter_loading_time_plot.tex}
 
 
-
-% \subsection{Comparing models with different input sizes}\label{subsec:efficiency-comparing_models} % TODO: Writing?
-% Short description of what \enquote{different input sizes} means (long explanation in earlier section).
-
-% Compare times for \SI{70}{\percent}.
-
-% Conclusion: No large difference, the difference may correlate with the larger file size of the model itself.
-
-
 \subsection{Changing the ratio of unique to non-unique columns}\label{subsec:efficiency-changing_uniques}
 The last variable that has an impact on the runtime of the model is the percentage of unique columns in the table. Since every positive prediction by the model has to be verified using the naive algorithm, the total runtime increases the more unique columns the model predicts.
 

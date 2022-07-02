@@ -20,11 +20,11 @@ Neural networks are particularly good at recognizing patterns in large unordered
 
 \input{table-code/machine-learning/neural_network.tex}
 
-\subsection{Classical Learning} % TODO: writing
+\subsection{Classical Learning}
 % https://towardsdatascience.com/deep-learning-vs-classical-machine-learning-9a42c6d48aa
-Algorithms in the field of classical machine learning are largely based on statistical or probabilistic methods, which originated as pattern recognition in the 1960s. It has the advantage of being a fast method that does not require much computing power compared to deep learning algorithms~\cite{classical-ml}.
+Algorithms in the field of classical machine learning are largely based on statistical or probabilistic methods, which originated as pattern recognition in the 1960s. It has the advantage of being a fast method that does not require much computing power and does not need as much training data compared to deep learning algorithms~\cite{classical-ml}.
 
-%! TODO: another paragraph -> easier to understand why a decision was made; not much training data needed; cannot predict very complex topics (language models)
+Another benefit in using classical learning is that it is easier to understand how the machine learning algorithm made its decision, since it is calculated from statistical dependencies between the data points. This comes with the drawback that a classical learning model is not capable of learning general concepts and applying them to completely new data~\cite{what-is-ml}.
 
 \subsection{Categories of Machine Learning}
 There are different types of machine learning depending on the task and training data the machine learning model has to work with.
@@ -33,10 +33,12 @@ Unsupervised learning is used on unlabeled data. Its main use is to organize the
 
 Supervised learning on the other hand makes use of labeled data which consists of several features that were selected in advance. This comes with the disadvantage that the structure of the data as well as the desired results have to be known~\cite{classical-ml}. Even though it increases the effort of the preparation of the training data, it also raises the accuracy of the model since it is trained to produce exactly the desired result.
 
-% Reinforcement Learning  ~\cite{types-of-ml} %! TODO
+With reinforcement learning, the machine learning model is trained by interacting with its environment through the context of states. The model learns which action it has to perform to reach its goal for each given state~\cite{types-of-ml}.
 
 \begin{figure}[ht]
-  \caption[Different kinds of machine learning]{This picture shows the different types of machine learning and the way they are trained~\cite{types-of-ml}.} % TODO: is a more detailed description necessary?
+  \caption[Different kinds of machine learning]{This picture shows the different types of machine learning and the way they are trained~\cite{types-of-ml}.}
   \centering
   \includegraphics[width=\linewidth]{img/types_of_machine_learning.png}\label{fig:kinds_of_ml}
 \end{figure}
+
+\newpage{}

@@ -9,12 +9,11 @@
 \let\cleardoublepage\relax
 \let\cleardoublepage\relax
 \chapter*{Abstract}
-The discovery of primary key candidates and unique columns in general is an important problem. While primary keys are required to efficiently interact with data stored in a table, various information can be obtained from the uniqueness of a column. % TODO: write better
-The conventional algorithms to find unique columns work in a linear runtime and are therefore not fast enough for large tables.
+The discovery of primary key candidates and (non-)unique columns in general is an important problem for many use-cases. While primary keys are required to efficiently interact with data stored in a table, various information can be obtained from the uniqueness of a column. % chktex 36
 
-In this thesis, I propose a new method to detect unique columns. It uses a machine learning model to predict which columns are probably unique. Only positive guesses will be checked for duplicates using a conventional algorithm. With this method, the time it takes to detect all unique columns is reduced by more than \SI{65}{\percent} for large tables with more than \num{10000000} rows. % 10.000.000 rows, parquet: model is 3,15 times faster than naive
+The conventional algorithms to find unique columns work in a linear runtime. This is fine for small to medium-sized tables. In tables with several million rows however the detection of unique columns can take a long time.
 
-%? Ideas: something about supervised learning, column preparation, maybe github link?
+In this thesis, I propose a new method to detect unique columns. It uses a machine learning model to predict which columns are unique. Only positive guesses will be checked for duplicates using a conventional algorithm. With this method, the time it takes to detect all unique columns is reduced by more than \SI{65}{\percent} for large tables with more than \num{10000000} rows. % 10.000.000 rows, parquet: model is 3,15 times faster than naive
 
 \endgroup
 
